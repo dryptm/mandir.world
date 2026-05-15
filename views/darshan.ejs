@@ -1,0 +1,48 @@
+<%- include('partials/header', { title: 'Live Darshan' }) %>
+<section class="page-hero page-hero--dark">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Live Darshan</div>
+    <h1>Live Darshan <span class="ph-hindi">लाइव दर्शन</span></h1>
+    <p>Sacred streams from India's holiest temples and ghats — available to you wherever you are.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <!-- CITY FILTER -->
+    <div class="city-filter-bar">
+      <a href="/darshan" class="cfb-city <%= !selectedCity?'active':'' %>">All Cities</a>
+      <% cities.forEach(c => { %>
+      <a href="/darshan?city=<%= c %>" class="cfb-city <%= selectedCity===c?'active':'' %>"><%= c %></a>
+      <% }) %>
+    </div>
+
+    <!-- LIVE -->
+    <% const live = streams.filter(s=>s.isLive); %>
+    <% if (live.length) { %>
+    <div class="stream-section-head"><span class="live-dot-sm"></span><h2>Live Right Now</h2></div>
+    <div class="streams-grid-page">
+      <% live.forEach((s,i) => { %>
+      <a href="/darshan/<%= s.id %>" class="sgp-card <%= i===0?'sgp-card--feat':'' %>">
+        <div class="sgp-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="sgp-live"><span></span>LIVE</div><div class="sgp-viewers"><%= s.viewers.toLocaleString('en-IN') %> watching</div><div class="sgp-play">▶</div></div>
+        <div class="sgp-info"><div class="sgp-city"><%= s.city %>, <%= s.state %></div><h3><%= s.title %></h3><div class="sgp-hindi"><%= s.hindi %></div><p><%= s.description.substring(0,90) %>...</p><div class="sgp-schedule">⏰ <%= s.schedule.split('|')[0] %></div></div>
+      </a>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <!-- ALL OTHERS -->
+    <% const others = streams.filter(s=>!s.isLive); %>
+    <% if (others.length) { %>
+    <div class="stream-section-head" style="margin-top:3rem"><h2>All Temples</h2></div>
+    <div class="streams-grid-page">
+      <% others.forEach(s => { %>
+      <a href="/darshan/<%= s.id %>" class="sgp-card sgp-card--offline">
+        <div class="sgp-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="sgp-offline">Scheduled</div></div>
+        <div class="sgp-info"><div class="sgp-city"><%= s.city %>, <%= s.state %></div><h3><%= s.title %></h3><div class="sgp-hindi"><%= s.hindi %></div><p><%= s.description.substring(0,90) %>...</p><div class="sgp-schedule">⏰ <%= s.schedule.split('|')[0] %></div></div>
+      </a>
+      <% }) %>
+    </div>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>

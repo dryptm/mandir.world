@@ -1,0 +1,213 @@
+<%- include('partials/header', { title: 'Home' }) %>
+
+<section class="hero">
+  <div class="hero-ambient"></div>
+  <div class="hero-content">
+    <div class="container">
+      <div class="hero-grid">
+        <div class="hero-left">
+          <div class="hero-eyebrow"><span class="live-dot-sm"></span><span><%= liveStreams.length %> temples streaming live</span></div>
+          <h1 class="hero-title">
+            <span class="hero-hindi">मंदिर तक नहीं जा सकते?</span>
+            Let the mandir<br/>come to you.
+          </h1>
+          <p class="hero-sub">Live darshan from India's most sacred temples. Record your sankalp. Book a puja. Give to dharmic causes. All from wherever you are.</p>
+          <div class="hero-ctas">
+            <a href="/darshan" class="btn btn--primary btn--large">Watch Live Darshan →</a>
+            <a href="/puja-sewa" class="btn btn--ghost btn--large">Book a Puja 🙏</a>
+          </div>
+          <div class="hero-stats-row">
+            <div class="hstat"><div class="hstat-num" id="h-viewers">15,162</div><div class="hstat-lbl">watching live</div></div>
+            <div class="hstat-sep"></div>
+            <div class="hstat"><div class="hstat-num"><%= totalSankalpCount.toLocaleString('en-IN') %></div><div class="hstat-lbl">sankalpas recorded</div></div>
+            <div class="hstat-sep"></div>
+            <div class="hstat"><div class="hstat-num">₹<%= (totalDonations/100000).toFixed(1) %>L+</div><div class="hstat-lbl">donated to causes</div></div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="panchang-card">
+            <div class="pc-header">
+              <span class="pc-om">ॐ</span>
+              <div><div class="pc-title">आज का पंचांग</div><div class="pc-subtitle">Today's Panchang · Varanasi</div></div>
+              <div class="pc-auspicious <%= panchang.isAuspicious ? 'pc-good' : 'pc-neutral' %>"><%= panchang.isAuspicious ? '✓ Shubh' : '~ Sadharan' %></div>
+            </div>
+            <div class="pc-date-line"><%= panchang.date %></div>
+            <div class="pc-body">
+              <div class="pc-row"><span>Vara</span><strong><%= panchang.vara %></strong><em><%= panchang.varaDeity %></em></div>
+              <div class="pc-row"><span>Tithi</span><strong><%= panchang.tithi %></strong><em><%= panchang.paksha %></em></div>
+              <div class="pc-row"><span>Nakshatra</span><strong><%= panchang.nakshatra %></strong></div>
+              <div class="pc-row"><span>Yoga</span><strong><%= panchang.yoga %></strong></div>
+              <div class="pc-row"><span>Moon Rashi</span><strong><%= panchang.moonRashi %></strong></div>
+            </div>
+            <div class="pc-sun-row">
+              <div>🌅 <strong><%= panchang.sunrise %></strong> Sunrise</div>
+              <div>🌇 <strong><%= panchang.sunset %></strong> Sunset</div>
+            </div>
+            <a href="/calendar" class="pc-cta">Full Panchang & Calendar →</a>
+          </div>
+          <% if (nextBig) { %>
+          <div class="next-fest-card" style="--accent:<%= nextBig.color %>">
+            <div class="nfc-label">Next Major Festival</div>
+            <div class="nfc-row">
+              <span class="nfc-icon"><%= nextBig.icon %></span>
+              <div>
+                <div class="nfc-name"><%= nextBig.name %></div>
+                <div class="nfc-hindi"><%= nextBig.hindi %></div>
+                <div class="nfc-date"><%= formatDate(nextBig.date) %></div>
+              </div>
+              <% const nd = daysUntil(nextBig.date); %>
+              <% if (nd && nd > 0) { %><div class="nfc-days"><%= nd %><span>days</span></div><% } %>
+            </div>
+            <a href="/calendar/<%= nextBig.id %>">Prepare for this festival →</a>
+          </div>
+          <% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LIVE STREAMS -->
+<section class="section">
+  <div class="container">
+    <div class="sh-row"><div class="sh-left"><span class="badge badge--live"><span class="live-dot-sm"></span>LIVE</span><h2>Live Darshan</h2></div><a href="/darshan" class="sh-more">View all →</a></div>
+    <div class="streams-home-grid">
+      <% liveStreams.forEach((s,i) => { %>
+      <a href="/darshan/<%= s.id %>" class="shg-card <%= i===0?'shg-card--feat':'' %>">
+        <div class="shg-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="shg-live-badge"><span></span>LIVE</div><div class="shg-viewers"><%= s.viewers.toLocaleString('en-IN') %> watching</div><div class="shg-overlay"></div></div>
+        <div class="shg-info"><div class="shg-city"><%= s.city %></div><h3><%= s.title %></h3><div class="shg-deity"><%= s.deity %></div></div>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- PUJA SEWA -->
+<section class="section section--puja">
+  <div class="container">
+    <div class="puja-feature">
+      <div class="pf-text">
+        <span class="badge badge--gold">PUJA SEWA — PHASE 2</span>
+        <h2>Book a Puja at Real Temples</h2>
+        <p>Remote puja performed by qualified pandits — Rudrabhishek at Kashi Vishwanath, Pind Daan at Gaya, Satyanarayan Katha for your home. Video proof delivered to you.</p>
+        <a href="/puja-sewa" class="btn btn--gold btn--large">Explore All Pujas →</a>
+      </div>
+      <div class="pf-cards">
+        <% popularPujas.forEach(p => { %>
+        <a href="/puja-sewa#<%= p.id %>" class="pf-mini">
+          <span><%= p.icon %></span>
+          <strong><%= p.name %></strong>
+          <span class="pf-mini-hindi"><%= p.hindi %></span>
+          <span class="pf-mini-price">₹<%= p.price.toLocaleString('en-IN') %></span>
+        </a>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FESTIVALS -->
+<section class="section">
+  <div class="container">
+    <div class="sh-row"><div class="sh-left"><span class="badge">📅 CALENDAR</span><h2>Upcoming Festivals</h2></div><a href="/calendar" class="sh-more">Full calendar →</a></div>
+    <div class="festivals-home-grid">
+      <% upcomingFestivals.forEach(f => { %>
+      <a href="/calendar/<%= f.id %>" class="fhg-card" style="--accent:<%= f.color %>">
+        <div class="fhg-top"><span class="fhg-icon"><%= f.icon %></span><% const d=daysUntil(f.date); if(d&&d<=30&&d>0){%><span class="fhg-days"><%= d %>d</span><%}%></div>
+        <div class="fhg-date"><%= formatDate(f.date) %></div>
+        <div class="fhg-name"><%= f.name %></div>
+        <div class="fhg-hindi"><%= f.hindi %></div>
+        <div class="fhg-deity"><%= f.deity %></div>
+        <div class="fhg-cities"><% f.cities.slice(0,2).forEach(c=>{%><span><%= c %></span><%})%></div>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- SANKALP -->
+<section class="section section--sankalp-feat">
+  <div class="container sankalp-feat-inner">
+    <div class="sfi-left">
+      <span class="badge badge--saffron">🙏 DIGITAL SANKALP</span>
+      <h2>Begin every sacred act with intention</h2>
+      <p>Every ritual in our tradition begins with a <em>sankalp</em> — your name, your lineage, your prayer, declared before the divine. Now you can register it digitally, tied to any festival or daily aarti.</p>
+      <ul class="sfi-points">
+        <li>✓ Tied to live events and real festivals</li>
+        <li>✓ Instant digital certificate in your name</li>
+        <li>✓ No priest required — pure intent</li>
+        <li>✓ Works for any deity, any occasion</li>
+      </ul>
+      <a href="/sankalp" class="btn btn--saffron btn--large">Register My Sankalp →</a>
+    </div>
+    <div class="sfi-right">
+      <div class="sankalp-cert-preview">
+        <div class="scp-header"><span>ॐ</span> संकल्प प्रमाण-पत्र <span>ॐ</span></div>
+        <div class="scp-body">
+          <div class="scp-row"><span>भक्त</span><strong>Ramesh Kumar Sharma</strong></div>
+          <div class="scp-row"><span>गोत्र</span><strong>Bharadwaj</strong></div>
+          <div class="scp-row"><span>अवसर</span><strong>Ganga Aarti, Varanasi</strong></div>
+          <div class="scp-row"><span>संकल्प</span><strong>सर्वे भवन्तु सुखिनः 🙏</strong></div>
+        </div>
+        <div class="scp-footer">Registered on Mandir.World · Sankalp #18,471</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DAILY STREAMS -->
+<section class="section section--dark-alt">
+  <div class="container">
+    <div class="sh-row sh-row--dark"><div class="sh-left"><span class="badge badge--live"><span class="live-dot-sm"></span>EVERY DAY</span><h2 style="color:var(--cream)">Sacred Streams That Never Stop</h2></div></div>
+    <div class="daily-grid">
+      <% dailyEvents.forEach(e => { %>
+      <a href="/darshan" class="daily-card">
+        <span class="dc-icon"><%= e.icon %></span>
+        <div class="dc-name"><%= e.name %></div>
+        <div class="dc-hindi"><%= e.hindi %></div>
+        <div class="dc-city"><%= e.cities[0] %></div>
+        <div class="dc-live-tag"><span></span>Live Daily</div>
+      </a>
+      <% }) %>
+    </div>
+  </div>
+</section>
+
+<!-- DAAN -->
+<section class="section">
+  <div class="container">
+    <div class="daan-home-row">
+      <div class="dhr-left">
+        <span class="badge badge--gold">🪔 DHARMIC GIVING</span>
+        <h2>Daan is Dharma.<br/>Give with purpose.</h2>
+        <p>Every rupee goes to verified, real causes — Gau Seva, Annadaan, Ganga conservation, Vidya Daan, and Ghat preservation.</p>
+        <div class="daan-tiers-preview"><span>₹51</span><span>₹251</span><span>₹501</span><span>₹1,100</span><span>₹5,100+</span></div>
+        <a href="/daan" class="btn btn--gold btn--large">Give Daan →</a>
+      </div>
+      <div class="dhr-right">
+        <% [['🐄','Gau Seva',38,384600],[' 🍛','Annadaan',48,241200],['🌊','Ganga Safai',54,161900],['📚','Vidya Daan',38,94000]].forEach(([icon,name,pct,amt])=>{ %>
+        <div class="dhr-cause">
+          <div class="dhr-cause-top"><span><%= icon %> <%= name %></span><span>₹<%= (amt/1000).toFixed(0) %>K raised</span></div>
+          <div class="dhr-bar"><div style="width:<%= pct %>%"></div></div>
+        </div>
+        <% }) %>
+        <a href="/daan" class="btn btn--outline" style="margin-top:1.25rem;width:100%;text-align:center;display:block;">View All Causes →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST -->
+<div class="trust-bar">
+  <div class="container trust-bar-inner">
+    <div class="tb-item"><span>🔴</span><div><strong>Live Streams</strong><span>Verified temple locations</span></div></div>
+    <div class="tb-sep"></div>
+    <div class="tb-item"><span>📅</span><div><strong>Real Festival Dates</strong><span>2025–26 calendar verified</span></div></div>
+    <div class="tb-sep"></div>
+    <div class="tb-item"><span>🙏</span><div><strong>No Fake Rituals</strong><span>We won't claim what we can't deliver</span></div></div>
+    <div class="tb-sep"></div>
+    <div class="tb-item"><span>📄</span><div><strong>Digital Receipts</strong><span>For every daan and puja</span></div></div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

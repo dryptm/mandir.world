@@ -1,0 +1,277 @@
+<%- include('partials/header', { title: stream.title }) %>
+
+<section class="stream-page">
+  <div class="container">
+    <div class="stream-page-layout">
+
+      <!-- MAIN VIDEO -->
+      <div class="stream-main">
+
+        <!-- VIDEO + BUBBLE ZONE -->
+        <div class="stream-video-wrap">
+          <% if (stream.isLive) { %>
+          <div class="live-indicator-bar">
+            <span class="live-pulse-dot"></span>
+            LIVE &nbsp;·&nbsp; <span id="viewerCount"><%= stream.viewers.toLocaleString('en-IN') %></span> watching
+          </div>
+          <% } %>
+
+          <!-- VIDEO + OVERLAID BUBBLE LAYER -->
+          <div class="video-outer">
+            <div class="video-embed">
+              <iframe
+                src="https://www.youtube.com/embed/<%= stream.youtubeEmbedId %>?autoplay=0&rel=0"
+                title="<%= stream.title %>"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+              </iframe>
+            </div>
+
+            <% if (stream.isLive) { %>
+            <!-- BUBBLE OVERLAY — floats on top of video -->
+            <div class="bubble-zone" id="bubbleZone" aria-hidden="true"></div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- REACTION BAR (below video) -->
+        <% if (stream.isLive) { %>
+        <div class="reaction-bar">
+          <div class="reaction-bar-left">
+            <span class="reaction-label">React</span>
+            <button class="reaction-btn" data-emoji="🙏" onclick="sendReaction('🙏')">🙏</button>
+            <button class="reaction-btn" data-emoji="❤️" onclick="sendReaction('❤️')">❤️</button>
+            <button class="reaction-btn" data-emoji="🔥" onclick="sendReaction('🔥')">🔥</button>
+            <button class="reaction-btn" data-emoji="ॐ"  onclick="sendReaction('ॐ')">ॐ</button>
+            <button class="reaction-btn" data-emoji="🪔" onclick="sendReaction('🪔')">🪔</button>
+            <button class="reaction-btn" data-emoji="🌸" onclick="sendReaction('🌸')">🌸</button>
+          </div>
+          <div class="reaction-bar-right">
+            <a href="/daan" class="btn btn--gold btn--sm">🪔 Give Daan</a>
+            <a href="/sankalp?event=<%= stream.id %>" class="btn btn--primary btn--sm">🙏 Sankalp</a>
+          </div>
+        </div>
+
+        <!-- LIVE ACTIVITY FEED -->
+        <div class="live-activity">
+          <div class="activity-header">
+            <span class="live-dot-sm"></span>
+            Live Activity
+          </div>
+          <div class="activity-feed" id="activityFeed">
+            <!-- JS will inject activity items here -->
+          </div>
+        </div>
+        <% } %>
+
+        <!-- STREAM INFO -->
+        <div class="stream-detail-info">
+          <div class="stream-city-tag"><%= stream.city %></div>
+          <h1 class="stream-page-title"><%= stream.title %></h1>
+          <div class="stream-page-hindi"><%= stream.hindi %></div>
+          <p class="stream-page-location">📍 <%= stream.location %></p>
+          <p class="stream-page-schedule">⏰ <%= stream.schedule %></p>
+          <p class="stream-page-desc"><%= stream.description %></p>
+
+          <div class="stream-tags">
+            <% stream.tags.forEach(tag => { %><span class="tag">#<%= tag %></span><% }) %>
+          </div>
+
+          <div class="stream-actions">
+            <a href="/sankalp?event=<%= stream.id %>" class="btn btn--primary">🙏 Register Sankalp for This</a>
+            <a href="/daan" class="btn btn--gold">🪔 Give Daan</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <div class="stream-sidebar">
+        <!-- Quick Sankalp -->
+        <div class="sidebar-widget sankalp-widget">
+          <h3>🙏 Quick Sankalp</h3>
+          <p>Record your intention for this darshan</p>
+          <form action="/sankalp" method="POST">
+            <input type="hidden" name="event" value="<%= stream.id %>" />
+            <input type="hidden" name="city" value="<%= stream.city %>" />
+            <div class="form-group">
+              <input type="text" name="name" placeholder="Your full name" required class="form-input" />
+            </div>
+            <div class="form-group">
+              <input type="text" name="gotra" placeholder="Gotra (optional)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <textarea name="wish" placeholder="Your sankalp / wish..." required class="form-input form-textarea" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary" style="width:100%">Record Sankalp →</button>
+          </form>
+        </div>
+
+        <!-- ── PROMINENT DAAN WIDGET ── -->
+        <div class="stream-daan-widget">
+          <div class="sdw-header">
+            <div class="sdw-flame">🪔</div>
+            <div>
+              <div class="sdw-title">Give Daan</div>
+              <div class="sdw-subtitle"><%= stream.hindi %> को दान</div>
+            </div>
+            <div class="sdw-live-tag">LIVE</div>
+          </div>
+
+          <p class="sdw-desc">
+            Your daan during this live darshan goes directly to the seva and upkeep tied to <strong><%= stream.city %></strong>.
+          </p>
+
+          <div class="sdw-tiers-label">Select Amount</div>
+          <div class="sdw-tiers" id="sdwTiers">
+            <button class="sdw-tier" data-amount="51"   onclick="selectTier(this,51)">
+              <span class="sdw-tier-amt">&#x20B9;51</span>
+              <span class="sdw-tier-tag">Seva</span>
+            </button>
+            <button class="sdw-tier" data-amount="251"  onclick="selectTier(this,251)">
+              <span class="sdw-tier-amt">&#x20B9;251</span>
+              <span class="sdw-tier-tag">Annadaan</span>
+            </button>
+            <button class="sdw-tier" data-amount="501"  onclick="selectTier(this,501)">
+              <span class="sdw-tier-amt">&#x20B9;501</span>
+              <span class="sdw-tier-tag sdw-premium-tag">&#x2726; Prasad</span>
+            </button>
+            <button class="sdw-tier" data-amount="1100" onclick="selectTier(this,1100)">
+              <span class="sdw-tier-amt">&#x20B9;1,100</span>
+              <span class="sdw-tier-tag sdw-premium-tag">&#x2726; Prasad</span>
+            </button>
+            <button class="sdw-tier" data-amount="5100" onclick="selectTier(this,5100)">
+              <span class="sdw-tier-amt">&#x20B9;5,100</span>
+              <span class="sdw-tier-tag sdw-premium-tag">&#x2726; Premium</span>
+            </button>
+            <button class="sdw-tier sdw-tier--custom" onclick="selectTier(this,'custom')">
+              <span class="sdw-tier-amt">Custom</span>
+              <span class="sdw-tier-tag">Any amount</span>
+            </button>
+          </div>
+
+          <div class="sdw-prasad-badge" id="sdwPrasadBadge">
+            🌸 This amount includes <strong>Prasad delivery</strong> to your doorstep
+          </div>
+
+          <button class="sdw-give-btn" id="sdwGiveBtn" onclick="openDaanModal()" disabled>
+            🪔 Give Daan
+          </button>
+
+          <div class="sdw-footer">
+            <span>🔒 Secure</span>
+            <span>·</span>
+            <span>80G receipt</span>
+            <span>·</span>
+            <span>100% to cause</span>
+          </div>
+        </div>
+
+        <!-- Related Streams -->
+        <div class="sidebar-widget">
+          <h3>More Streams</h3>
+          <% relatedStreams.forEach(s => { %>
+          <a href="/darshan/<%= s.id %>" class="related-stream">
+            <img src="<%= s.thumbnail %>" alt="" />
+            <div>
+              <strong><%= s.title %></strong>
+              <span><%= s.city %></span>
+            </div>
+            <% if (s.isLive) { %><span class="mini-live">LIVE</span><% } %>
+          </a>
+          <% }) %>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════ DAAN MODAL ══════════════════════ -->
+<div class="modal-overlay" id="daanModal" onclick="closeDaanModalOutside(event)">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-flame">🪔</span>
+        <div>
+          <div class="modal-title">Give Daan</div>
+          <div class="modal-subtitle"><%= stream.title %></div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeDaanModal()">&#x2715;</button>
+    </div>
+
+    <div class="modal-amount-display" id="modalAmountDisplay"></div>
+
+    <div class="modal-section" id="customAmountSection" style="display:none">
+      <label class="modal-label">Enter Amount (&#x20B9;) <span class="req">*</span></label>
+      <input type="number" id="customAmountInput" class="form-input" placeholder="e.g. 750" min="10" oninput="updateCustomAmount(this.value)" />
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">Your Full Name <span class="req">*</span></label>
+      <input type="text" id="daanName" class="form-input" placeholder="As per your tradition" />
+    </div>
+
+    <div class="modal-section">
+      <label class="modal-label">PAN Number <span class="modal-label-note">Optional — for 80G tax receipt</span></label>
+      <input type="text" id="daanPan" class="form-input" placeholder="ABCDE1234F" maxlength="10" />
+    </div>
+
+    <!-- PRASAD SECTION — premium only -->
+    <div class="modal-prasad-section" id="modalPrasadSection">
+      <div class="prasad-toggle-header" onclick="togglePrasad()">
+        <div class="prasad-toggle-left">
+          <span class="prasad-icon">🌸</span>
+          <div>
+            <strong>Receive Prasad at Home</strong>
+            <span>Blessed prasad from this stream, delivered to you</span>
+          </div>
+        </div>
+        <div class="prasad-toggle-switch" id="prasadToggle">
+          <div class="toggle-knob"></div>
+        </div>
+      </div>
+      <div class="prasad-address-fields" id="prasadAddressFields">
+        <div class="modal-label" style="margin-bottom:0.6rem;margin-top:0.25rem;">Delivery Address</div>
+        <input type="text" id="prasadAddress1" class="form-input" placeholder="House / Flat / Building" style="margin-bottom:0.5rem;" />
+        <input type="text" id="prasadAddress2" class="form-input" placeholder="Street, Area, Locality" style="margin-bottom:0.5rem;" />
+        <div class="modal-addr-row">
+          <input type="text" id="prasadCity" class="form-input" placeholder="City" />
+          <input type="text" id="prasadPincode" class="form-input" placeholder="PIN Code" maxlength="6" />
+        </div>
+        <input type="tel" id="prasadPhone" class="form-input" placeholder="Mobile number for delivery" maxlength="10" style="margin-top:0.5rem;" />
+        <p class="prasad-note">📦 Dispatched within 7–10 working days after the event.</p>
+      </div>
+    </div>
+
+    <div class="modal-error" id="modalError"></div>
+    <button class="modal-submit-btn" id="modalSubmitBtn" onclick="submitDaan()">
+      <span id="modalSubmitText">🪔 Confirm Daan</span>
+    </button>
+    <p class="modal-terms">Receipts are sent within 24 hours. 100% goes to the cause.</p>
+  </div>
+</div>
+
+<!-- DAAN SUCCESS -->
+<div class="daan-success-overlay" id="daanSuccessOverlay">
+  <div class="daan-success-box">
+    <div class="daan-success-icon">🪔</div>
+    <h2>Daan Received with Gratitude</h2>
+    <p id="successMsg"></p>
+    <div class="success-receipt" id="successReceipt"></div>
+    <button class="btn btn--gold" onclick="closeDaanSuccess()" style="margin-top:1.5rem;width:100%;">Continue Darshan 🙏</button>
+  </div>
+</div>
+
+<% if (stream.isLive) { %>
+<script>
+// Inject server-side viewer count into main.js ticker
+window.__STREAM_VIEWERS__ = <%= stream.viewers %>;
+window.__STREAM_MIN_VIEWERS__ = <%= stream.viewers - 300 %>;
+window.__STREAM_ID__ = '<%= stream.id %>';
+window.__STREAM_CITY__ = '<%= stream.city %>';
+</script>
+<% } %>
+
+<%- include('partials/footer') %>

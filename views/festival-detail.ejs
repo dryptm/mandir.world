@@ -1,0 +1,74 @@
+<%- include('partials/header', { title: festival.name }) %>
+<section class="page-hero" style="--accent:<%= festival.color %>">
+  <div class="container">
+    <div class="ph-breadcrumb"><a href="/calendar">Calendar</a> → <%= festival.name %></div>
+    <div class="fd-hero-row">
+      <span class="fd-hero-icon"><%= festival.icon %></span>
+      <div>
+        <h1><%= festival.name %></h1>
+        <div class="fd-hindi"><%= festival.hindi %></div>
+        <div class="fd-meta">
+          <span>📅 <%= formatDate(festival.date) %></span>
+          <span>🙏 <%= festival.deity %></span>
+          <% const d = daysUntil(festival.date); %>
+          <% if (d && d > 0) { %><span class="fd-countdown"><%= d %> days away</span><% } %>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="section">
+  <div class="container fd-layout">
+    <div class="fd-main">
+      <div class="fd-block">
+        <h2>About this Festival</h2>
+        <p><%= festival.description %></p>
+      </div>
+      <div class="fd-block">
+        <h2>Significance</h2>
+        <p><%= festival.significance %></p>
+      </div>
+      <div class="fd-block">
+        <h2>Key Rituals</h2>
+        <ul class="fd-rituals-list">
+          <% festival.rituals.forEach(r => { %><li><%= r %></li><% }) %>
+        </ul>
+      </div>
+      <% if (festival.mantra) { %>
+      <div class="fd-mantra-block">
+        <div class="fd-mantra-label">Sacred Mantra</div>
+        <div class="fd-mantra"><%= festival.mantra %></div>
+      </div>
+      <% } %>
+      <div class="fd-cta-row">
+        <a href="/sankalp" class="btn btn--primary btn--large">Register My Sankalp 🙏</a>
+        <a href="/daan" class="btn btn--gold btn--large">Give Daan 🪔</a>
+        <a href="/puja-sewa" class="btn btn--outline btn--large">Book a Puja</a>
+      </div>
+    </div>
+    <div class="fd-side">
+      <div class="fd-side-card">
+        <h3>Festival Details</h3>
+        <div class="fsc-row"><span>Date</span><strong><%= formatDate(festival.date) %></strong></div>
+        <% if (festival.endDate) { %><div class="fsc-row"><span>Ends</span><strong><%= formatDate(festival.endDate) %></strong></div><% } %>
+        <div class="fsc-row"><span>Deity</span><strong><%= festival.deity %></strong></div>
+        <div class="fsc-row"><span>Month</span><strong><%= festival.month %></strong></div>
+        <% if (festival.paksha) { %><div class="fsc-row"><span>Paksha</span><strong><%= festival.paksha %></strong></div><% } %>
+        <% if (festival.tithi) { %><div class="fsc-row"><span>Tithi</span><strong><%= festival.tithi %></strong></div><% } %>
+        <h3 style="margin-top:1.5rem">Celebrated In</h3>
+        <div class="fd-city-list"><% festival.cities.forEach(c=>{%><span><%= c %></span><%})%></div>
+        <h3 style="margin-top:1.5rem">Give Daan For</h3>
+        <% festival.donationCauses.forEach(c => { %><a href="/daan" class="fsc-cause-link">🪔 <%= c %></a><% }) %>
+      </div>
+      <% if (related.length > 0) { %>
+      <div class="fd-side-card">
+        <h3>Related Festivals</h3>
+        <% related.forEach(r => { %>
+        <a href="/calendar/<%= r.id %>" class="fd-related-item"><span><%= r.icon %></span><div><strong><%= r.name %></strong><span><%= formatDate(r.date) %></span></div></a>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+</section>
+<%- include('partials/footer') %>

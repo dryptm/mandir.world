@@ -1,0 +1,41 @@
+<%- include('partials/header', { title: 'Temple Directory' }) %>
+<section class="page-hero page-hero--dark">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Temples</div>
+    <h1>Temple Directory <span class="ph-hindi">मंदिर सूची</span></h1>
+    <p><%= streams.length %> temples across India — with live streams where available.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <% cities.forEach(city => { %>
+    <div class="temples-city-section">
+      <h2 class="tcs-heading"><span class="tcs-dot"></span><%= city %></h2>
+      <div class="temples-city-grid">
+        <% byCity[city].forEach(temple => { %>
+        <a href="/darshan/<%= temple.id %>" class="temple-dir-card">
+          <div class="tdc-thumb">
+            <img src="<%= temple.thumbnail %>" alt="<%= temple.title %>" loading="lazy"/>
+            <% if (temple.isLive) { %><div class="tdc-live"><span></span>LIVE</div><% } %>
+          </div>
+          <div class="tdc-body">
+            <div class="tdc-city"><%= temple.city %>, <%= temple.state %></div>
+            <h3 class="tdc-name"><%= temple.title %></h3>
+            <div class="tdc-hindi"><%= temple.hindi %></div>
+            <div class="tdc-deity">🙏 <%= temple.deity %></div>
+            <div class="tdc-schedule">⏰ <%= temple.schedule.split('|')[0].trim() %></div>
+          </div>
+          <div class="tdc-footer">
+            <% if (temple.isLive) { %>
+            <span class="tdc-viewers"><%= temple.viewers.toLocaleString('en-IN') %> watching</span>
+            <% } %>
+            <span class="tdc-cta">Watch Darshan →</span>
+          </div>
+        </a>
+        <% }) %>
+      </div>
+    </div>
+    <% }) %>
+  </div>
+</section>
+<%- include('partials/footer') %>

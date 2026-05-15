@@ -1,0 +1,742 @@
+[
+  {
+    "id": "makar-sankranti-2025",
+    "name": "Makar Sankranti",
+    "hindi": "मकर संक्रांति",
+    "date": "2025-01-14",
+    "month": "January",
+    "deity": "Surya Dev",
+    "category": "solar",
+    "description": "The sun enters Capricorn. A fixed solar festival celebrated with kite flying, sesame sweets, and holy dips in sacred rivers.",
+    "significance": "Marks the start of Uttarayana — the sun's northward journey. Bathing in the Ganga is especially meritorious. The day is auspicious for tarpan and charity.",
+    "rituals": [
+      "Holy dip in Ganga",
+      "Tarpan to ancestors",
+      "Donation of sesame and jaggery",
+      "Kite flying"
+    ],
+    "cities": [
+      "Prayagraj",
+      "Varanasi",
+      "Haridwar",
+      "Gaya"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Gau Seva"
+    ],
+    "mantra": "ॐ घृणि सूर्याय नमः",
+    "color": "#FF8C00",
+    "icon": "☀️",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "basant-panchami-2025",
+    "name": "Basant Panchami",
+    "hindi": "बसंत पंचमी",
+    "date": "2025-02-02",
+    "month": "February",
+    "deity": "Maa Saraswati",
+    "category": "seasonal",
+    "description": "The festival of spring and knowledge. Maa Saraswati is worshipped by students, artists, and scholars.",
+    "significance": "The colour yellow is sacred — representing the mustard flowers of spring. Books and musical instruments are placed before the goddess for blessings.",
+    "rituals": [
+      "Saraswati Puja",
+      "Placing books before deity",
+      "Wearing yellow",
+      "Eating saffron sweets"
+    ],
+    "cities": [
+      "Varanasi",
+      "Prayagraj",
+      "Kolkata"
+    ],
+    "donationCauses": [
+      "Vidya Daan",
+      "Annadaan"
+    ],
+    "mantra": "ॐ ऐं सरस्वत्यै नमः",
+    "color": "#FFD700",
+    "icon": "🌼",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "maha-shivaratri-2025",
+    "name": "Maha Shivaratri",
+    "hindi": "महाशिवरात्रि",
+    "date": "2025-02-26",
+    "month": "February",
+    "deity": "Lord Shiva",
+    "category": "major",
+    "description": "The great night of Lord Shiva. All-night vigil, fasting, and continuous abhishek across all Shiva temples.",
+    "significance": "Shiva lingams are bathed in milk, honey, and water through the night in four praharas. Devotees fast and chant Om Namah Shivaya without break.",
+    "rituals": [
+      "All-night jagran",
+      "Panchamrit abhishek",
+      "Rudra patha",
+      "Fasting",
+      "Bilva patra offering"
+    ],
+    "cities": [
+      "Varanasi",
+      "Ujjain",
+      "Haridwar",
+      "Somnath"
+    ],
+    "donationCauses": [
+      "Annadaan at Kashi",
+      "Gau Seva"
+    ],
+    "mantra": "ॐ नमः शिवाय",
+    "color": "#6B21A8",
+    "icon": "🕉️",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "holi-2025",
+    "name": "Holi",
+    "hindi": "होली",
+    "date": "2025-03-14",
+    "month": "March",
+    "deity": "Lord Krishna",
+    "category": "major",
+    "description": "The festival of colours. Preceded by Holika Dahan symbolising the victory of devotion over evil.",
+    "significance": "Holika Dahan marks Prahlad's divine protection. Holi celebrates the eternal love of Radha-Krishna and the arrival of spring.",
+    "rituals": [
+      "Holika Dahan",
+      "Playing with colours",
+      "Thandai",
+      "Braj ki Holi in Vrindavan"
+    ],
+    "cities": [
+      "Mathura",
+      "Vrindavan",
+      "Barsana",
+      "Varanasi"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Gau Seva"
+    ],
+    "mantra": "ॐ नमो भगवते वासुदेवाय",
+    "color": "#EC4899",
+    "icon": "🌈",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "ram-navami-2025",
+    "name": "Ram Navami",
+    "hindi": "राम नवमी",
+    "date": "2025-04-06",
+    "month": "April",
+    "deity": "Lord Shri Ram",
+    "category": "major",
+    "description": "Birth anniversary of Maryada Purushottam Shri Ram. Celebrated on Chaitra Shukla Navami with processions and Ramcharitmanas recitation.",
+    "significance": "Ram's birth is celebrated with shobha yatras, recitation of Ramcharitmanas, and elaborate temple decorations across Bharat. Ayodhya sees lakhs of pilgrims.",
+    "rituals": [
+      "Ramcharitmanas path",
+      "Ram janmotsav at noon",
+      "Shobha yatra",
+      "Ram naam sankirtan"
+    ],
+    "cities": [
+      "Ayodhya",
+      "Varanasi",
+      "Chitrakoot",
+      "Rameswaram"
+    ],
+    "donationCauses": [
+      "Prasad Vitaran",
+      "Annadaan"
+    ],
+    "mantra": "श्री राम जय राम जय जय राम",
+    "color": "#1D4ED8",
+    "icon": "🏹",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "hanuman-jayanti-2025",
+    "name": "Hanuman Jayanti",
+    "hindi": "हनुमान जयंती",
+    "date": "2025-04-12",
+    "month": "April",
+    "deity": "Lord Hanuman",
+    "category": "major",
+    "description": "Birth anniversary of Lord Hanuman — the embodiment of devotion, courage, and selfless service.",
+    "significance": "Recitation of Hanuman Chalisa, Sundarkand, and Bajrang Baan. Red flowers, sindoor, and sesame oil are offered.",
+    "rituals": [
+      "Hanuman Chalisa",
+      "Sundarkand path",
+      "Sindoor offering",
+      "Flag hoisting"
+    ],
+    "cities": [
+      "Ayodhya",
+      "Varanasi",
+      "Hampi"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Temple Seva"
+    ],
+    "mantra": "ॐ हनुमते नमः",
+    "color": "#FF6B00",
+    "icon": "🌟",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "akshaya-tritiya-2025",
+    "name": "Akshaya Tritiya",
+    "hindi": "अक्षय तृतीया",
+    "date": "2025-04-30",
+    "month": "April",
+    "deity": "Lord Vishnu",
+    "category": "auspicious",
+    "description": "One of the most auspicious days — any action begun or gift given on this day multiplies without end.",
+    "significance": "Donations, new beginnings, and gold purchases are permanently blessed. The gates of Badrinath and Gangotri open on this day.",
+    "rituals": [
+      "Daan and charity",
+      "Offering sattu",
+      "Pitru tarpan",
+      "Vishnu-Lakshmi puja"
+    ],
+    "cities": [
+      "Badrinath",
+      "Varanasi",
+      "Prayagraj"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Gau Seva",
+      "Ganga Seva"
+    ],
+    "mantra": "ॐ नमो भगवते वासुदेवाय",
+    "color": "#D97706",
+    "icon": "✨",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "ganga-dussehra-2025",
+    "name": "Ganga Dussehra",
+    "hindi": "गंगा दशहरा",
+    "date": "2025-06-05",
+    "month": "June",
+    "deity": "Maa Ganga",
+    "category": "major",
+    "description": "The day Goddess Ganga descended from the heavens to Earth. Massive bathing festivals along all Ganga ghats.",
+    "significance": "A bath in the Ganga on this day cleanses ten types of sins. The water is especially potent. Ghats of Varanasi, Haridwar overflow with devotees.",
+    "rituals": [
+      "Ganga snan",
+      "Deepdaan",
+      "Tarpan on the ghats",
+      "Ganga aarti",
+      "Flower offering to the river"
+    ],
+    "cities": [
+      "Haridwar",
+      "Varanasi",
+      "Prayagraj",
+      "Rishikesh"
+    ],
+    "donationCauses": [
+      "Ganga Safai",
+      "Ghat Development"
+    ],
+    "mantra": "ॐ नमः शिवाय नमः गंगे",
+    "color": "#0EA5E9",
+    "icon": "🌊",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "jagannath-rath-yatra-2025",
+    "name": "Jagannath Rath Yatra",
+    "hindi": "जगन्नाथ रथ यात्रा",
+    "date": "2025-06-27",
+    "month": "June",
+    "deity": "Lord Jagannath",
+    "category": "major",
+    "description": "The grand chariot procession of Lord Jagannath from the main temple to Gundicha temple in Puri. One of the oldest and largest religious processions on Earth.",
+    "significance": "Pulling the chariot of Lord Jagannath grants liberation equivalent to 100 sacrifices. Even a glimpse frees one from the cycle of rebirth.",
+    "rituals": [
+      "Rath khinchan",
+      "Chhera pahanra by King of Puri",
+      "Mahaprasad distribution"
+    ],
+    "cities": [
+      "Puri",
+      "Ahmedabad",
+      "Kolkata"
+    ],
+    "donationCauses": [
+      "Mahaprasad Vitaran",
+      "Annadaan"
+    ],
+    "mantra": "जय जगन्नाथ",
+    "color": "#DC2626",
+    "icon": "🛕",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "guru-purnima-2025",
+    "name": "Guru Purnima",
+    "hindi": "गुरु पूर्णिमा",
+    "date": "2025-07-10",
+    "month": "July",
+    "deity": "Maharishi Veda Vyasa",
+    "category": "major",
+    "description": "The full moon of Ashadha dedicated to honoring the Guru — birthdate of Maharishi Veda Vyasa, compiler of the Vedas.",
+    "significance": "Disciples honor their gurus and spiritual masters. The day holds significance in Hindu, Buddhist, and Jain traditions alike.",
+    "rituals": [
+      "Guru puja",
+      "Pada puja of the Guru",
+      "Recitation of Guru Stotram"
+    ],
+    "cities": [
+      "Varanasi",
+      "Rishikesh"
+    ],
+    "donationCauses": [
+      "Vidya Daan",
+      "Annadaan"
+    ],
+    "mantra": "गुरुर्ब्रह्मा गुरुर्विष्णुः",
+    "color": "#7C3AED",
+    "icon": "🙏",
+    "isPast": true,
+    "isUpcoming": false,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "raksha-bandhan-2025",
+    "name": "Raksha Bandhan",
+    "hindi": "रक्षा बंधन",
+    "date": "2025-08-09",
+    "month": "August",
+    "deity": "Lord Indra",
+    "category": "family",
+    "description": "The sacred bond of siblings. Sisters tie a rakhi on their brother's wrist; brothers pledge lifelong protection.",
+    "significance": "Raksha means protection, Bandhan means bond. The tradition originates from Draupadi tying cloth around Krishna's wrist.",
+    "rituals": [
+      "Tying rakhi",
+      "Applying tilak",
+      "Coconut offering to the sea",
+      "Exchange of sweets"
+    ],
+    "cities": [
+      "Varanasi",
+      "Mathura"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Gau Seva"
+    ],
+    "mantra": "येन बद्धो बली राजा",
+    "color": "#BE185D",
+    "icon": "🪡",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "janmashtami-2025",
+    "name": "Janmashtami",
+    "hindi": "श्री कृष्ण जन्माष्टमी",
+    "date": "2025-08-16",
+    "month": "August",
+    "deity": "Lord Shri Krishna",
+    "category": "major",
+    "description": "Birth anniversary of Lord Shri Krishna — celebrated at midnight with fasting, bhajans, jhanki darshan, and dahi handi.",
+    "significance": "Krishna was born to liberate the world from Kamsa's tyranny. His birth is a cosmic event celebrated with ecstatic joy. Mathura and Vrindavan are transformed.",
+    "rituals": [
+      "Midnight puja",
+      "Jhula saja",
+      "Fasting until midnight",
+      "Dahi handi",
+      "Bhajan and kirtan all night"
+    ],
+    "cities": [
+      "Mathura",
+      "Vrindavan",
+      "Dwarka",
+      "Gokul"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Temple Seva"
+    ],
+    "mantra": "ॐ नमो भगवते वासुदेवाय",
+    "color": "#1D4ED8",
+    "icon": "🦚",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "ganesh-chaturthi-2025",
+    "name": "Ganesh Chaturthi",
+    "hindi": "गणेश चतुर्थी",
+    "date": "2025-08-27",
+    "month": "August",
+    "deity": "Lord Ganesha",
+    "category": "major",
+    "description": "Birth anniversary of Lord Ganesha — Vighnaharta, the remover of obstacles. A 10-day festival with grand clay idols and processions.",
+    "significance": "Ganesha is invoked at the start of every ritual. His 10-day festival concludes with Ganesh Visarjan — immersion of the idol in water.",
+    "rituals": [
+      "Ganesh sthapana",
+      "Shodashopachar puja",
+      "Modak offering",
+      "Aarti twice daily",
+      "Visarjan on 10th day"
+    ],
+    "cities": [
+      "Pune",
+      "Mumbai",
+      "Nashik",
+      "Varanasi"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Gau Seva"
+    ],
+    "mantra": "ॐ गं गणपतये नमः",
+    "color": "#F59E0B",
+    "icon": "🐘",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "pitru-paksha-2025",
+    "name": "Pitru Paksha",
+    "hindi": "पितृ पक्ष",
+    "date": "2025-09-07",
+    "endDate": "2025-09-21",
+    "month": "September",
+    "deity": "Pitru Devata",
+    "category": "ancestor",
+    "description": "Sixteen days dedicated to ancestor worship. Tarpan and shraddha performed at Gaya, Varanasi, and Prayagraj.",
+    "significance": "During Pitru Paksha, the gates of Yamaloka open. Tarpan — water with sesame — offered to ancestors liberates them and brings blessings to the living.",
+    "rituals": [
+      "Tarpan (water offering)",
+      "Shraddha ceremony",
+      "Pind daan at Gaya",
+      "Brahmin bhojan",
+      "Cow feeding"
+    ],
+    "cities": [
+      "Gaya",
+      "Varanasi",
+      "Prayagraj"
+    ],
+    "donationCauses": [
+      "Brahmin Bhojan",
+      "Gau Seva"
+    ],
+    "mantra": "ॐ पितृभ्यः स्वधायिभ्यः स्वधा नमः",
+    "color": "#4B5563",
+    "icon": "🪔",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "sharad-navratri-2025",
+    "name": "Sharad Navratri",
+    "hindi": "शारदीय नवरात्रि",
+    "date": "2025-09-22",
+    "endDate": "2025-10-01",
+    "month": "September",
+    "deity": "Maa Durga",
+    "category": "major",
+    "description": "Nine nights of Maa Durga in her nine forms. The most celebrated Navratri — observed with fasting, garba, and Durga Saptashati recitation.",
+    "significance": "The nine avatars worshipped are Shailputri through Siddhidatri. Culminates in Vijayadashami — the victory of good over evil.",
+    "rituals": [
+      "Ghatasthapana",
+      "Fasting for nine days",
+      "Durga Saptashati path",
+      "Garba and Dandiya",
+      "Kanya puja"
+    ],
+    "cities": [
+      "Varanasi",
+      "Kolkata",
+      "Haridwar",
+      "Mysore"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Kanya Pujan"
+    ],
+    "mantra": "ॐ दुं दुर्गायै नमः",
+    "color": "#DC2626",
+    "icon": "🌺",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "dussehra-2025",
+    "name": "Vijayadashami (Dussehra)",
+    "hindi": "विजयदशमी",
+    "date": "2025-10-02",
+    "month": "October",
+    "deity": "Maa Durga / Lord Ram",
+    "category": "major",
+    "description": "The day Maa Durga killed Mahishasura and Shri Ram killed Ravana. The ultimate triumph of good over evil.",
+    "significance": "Considered the most auspicious day to begin new ventures. Ravana effigies are burned across Bharat. Mysore Dussehra is legendary.",
+    "rituals": [
+      "Ravana dahan",
+      "Ayudha Puja",
+      "Shami tree worship",
+      "Durga visarjan"
+    ],
+    "cities": [
+      "Varanasi",
+      "Mysore",
+      "Kolkata",
+      "Kullu"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Temple Seva"
+    ],
+    "mantra": "जय श्री राम",
+    "color": "#FF6B00",
+    "icon": "🏹",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "dhanteras-diwali-2025",
+    "name": "Diwali & Dhanteras",
+    "hindi": "दीपावली",
+    "date": "2025-10-20",
+    "month": "October",
+    "deity": "Maa Lakshmi / Lord Ganesha",
+    "category": "major",
+    "description": "The festival of lights. Shri Ram returned to Ayodhya after 14 years. The night Maa Lakshmi roams the earth entering well-lit, clean homes.",
+    "significance": "Lakshmi-Ganesha puja at midnight on Amavasya. Dhanteras on Oct 20, Diwali on Oct 20. Five days of celebration with diyas, rangoli, and sweets.",
+    "rituals": [
+      "Dhanvantari puja on Dhanteras",
+      "Lakshmi-Ganesha puja",
+      "Diya lighting",
+      "Rangoli",
+      "Midnight puja on Amavasya"
+    ],
+    "cities": [
+      "Ayodhya",
+      "Varanasi",
+      "Mathura"
+    ],
+    "donationCauses": [
+      "Annadaan",
+      "Gau Seva",
+      "Ghat Development"
+    ],
+    "mantra": "ॐ ह्रीं श्रीं लक्ष्मीभ्यो नमः",
+    "color": "#F59E0B",
+    "icon": "🪔",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "chhath-puja-2025",
+    "name": "Chhath Puja",
+    "hindi": "छठ पूजा",
+    "date": "2025-10-28",
+    "month": "October",
+    "deity": "Surya Dev / Chhathi Maiya",
+    "category": "major",
+    "description": "The most spiritually intense Hindu festival. Devotees stand in rivers for hours offering arghya to the setting and rising sun — a 36-hour continuous fast.",
+    "significance": "Chhath directly worships Surya Dev without any idol or intermediary. The river becomes the altar. The devotee stands as the priest. Raw faith, unmediated.",
+    "rituals": [
+      "Nahay-Khay (Day 1)",
+      "Kharna (Day 2)",
+      "Sandhya arghya at sunset (Day 3)",
+      "Usha arghya at sunrise (Day 4)"
+    ],
+    "cities": [
+      "Varanasi",
+      "Patna",
+      "Prayagraj"
+    ],
+    "donationCauses": [
+      "Ghat Development",
+      "Annadaan",
+      "Ganga Seva"
+    ],
+    "mantra": "ॐ सूर्याय नमः",
+    "color": "#FF6B00",
+    "icon": "☀️",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "dev-diwali-2025",
+    "name": "Dev Diwali",
+    "hindi": "देव दीपावली",
+    "date": "2025-11-05",
+    "month": "November",
+    "deity": "All Devatas",
+    "category": "major",
+    "description": "The Diwali of the Gods — on Kartik Purnima all 33 crore deities descend to the ghats of Varanasi. The entire riverfront illuminates with lakhs of diyas.",
+    "significance": "Varanasi is the capital of Dev Diwali. Every ghat from Asi to Raj is lit with earthen lamps. The reflection of lakhs of flames in the Ganga is among the most extraordinary sights in Hinduism.",
+    "rituals": [
+      "Ghat illumination with lakhs of diyas",
+      "Grand Ganga aarti",
+      "Deepdaan in the river",
+      "Boat processions",
+      "Kartik snan"
+    ],
+    "cities": [
+      "Varanasi",
+      "Haridwar"
+    ],
+    "donationCauses": [
+      "Ghat Development",
+      "Ganga Seva"
+    ],
+    "mantra": "हर हर महादेव",
+    "color": "#F59E0B",
+    "icon": "✨",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "maha-shivaratri-2026",
+    "name": "Maha Shivaratri 2026",
+    "hindi": "महाशिवरात्रि २०२६",
+    "date": "2026-02-15",
+    "month": "February",
+    "deity": "Lord Shiva",
+    "category": "major",
+    "description": "The great night of Lord Shiva in 2026. The cosmic marriage of Shiva and Parvati celebrated with all-night vigil, fasting, and continuous abhishek.",
+    "significance": "Maha Shivaratri 2026 will see new significance with expanded Kashi Vishwanath Corridor and digital darshan reaching millions across the world.",
+    "rituals": [
+      "All-night jagran",
+      "Panchamrit abhishek",
+      "Four prahara puja"
+    ],
+    "cities": [
+      "Varanasi",
+      "Ujjain",
+      "Haridwar",
+      "Somnath"
+    ],
+    "donationCauses": [
+      "Annadaan at Kashi",
+      "Gau Seva"
+    ],
+    "mantra": "ॐ नमः शिवाय",
+    "color": "#6B21A8",
+    "icon": "🕉️",
+    "isPast": false,
+    "isUpcoming": true,
+    "isLive": false,
+    "isDaily": false
+  },
+  {
+    "id": "ganga-aarti-daily",
+    "name": "Ganga Aarti — Dashashwamedh",
+    "hindi": "गंगा आरती, वाराणसी",
+    "date": "daily",
+    "month": "Daily",
+    "deity": "Maa Ganga",
+    "category": "daily",
+    "description": "Seven priests perform in perfect synchrony every evening at Dashashwamedh Ghat. Witnessed by thousands every single day without exception.",
+    "significance": "The Ganga Aarti is a living ceremony continued without interruption for centuries. Every evening the boundary between the sacred and the everyday dissolves.",
+    "rituals": [
+      "Seven-priest synchronized aarti",
+      "Fire offerings",
+      "Flower garlands",
+      "Shankh and ghanta"
+    ],
+    "cities": [
+      "Varanasi"
+    ],
+    "donationCauses": [
+      "Ganga Seva",
+      "Ghat Maintenance"
+    ],
+    "mantra": "हर हर गंगे",
+    "color": "#FF6B00",
+    "icon": "🔥",
+    "isPast": false,
+    "isUpcoming": false,
+    "isLive": true,
+    "isDaily": true
+  },
+  {
+    "id": "kashi-vishwanath-aarti-daily",
+    "name": "Kashi Vishwanath Aarti",
+    "hindi": "काशी विश्वनाथ आरती",
+    "date": "daily",
+    "month": "Daily",
+    "deity": "Lord Shiva (Vishwanath)",
+    "category": "daily",
+    "description": "Five aartis performed daily at the Kashi Vishwanath Jyotirlinga. Mangala Aarti at 3 AM draws thousands even before dawn.",
+    "significance": "Shiva himself is said to reside in Kashi. The daily aarti is a direct communion with the divine — the most sacred Shiva darshan available to the world.",
+    "rituals": [
+      "Mangala Aarti 3 AM",
+      "Bhog Aarti 11:30 AM",
+      "Sandhya Aarti 7 PM",
+      "Shringaar Aarti 8 PM",
+      "Shayana Aarti 10:30 PM"
+    ],
+    "cities": [
+      "Varanasi"
+    ],
+    "donationCauses": [
+      "Temple Seva",
+      "Annadaan at Kashi"
+    ],
+    "mantra": "ॐ नमः शिवाय",
+    "color": "#7C3AED",
+    "icon": "🕯️",
+    "isPast": false,
+    "isUpcoming": false,
+    "isLive": true,
+    "isDaily": true
+  }
+]

@@ -1,0 +1,75 @@
+<%- include('partials/header', { title: 'Daan — Give with Dharma' }) %>
+<section class="page-hero page-hero--daan">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Daan</div>
+    <h1>Daan <span class="ph-hindi">दान</span></h1>
+    <p>Give with intention. Every rupee supports a real, verified cause — with full transparency and a digital receipt.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <% if (success && lastDonation) { %>
+    <div class="sankalp-success">
+      <div class="success-icon">🪔</div>
+      <h2>Daan Received with Gratitude</h2>
+      <p>Your donation of <strong>₹<%= lastDonation.amount.toLocaleString('en-IN') %></strong> to <strong><%= lastDonation.cause_name %></strong> has been recorded.</p>
+      <div class="sankalp-certificate">
+        <div class="cert-header"><span>🪔</span><h3>Daan Praman-Patra</h3><span>🪔</span></div>
+        <div class="cert-body">
+          <div class="cert-row"><span>Donor</span><strong><%= lastDonation.name %></strong></div>
+          <div class="cert-row"><span>Amount</span><strong>₹<%= lastDonation.amount.toLocaleString('en-IN') %></strong></div>
+          <div class="cert-row"><span>Cause</span><strong><%= lastDonation.cause_name %></strong></div>
+          <div class="cert-row"><span>Receipt No</span><strong><%= lastDonation.receiptNo %></strong></div>
+          <div class="cert-row"><span>Date</span><strong><%= new Date(lastDonation.timestamp).toLocaleString('en-IN') %></strong></div>
+        </div>
+        <div class="cert-footer">🙏 धर्मो रक्षति रक्षितः — Mandir.World</div>
+      </div>
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="/daan" class="btn btn--outline">Give More Daan</a>
+        <a href="/sankalp" class="btn btn--saffron">Register Sankalp 🙏</a>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="daan-page-layout">
+      <div class="daan-causes-col">
+        <h2>Choose a Cause</h2>
+        <% causes.forEach(cause => { %>
+        <div class="cause-card-v2" id="<%= cause.id %>">
+          <div class="ccv2-header">
+            <span class="ccv2-icon"><%= cause.icon %></span>
+            <div><h3><%= cause.name %></h3><div class="ccv2-hindi"><%= cause.hindi %></div></div>
+          </div>
+          <p class="ccv2-desc"><%= cause.description %></p>
+          <div class="ccv2-progress">
+            <div class="ccv2-bar"><div style="width:<%= Math.min((cause.raised/cause.goal)*100,100).toFixed(0) %>%"></div></div>
+            <div class="ccv2-labels"><span>₹<%= (cause.raised/1000).toFixed(0) %>K raised</span><span>Goal: ₹<%= (cause.goal/1000).toFixed(0) %>K</span></div>
+          </div>
+          <form action="/daan" method="POST" class="cause-form-v2">
+            <input type="hidden" name="cause_id" value="<%= cause.id %>"/>
+            <input type="hidden" name="cause_name" value="<%= cause.name %>"/>
+            <div class="form-group"><label>Your Name <span class="req">*</span></label><input type="text" name="name" class="form-input" placeholder="Full name" required/></div>
+            <div class="cf-tiers">
+              <label class="cf-tiers-label">Select Amount</label>
+              <div class="cf-tier-row">
+                <% cause.tier.forEach(t => { %>
+                <label class="cf-tier"><input type="radio" name="amount" value="<%= t %>"/><span>₹<%= t.toLocaleString('en-IN') %></span></label>
+                <% }) %>
+              </div>
+              <input type="number" name="custom_amount" class="form-input" placeholder="Or enter custom amount (₹)" min="10" style="margin-top:0.5rem"/>
+            </div>
+            <div class="form-group"><label>PAN <span class="optional">(for 80G receipt)</span></label><input type="text" name="pan" class="form-input" placeholder="ABCDE1234F" maxlength="10"/></div>
+            <button type="submit" class="btn btn--gold btn--large" style="width:100%">🪔 Give Daan to <%= cause.name %></button>
+          </form>
+        </div>
+        <% }) %>
+      </div>
+      <div class="daan-sidebar-col">
+        <div class="ds-card"><h3>Why Give on Mandir.World?</h3><ul><li>✅ 100% goes to the cause</li><li>✅ Digital receipt instantly</li><li>✅ No middlemen</li><li>✅ Causes selected for impact</li><li>✅ Regular updates on cause progress</li></ul></div>
+        <div class="ds-card ds-card--saffron"><h3>धर्मो रक्षति रक्षितः</h3><p><em>"Dharma protects those who protect Dharma."</em></p><p>Your daan is not charity — it is Dharma. It returns to you multiplied.</p></div>
+        <div class="ds-card"><h3>🙏 After Giving</h3><p>Register a Sankalp or book a Puja to complete your spiritual practice.</p><a href="/sankalp" class="btn btn--saffron" style="margin-top:0.75rem;display:block;text-align:center">Register Sankalp</a><a href="/puja-sewa" class="btn btn--outline" style="margin-top:0.5rem;display:block;text-align:center">Book a Puja</a></div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>

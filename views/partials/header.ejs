@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= typeof title !== 'undefined' ? title + ' — ' : '' %>मंदिर.World</title>
+  <meta name="description" content="Live darshan, Sankalp, Puja Sewa, and Dharmic giving — mandir.world brings India's most sacred temples to you." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"></noscript>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-inner">
+    <span id="topbarPanchang">Loading today's panchang...</span>
+    <div class="topbar-right">
+      <span>🕉️ Jai Shri Ram</span>
+      <span>·</span>
+      <span>हर हर महादेव</span>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <div class="nav-inner">
+    <a href="/" class="nav-brand">
+      <span class="brand-om">ॐ</span>
+      <div class="brand-text-wrap">
+        <span class="brand-name">mandir<span class="brand-dot">.</span>world</span>
+        <span class="brand-tagline">Digital Darshan Platform</span>
+      </div>
+    </a>
+
+    <div class="nav-links" id="navLinks">
+      <!-- Darshan -->
+      <div class="nav-item nav-item--has-dropdown">
+        <a href="/darshan" class="nav-link <%= page === 'darshan' ? 'active' : '' %>">
+          Darshan <span class="nav-arrow">▾</span>
+        </a>
+        <div class="nav-dropdown">
+          <a href="/darshan" class="nd-item">
+            <span class="nd-icon">📺</span>
+            <div><strong>Live Now</strong><span>Watch live temple streams</span></div>
+          </a>
+          <a href="/darshan?city=Varanasi" class="nd-item">
+            <span class="nd-icon">🕯️</span>
+            <div><strong>Varanasi</strong><span>Kashi Vishwanath · Ganga Aarti</span></div>
+          </a>
+          <a href="/darshan?city=Ayodhya" class="nd-item">
+            <span class="nd-icon">🏹</span>
+            <div><strong>Ayodhya</strong><span>Ram Mandir darshan</span></div>
+          </a>
+          <a href="/darshan?city=Haridwar" class="nd-item">
+            <span class="nd-icon">🌊</span>
+            <div><strong>Haridwar</strong><span>Har Ki Pauri aarti</span></div>
+          </a>
+          <a href="/temples" class="nd-item">
+            <span class="nd-icon">🛕</span>
+            <div><strong>All Temples</strong><span>Full directory — 11 temples</span></div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Puja Sewa -->
+      <div class="nav-item nav-item--has-dropdown">
+        <a href="/puja-sewa" class="nav-link <%= page === 'puja' ? 'active' : '' %>">
+          Puja Sewa <span class="nav-arrow">▾</span>
+        </a>
+        <div class="nav-dropdown">
+          <a href="/puja-sewa" class="nd-item">
+            <span class="nd-icon">🙏</span>
+            <div><strong>Book a Puja</strong><span>Remote puja by qualified pandits</span></div>
+          </a>
+          <a href="/puja-sewa#rudrabhishek" class="nd-item">
+            <span class="nd-icon">🕉️</span>
+            <div><strong>Rudrabhishek</strong><span>Panchamrit abhishek of Shiva</span></div>
+          </a>
+          <a href="/puja-sewa#satyanarayan-katha" class="nd-item">
+            <span class="nd-icon">📖</span>
+            <div><strong>Satyanarayan Katha</strong><span>For new beginnings</span></div>
+          </a>
+          <a href="/puja-sewa#pind-daan" class="nd-item">
+            <span class="nd-icon">🪔</span>
+            <div><strong>Pind Daan & Tarpan</strong><span>Ancestor liberation rituals</span></div>
+          </a>
+        </div>
+      </div>
+
+      <a href="/sankalp" class="nav-link <%= page === 'sankalp' ? 'active' : '' %>">Sankalp</a>
+      <a href="/calendar" class="nav-link <%= page === 'calendar' ? 'active' : '' %>">Panchang</a>
+      <a href="/daan" class="nav-link nav-link--daan <%= page === 'daan' ? 'active' : '' %>">🪔 Daan</a>
+    </div>
+
+    <button class="nav-toggle" id="navToggle" onclick="toggleMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="/darshan">📺 Live Darshan</a>
+  <a href="/temples">🛕 Temple Directory</a>
+  <a href="/puja-sewa">🙏 Puja Sewa</a>
+  <a href="/sankalp">🕉️ Sankalp</a>
+  <a href="/calendar">📅 Panchang & Calendar</a>
+  <a href="/daan">🪔 Give Daan</a>
+  <a href="/about">About Us</a>
+</div>

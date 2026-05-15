@@ -1,0 +1,84 @@
+<%- include('partials/header', { title: 'Digital Sankalp' }) %>
+<section class="page-hero page-hero--sankalp">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Sankalp</div>
+    <h1>Digital Sankalp <span class="ph-hindi">संकल्प</span></h1>
+    <p>Begin every sacred act with intention. Register yours — tied to any festival or daily aarti.</p>
+  </div>
+</section>
+<section class="section">
+  <div class="container">
+    <% if (success && lastSankalp) { %>
+    <div class="sankalp-success">
+      <div class="success-icon">🕉️</div>
+      <h2>Your Sankalp is Registered</h2>
+      <p>Sankalp #<%= lastSankalp.number %> has been recorded in the name of <strong><%= lastSankalp.name %></strong>.</p>
+      <div class="sankalp-certificate">
+        <div class="cert-header"><span>ॐ</span><h3>Sankalp Praman-Patra</h3><span>ॐ</span></div>
+        <div class="cert-body">
+          <div class="cert-row"><span>Devotee</span><strong><%= lastSankalp.name %></strong></div>
+          <% if (lastSankalp.gotra !== 'Not specified') { %><div class="cert-row"><span>Gotra</span><strong><%= lastSankalp.gotra %></strong></div><% } %>
+          <div class="cert-row"><span>Occasion</span><strong><%= lastSankalp.event %></strong></div>
+          <div class="cert-row"><span>City</span><strong><%= lastSankalp.city %></strong></div>
+          <div class="cert-row"><span>Sankalp</span><strong><%= lastSankalp.wish %></strong></div>
+          <div class="cert-row"><span>Registered</span><strong><%= new Date(lastSankalp.timestamp).toLocaleString('en-IN') %></strong></div>
+        </div>
+        <div class="cert-footer">🙏 Registered on Mandir.World — Sankalp No. #<%= lastSankalp.number %></div>
+      </div>
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
+        <a href="/sankalp" class="btn btn--outline">Register Another</a>
+        <a href="/daan" class="btn btn--gold">Give Daan 🪔</a>
+        <a href="/puja-sewa" class="btn btn--saffron">Book a Puja 🙏</a>
+      </div>
+    </div>
+    <% } else { %>
+    <div class="sankalp-layout">
+      <div class="sankalp-form-side">
+        <div class="sankalp-explainer">
+          <h3>What is a Sankalp?</h3>
+          <p>A <em>sankalp</em> (संकल्प) is a sacred vow or intention declared before the divine before any ritual or important act. It includes your name, gotra (lineage), the occasion, and your prayer. Traditionally spoken by a priest — now you can register it yourself, with sincerity.</p>
+        </div>
+        <form action="/sankalp" method="POST" class="sankalp-form">
+          <div class="form-section"><h3>1. Who are you?</h3>
+            <div class="form-row">
+              <div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" name="name" class="form-input" placeholder="As per your tradition" required/></div>
+              <div class="form-group"><label>Gotra <span class="optional">(optional)</span></label><input type="text" name="gotra" class="form-input" placeholder="e.g. Bharadwaj, Kashyap..."/></div>
+            </div>
+          </div>
+          <div class="form-section"><h3>2. For which occasion?</h3>
+            <div class="event-picker-grid">
+              <% events.forEach(e => { %>
+              <label class="event-pick-item">
+                <input type="radio" name="event" value="<%= e.name %>" required/>
+                <div class="epi-card">
+                  <span class="epi-icon"><%= e.icon %></span>
+                  <span class="epi-name"><%= e.name %></span>
+                  <span class="epi-hindi"><%= e.hindi %></span>
+                  <% if (e.isLive||e.isDaily) { %><span class="epi-live">LIVE</span><% } %>
+                </div>
+              </label>
+              <% }) %>
+            </div>
+            <div class="form-group" style="margin-top:1rem"><label>City / Location</label>
+              <select name="city" class="form-input form-select">
+                <option>Varanasi (Kashi)</option><option>Ayodhya</option><option>Haridwar</option><option>Prayagraj</option><option>Mathura</option><option>Vrindavan</option><option>Gaya</option><option>Puri</option><option>Tirupati</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-section"><h3>3. Your Sankalp</h3>
+            <div class="form-group"><label>Your wish, prayer, or intention <span class="req">*</span></label><textarea name="wish" rows="4" class="form-input form-textarea" placeholder="e.g. Sarve bhavantu sukhinah — May all beings be happy." required></textarea></div>
+          </div>
+          <button type="submit" class="btn btn--saffron btn--large" style="width:100%">🙏 Register My Sankalp</button>
+          <p class="form-note">Your sankalp is stored on Mandir.World, tied to this sacred occasion.</p>
+        </form>
+      </div>
+      <div class="sankalp-info-side">
+        <div class="info-box"><h3>The Sankalp Mantra</h3><p>A traditional sankalp begins with:</p><div class="mantra-block">ॐ विष्णुर्विष्णुर्विष्णुः श्रीमद् भगवतो महापुरुषस्य विष्णोराज्ञया...</div><p style="font-size:0.82rem;color:var(--text-soft);margin-top:0.5rem">Followed by your name, gotra, date, location, and intention.</p></div>
+        <div class="info-box info-box--saffron"><h3>🙏 Complete Your Devotion</h3><p>After recording your sankalp, consider giving <strong>daan</strong> — a donation to one of our dharmic causes. It completes the circle.</p><a href="/daan" class="btn btn--gold" style="margin-top:0.75rem;display:block;text-align:center">Give Daan →</a></div>
+        <div class="info-box"><h3>Want a Puja Too?</h3><p>Book a complete puja performed by a qualified pandit — Rudrabhishek, Satyanarayan Katha, and more.</p><a href="/puja-sewa" class="btn btn--outline" style="margin-top:0.75rem;display:block;text-align:center">Explore Puja Sewa →</a></div>
+      </div>
+    </div>
+    <% } %>
+  </div>
+</section>
+<%- include('partials/footer') %>
