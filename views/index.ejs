@@ -111,16 +111,45 @@
   <div class="container">
     <div class="sh-row"><div class="sh-left"><span class="badge">📅 CALENDAR</span><h2>Upcoming Festivals</h2></div><a href="/calendar" class="sh-more">Full calendar →</a></div>
     <div class="festivals-home-grid">
-      <% upcomingFestivals.forEach(f => { %>
-      <a href="/calendar/<%= f.id %>" class="fhg-card" style="--accent:<%= f.color %>">
-        <div class="fhg-top"><span class="fhg-icon"><%= f.icon %></span><% const d=daysUntil(f.date); if(d&&d<=30&&d>0){%><span class="fhg-days"><%= d %>d</span><%}%></div>
-        <div class="fhg-date"><%= formatDate(f.date) %></div>
-        <div class="fhg-name"><%= f.name %></div>
-        <div class="fhg-hindi"><%= f.hindi %></div>
-        <div class="fhg-deity"><%= f.deity %></div>
-        <div class="fhg-cities"><% f.cities.slice(0,2).forEach(c=>{%><span><%= c %></span><%})%></div>
-      </a>
+      <%= console.log(upcomingFestivals.length)%>
+      <%
+let shown = 0;
+upcomingFestivals.forEach(f => {
+  if (shown < 4 && new Date() < new Date(f.date)) {
+    shown++;
+%>
+
+  <a href="/calendar/<%= f.id %>" class="fhg-card" style="--accent:<%= f.color %>">
+
+    <div class="fhg-top">
+      <span class="fhg-icon"><%= f.icon %></span>
+
+      <% const d = daysUntil(f.date); %>
+      <% if (d && d <= 30 && d > 0) { %>
+        <span class="fhg-days"><%= d %>d</span>
+      <% } %>
+    </div>
+
+    <div class="fhg-date"><%= formatDate(f.date) %></div>
+
+    <% console.log(formatDate(panchang.date)+" "+formatDate(f.date)) %>
+
+    <div class="fhg-name"><%= f.name %></div>
+    <div class="fhg-hindi"><%= f.hindi %></div>
+    <div class="fhg-deity"><%= f.deity %></div>
+
+    <div class="fhg-cities">
+      <% f.cities.slice(0,2).forEach(c => { %>
+        <span><%= c %></span>
       <% }) %>
+    </div>
+
+  </a>
+
+<%
+  }
+});
+%>
     </div>
   </div>
 </section>

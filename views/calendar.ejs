@@ -27,7 +27,7 @@
 
 <!-- FILTER BAR -->
 <section class="section" style="padding-top:2rem;padding-bottom:1.5rem">
-  <div class="container">
+  <!-- <div class="container">
     <div class="cal-filter-bar">
       <div class="cfb-group">
         <span class="cfb-label">Month:</span>
@@ -39,16 +39,18 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
 </section>
 
 <!-- UPCOMING FESTIVALS TIMELINE -->
 <section class="section" style="padding-top:0">
   <div class="container">
+    <% console.log(upcoming.length)%>
     <% if (upcoming.length > 0) { %>
     <h3 class="cal-section-heading">Upcoming Festivals</h3>
     <div class="cal-timeline-v2">
       <% upcoming.forEach((f, idx) => { %>
+        <% if(new Date() < new Date(f.date)){%>
       <div class="ctv2-item" style="--accent:<%= f.color %>">
         <div class="ctv2-marker">
           <div class="ctv2-icon"><%= f.icon %></div>
@@ -80,6 +82,7 @@
           </div>
         </div>
       </div>
+      <% }%>
       <% }) %>
     </div>
     <% } %>
