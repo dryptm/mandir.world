@@ -1,79 +1,158 @@
-<%- include('partials/header', { title: 'Panchang & Festival Calendar' }) %>
+<%- include('partials/header', { title: 'Panchang & Festival Calendar 2026' }) %>
 
-<section class="page-hero">
+<section class="page-hero page-hero--dark">
   <div class="container">
     <div class="ph-breadcrumb">Home → Panchang & Calendar</div>
-    <h1>पंचांग & Festival Calendar <span class="ph-year">2025–26</span></h1>
-    <p>Every major Hindu festival with verified dates, significance, and rituals — plus today's panchang.</p>
+    <h1>पंचांग & Festival Calendar <span class="ph-year">2026</span></h1>
+    <p>Real verified dates for every major Hindu festival · Daily panchang for Varanasi</p>
   </div>
 </section>
 
-<!-- PANCHANG FULL WIDGET -->
+<!-- ══ PANCHANG WIDGET ═══════════════════════════════════════════════════ -->
 <section class="section" style="padding-bottom:0">
   <div class="container">
-    <div class="panchang-full">
-      <div class="pf-header"><span class="pc-om" style="font-size:2rem">ॐ</span><div><h2 style="font-size:1.5rem;margin:0">आज का पंचांग</h2><p style="color:var(--text-soft);margin:0;font-size:0.85rem">Calculated for Varanasi (25.32°N, 83.01°E) · IST</p></div></div>
-      <div class="panchang-grid" id="panchaangWidget">
-        <div class="pg-item pg-item--vara"><div class="pg-label">वार (Vara)</div><div class="pg-value" id="pg-vara">Loading...</div><div class="pg-sub" id="pg-vara-deity"></div></div>
-        <div class="pg-item"><div class="pg-label">तिथि (Tithi)</div><div class="pg-value" id="pg-tithi"></div><div class="pg-sub" id="pg-paksha"></div></div>
-        <div class="pg-item"><div class="pg-label">नक्षत्र (Nakshatra)</div><div class="pg-value" id="pg-nakshatra"></div></div>
-        <div class="pg-item"><div class="pg-label">योग (Yoga)</div><div class="pg-value" id="pg-yoga"></div></div>
-        <div class="pg-item"><div class="pg-label">चंद्र राशि</div><div class="pg-value" id="pg-rashi"></div></div>
-        <div class="pg-item pg-item--sun"><div class="pg-label">सूर्योदय / सूर्यास्त</div><div class="pg-value"><span id="pg-sunrise"></span> / <span id="pg-sunset"></span></div></div>
+    <div class="panchang-full" id="panchaangWidget">
+      <div class="pf-header">
+        <span class="pc-om" style="font-size:2.2rem">ॐ</span>
+        <div>
+          <h2 style="font-size:1.4rem;margin:0;color:var(--gold-lt)">आज का पंचांग</h2>
+          <p style="color:rgba(253,246,227,.35);margin:0;font-size:.78rem">Varanasi (25.32°N, 83.01°E) · IST</p>
+        </div>
+        <div class="pc-auspicious" id="pg-auspicious" style="margin-left:auto"></div>
       </div>
-    </div>
-  </div>
-</section>
 
-<!-- FILTER BAR -->
-<section class="section" style="padding-top:2rem;padding-bottom:1.5rem">
-  <!-- <div class="container">
-    <div class="cal-filter-bar">
-      <div class="cfb-group">
-        <span class="cfb-label">Month:</span>
-        <div class="cfb-pills">
-          <a href="/calendar" class="cfb-pill <%= !selectedMonth ? 'active' : '' %>">All</a>
-          <% months.forEach(m => { %>
-          <a href="/calendar?month=<%= m %><%= selectedCategory ? '&category='+selectedCategory : '' %>" class="cfb-pill <%= selectedMonth===m ? 'active' : '' %>"><%= m %></a>
-          <% }) %>
+      <div class="pg-date-line" id="pg-date">Loading...</div>
+
+      <div class="panchang-grid">
+        <div class="pg-item pg-item--vara">
+          <div class="pg-label">वार / Vara</div>
+          <div class="pg-value" id="pg-vara">—</div>
+          <div class="pg-sub" id="pg-vara-deity">—</div>
+        </div>
+        <div class="pg-item">
+          <div class="pg-label">तिथि / Tithi</div>
+          <div class="pg-value" id="pg-tithi">—</div>
+          <div class="pg-sub" id="pg-paksha">—</div>
+        </div>
+        <div class="pg-item">
+          <div class="pg-label">नक्षत्र / Nakshatra</div>
+          <div class="pg-value" id="pg-nakshatra">—</div>
+        </div>
+        <div class="pg-item">
+          <div class="pg-label">योग / Yoga</div>
+          <div class="pg-value" id="pg-yoga">—</div>
+        </div>
+        <div class="pg-item">
+          <div class="pg-label">चंद्र राशि / Moon Sign</div>
+          <div class="pg-value" id="pg-rashi">—</div>
+        </div>
+        <div class="pg-item pg-item--sun">
+          <div class="pg-label">सूर्योदय · सूर्यास्त</div>
+          <div class="pg-value">
+            🌅 <span id="pg-sunrise">—</span> &nbsp;·&nbsp; 🌇 <span id="pg-sunset">—</span>
+          </div>
         </div>
       </div>
     </div>
-  </div> -->
+  </div>
 </section>
 
-<!-- UPCOMING FESTIVALS TIMELINE -->
+<!-- ══ NEXT FESTIVAL ALERT ════════════════════════════════════════════════ -->
+<% const nextFest = upcoming[0]; %>
+<% if (nextFest) { %>
+<% const daysAway = nextFest.daysAway; %>
+<section class="section" style="padding:1.5rem 0 0">
+  <div class="container">
+    <div class="next-fest-alert" style="--accent:<%= nextFest.color %>">
+      <div class="nfa-icon"><%= nextFest.icon %></div>
+      <div class="nfa-body">
+        <div class="nfa-label">Next Major Festival</div>
+        <div class="nfa-name"><%= nextFest.name %> <span class="nfa-hindi"><%= nextFest.hindi %></span></div>
+        <div class="nfa-date">📅 <%= formatDate(nextFest.date) %> · 🙏 <%= nextFest.deity %></div>
+        <div class="nfa-desc"><%= nextFest.description %></div>
+      </div>
+      <div class="nfa-countdown">
+        <div class="nfa-days"><%= daysAway === 0 ? 'Today' : daysAway %></div>
+        <% if (daysAway > 0) { %><div class="nfa-days-label">days away</div><% } %>
+        <div class="nfa-actions">
+          <a href="/sankalp" class="btn btn--saffron btn--sm">Sankalp 🙏</a>
+          <a href="/daan" class="btn btn--gold btn--sm">Daan 🪔</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+<% } %>
+
+<!-- ══ MONTH FILTER ═══════════════════════════════════════════════════════ -->
+<section class="section" style="padding:1.5rem 0">
+  <div class="container">
+    <div class="cal-filter-bar">
+      <span class="cfb-label">Filter:</span>
+      <div class="cfb-pills">
+        <a href="/calendar" class="cfb-pill <%= !selectedMonth ? 'active' : '' %>">All</a>
+        <% months.forEach(m => { %>
+        <a href="/calendar?month=<%= m %>" class="cfb-pill <%= selectedMonth === m ? 'active' : '' %>"><%= m %></a>
+        <% }) %>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ UPCOMING TIMELINE ══════════════════════════════════════════════════ -->
 <section class="section" style="padding-top:0">
   <div class="container">
-    <% console.log(upcoming.length)%>
+
     <% if (upcoming.length > 0) { %>
-    <h3 class="cal-section-heading">Upcoming Festivals</h3>
+    <h3 class="cal-section-heading">
+      Upcoming Festivals
+      <span class="csh-count"><%= upcoming.length %> events</span>
+    </h3>
+
     <div class="cal-timeline-v2">
       <% upcoming.forEach((f, idx) => { %>
-        <% if(new Date() < new Date(f.date)){%>
       <div class="ctv2-item" style="--accent:<%= f.color %>">
+
         <div class="ctv2-marker">
           <div class="ctv2-icon"><%= f.icon %></div>
           <% if (idx < upcoming.length - 1) { %><div class="ctv2-line"></div><% } %>
         </div>
+
         <div class="ctv2-card">
           <div class="ctv2-date-row">
-            <span class="ctv2-date"><%= formatDate(f.date) %></span>
-            <% const d = daysUntil(f.date); %>
-            <% if (d !== null && d > 0) { %>
-            <span class="ctv2-countdown <%= d<=7 ? 'ctv2-countdown--urgent' : '' %>"><%= d <= 7 ? '🔔 ' : '' %><%= d %> days away</span>
+            <span class="ctv2-date">📅 <%= formatDate(f.date) %></span>
+            <% if (f.endDate) { %><span class="ctv2-date-end">→ <%= formatDate(f.endDate) %></span><% } %>
+            <% if (f.daysAway === 0) { %>
+              <span class="ctv2-countdown ctv2-countdown--today">🔴 Today</span>
+            <% } else if (f.daysAway !== null && f.daysAway <= 7) { %>
+              <span class="ctv2-countdown ctv2-countdown--urgent">🔔 <%= f.daysAway %> days away</span>
+            <% } else if (f.daysAway !== null) { %>
+              <span class="ctv2-countdown"><%= f.daysAway %> days away</span>
             <% } %>
           </div>
-          <h3 class="ctv2-name"><%= f.name %> <span class="ctv2-hindi"><%= f.hindi %></span></h3>
+
+          <h3 class="ctv2-name">
+            <%= f.name %>
+            <span class="ctv2-hindi"><%= f.hindi %></span>
+          </h3>
+
           <div class="ctv2-deity">🙏 <%= f.deity %></div>
           <p class="ctv2-desc"><%= f.description %></p>
-          <div class="ctv2-sig"><em>"<%= f.significance %>"</em></div>
+          <p class="ctv2-sig"><em><%= f.significance %></em></p>
+
           <div class="ctv2-rituals">
             <strong>Key Rituals:</strong>
-            <% f.rituals.slice(0,4).forEach(r => { %><span><%= r %></span><% }) %>
+            <% f.rituals.slice(0, 4).forEach(r => { %><span><%= r %></span><% }) %>
           </div>
+
+          <% if (f.mantra) { %>
+          <div class="ctv2-mantra"><%= f.mantra %></div>
+          <% } %>
+
           <div class="ctv2-footer">
-            <div class="ctv2-cities"><% f.cities.forEach(c=>{%><span><%= c %></span><%})%></div>
+            <div class="ctv2-cities">
+              <% f.cities.forEach(c => { %><span><%= c %></span><% }) %>
+            </div>
             <div class="ctv2-actions">
               <a href="/sankalp" class="btn btn--sm btn--saffron">Sankalp 🙏</a>
               <a href="/daan" class="btn btn--sm btn--gold">Daan 🪔</a>
@@ -81,14 +160,17 @@
             </div>
           </div>
         </div>
+
       </div>
-      <% }%>
       <% }) %>
     </div>
     <% } %>
 
-    <!-- DAILY STREAMS -->
-    <h3 class="cal-section-heading" style="margin-top:3rem">Daily Sacred Streams 🔴</h3>
+    <!-- ── DAILY STREAMS ───────────────────────────────── -->
+    <h3 class="cal-section-heading" style="margin-top:3.5rem">
+      Daily Sacred Streams
+      <span class="csh-live"><span></span> Every day</span>
+    </h3>
     <div class="cal-daily-cards">
       <% dailyEvents.forEach(e => { %>
       <div class="cdc-card" style="border-left-color:<%= e.color %>">
@@ -96,49 +178,71 @@
         <div class="cdc-body">
           <div class="cdc-name"><%= e.name %></div>
           <div class="cdc-hindi"><%= e.hindi %></div>
-          <div class="cdc-deity"><%= e.deity %></div>
+          <div class="cdc-deity">🙏 <%= e.deity %></div>
           <p class="cdc-desc"><%= e.description %></p>
-          <div class="cdc-rituals"><% e.rituals.forEach(r=>{%><span><%= r %></span><%})%></div>
+          <div class="cdc-rituals">
+            <% e.rituals.slice(0, 4).forEach(r => { %><span><%= r %></span><% }) %>
+          </div>
+          <div class="cdc-mantra"><%= e.mantra %></div>
         </div>
         <div class="cdc-actions">
-          <a href="/darshan" class="btn btn--sm btn--primary">Watch Live</a>
+          <a href="/darshan" class="btn btn--sm btn--primary">Watch Live 🔴</a>
           <a href="/sankalp" class="btn btn--sm btn--outline">Sankalp</a>
         </div>
       </div>
       <% }) %>
     </div>
 
-    <!-- PAST FESTIVALS -->
+    <!-- ── PAST FESTIVALS ─────────────────────────────── -->
     <% if (past.length > 0) { %>
-    <h3 class="cal-section-heading" style="margin-top:3rem">Past Celebrations (2025)</h3>
+    <h3 class="cal-section-heading" style="margin-top:3.5rem">
+      Past Celebrations (2026)
+    </h3>
     <div class="cal-past-grid-v2">
-      <% past.forEach(f => { %>
+      <% past.slice().reverse().forEach(f => { %>
       <a href="/calendar/<%= f.id %>" class="cpg2-item">
-        <span><%= f.icon %></span>
+        <span class="cpg2-icon"><%= f.icon %></span>
         <div>
           <strong><%= f.name %></strong>
-          <span><%= f.hindi %></span>
+          <span class="cpg2-hindi"><%= f.hindi %></span>
           <div class="cpg2-date"><%= formatDate(f.date) %></div>
         </div>
+        <span class="cpg2-arrow">→</span>
       </a>
       <% }) %>
     </div>
     <% } %>
+
   </div>
 </section>
 
 <script>
-fetch('/api/panchang').then(r=>r.json()).then(p=>{
-  document.getElementById('pg-vara').textContent = p.vara;
-  document.getElementById('pg-vara-deity').textContent = p.varaDeity;
-  document.getElementById('pg-tithi').textContent = p.tithi;
-  document.getElementById('pg-paksha').textContent = p.paksha;
-  document.getElementById('pg-nakshatra').textContent = p.nakshatra;
-  document.getElementById('pg-yoga').textContent = p.yoga;
-  document.getElementById('pg-rashi').textContent = p.moonRashi;
-  document.getElementById('pg-sunrise').textContent = p.sunrise;
-  document.getElementById('pg-sunset').textContent = p.sunset;
-});
+// Load live panchang from API
+fetch('/api/panchang')
+  .then(r => r.json())
+  .then(p => {
+    document.getElementById('pg-date').textContent      = p.date;
+    document.getElementById('pg-vara').textContent      = p.vara;
+    document.getElementById('pg-vara-deity').textContent = p.varaDeity;
+    document.getElementById('pg-tithi').textContent     = p.tithi;
+    document.getElementById('pg-paksha').textContent    = p.paksha;
+    document.getElementById('pg-nakshatra').textContent = p.nakshatra;
+    document.getElementById('pg-yoga').textContent      = p.yoga;
+    document.getElementById('pg-rashi').textContent     = p.moonRashi;
+    document.getElementById('pg-sunrise').textContent   = p.sunrise;
+    document.getElementById('pg-sunset').textContent    = p.sunset;
+    const aEl = document.getElementById('pg-auspicious');
+    if (p.isAuspicious) {
+      aEl.textContent = '✓ Shubh Din';
+      aEl.classList.add('pc-good');
+    } else {
+      aEl.textContent = '~ Sadharan';
+      aEl.classList.add('pc-neutral');
+    }
+  })
+  .catch(() => {
+    document.getElementById('pg-date').textContent = 'Panchang unavailable';
+  });
 </script>
 
 <%- include('partials/footer') %>

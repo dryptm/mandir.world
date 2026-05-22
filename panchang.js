@@ -1,5 +1,5 @@
-// panchang.js — Simplified Vedic Panchang Calculator
-// Based on approximate astronomical algorithms
+// panchang.js — Vedic Panchang Calculator
+// Uses Lahiri ayanamsha to convert tropical → sidereal (the main fix)
 
 const TITHIS = [
   'Pratipada','Dwitiya','Tritiya','Chaturthi','Panchami',
@@ -25,7 +25,7 @@ const YOGAS = [
   'Shukla','Brahma','Indra','Vaidhriti'
 ];
 
-const VARAS = ['Ravivar','Somvar','Mangalvar','Budhvar','Guruvar','Shukravar','Shanivar'];
+const VARAS       = ['Ravivar','Somvar','Mangalvar','Budhvar','Guruvar','Shukravar','Shanivar'];
 const VARA_DEITIES = ['Surya Dev','Chandra Dev','Mangal Dev','Budha Dev','Brihaspati Dev','Shukra Dev','Shani Dev'];
 
 const RASHI_NAMES = [
@@ -34,104 +34,162 @@ const RASHI_NAMES = [
   'Dhanu (Sagittarius)','Makara (Capricorn)','Kumbha (Aquarius)','Meena (Pisces)'
 ];
 
-// Approximate Sun longitude (degrees) for a given date
-function sunLongitude(date) {
-  const J2000 = new Date('2000-01-01T12:00:00Z');
-  const n = (date - J2000) / 86400000; // days since J2000
-  const L = (280.460 + 0.9856474 * n) % 360;
-  const g = ((357.528 + 0.9856003 * n) % 360) * Math.PI / 180;
-  const lam = L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g);
-  return ((lam % 360) + 360) % 360;
+// Normalize to [0, 360)
+function norm(deg) {
+  return ((deg % 360) + 360) % 360;
 }
 
-// Approximate Moon longitude (degrees) for a given date
-function moonLongitude(date) {
-  const J2000 = new Date('2000-01-01T12:00:00Z');
-  const n = (date - J2000) / 86400000;
-  const L = (218.316 + 13.176396 * n) % 360;
-  const M = (134.963 + 13.064993 * n) % 360;
-  const F = (93.272 + 13.229350 * n) % 360;
-  const lam = L + 6.289 * Math.sin(M * Math.PI / 180) 
-                - 1.274 * Math.sin((2*F - M) * Math.PI / 180)
-                + 0.658 * Math.sin((2*F) * Math.PI / 180);
-  return ((lam % 360) + 360) % 360;
+// Days since J2000.0 (Jan 1.5, 2000 = Jan 1 2000 12:00 UT)
+function daysSinceJ2000(date) {
+  const J2000 = Date.UTC(2000, 0, 1, 12, 0, 0);
+  return (date.getTime() - J2000) / 86400000;
 }
 
-// Sunrise/sunset approximation for a given lat/lon
-function getSunTimes(date, lat = 25.32, lon = 83.01) { // default: Varanasi
-  const J2000 = new Date('2000-01-01T12:00:00Z');
-  const n = (date - J2000) / 86400000;
-  const J = Math.floor(n) + 2451545.0;
-  const lw = -lon * Math.PI / 180;
-  const phi = lat * Math.PI / 180;
-  const d = J - 2451545.0;
-  const M_deg = (357.5291 + 0.98560028 * d) % 360;
-  const M = M_deg * Math.PI / 180;
-  const C = 1.9148 * Math.sin(M) + 0.0200 * Math.sin(2*M) + 0.0003 * Math.sin(3*M);
-  const lam = (M_deg + C + 180 + 102.9372) % 360;
-  const lamR = lam * Math.PI / 180;
-  const sinDec = Math.sin(lamR) * Math.sin(23.4397 * Math.PI / 180);
-  const dec = Math.asin(sinDec);
-  const cosHourAngle = (Math.sin(-0.0083 * Math.PI / 180) - Math.sin(phi) * sinDec) / (Math.cos(phi) * Math.cos(dec));
-  if (Math.abs(cosHourAngle) > 1) return { sunrise: '06:00 AM', sunset: '06:00 PM' };
-  const hourAngle = Math.acos(cosHourAngle);
-  const Jset = 2451545.0 + 0.0009 + ((hourAngle * 180/Math.PI + lon) / 360) + Math.floor(n) + 0.5 - 0.0053 * Math.sin(M) + 0.0069 * Math.sin(2 * lamR);
-  const Jrise = Jset - hourAngle * 2 * 180/Math.PI / 360;
-  const toTime = (j) => {
-    const t = (j - 2440587.5) * 86400000;
-    const d = new Date(t + 5.5 * 3600000); // IST offset
-    const h = d.getUTCHours();
-    const m = d.getUTCMinutes().toString().padStart(2, '0');
-    const ampm = h >= 12 ? 'PM' : 'AM';
-    const h12 = ((h % 12) || 12).toString().padStart(2, '0');
-    return `${h12}:${m} ${ampm}`;
+// Lahiri ayanamsha (degrees) — increases ~50.26" per year
+// At J2000.0: 23.8530° — calibrated to match Drik Panchang
+function lahiriAyanamsha(n) {
+  const T = n / 36525; // Julian centuries
+  return 23.85 + 0.013958 * T * 100; // ~50.26" per year
+}
+
+// Tropical Sun longitude
+function sunLongitudeTropical(n) {
+  const L = norm(280.460 + 0.9856474 * n);
+  const g = norm(357.528 + 0.9856003 * n) * Math.PI / 180;
+  return norm(L + 1.915 * Math.sin(g) + 0.020 * Math.sin(2 * g));
+}
+
+// Tropical Moon longitude (more accurate with perturbations)
+function moonLongitudeTropical(n) {
+  // Mean longitude
+  const L  = norm(218.3165 + 13.17639648 * n);
+  // Mean anomaly of Moon
+  const M  = norm(134.9634 + 13.06499295 * n);
+  // Mean anomaly of Sun
+  const Ms = norm(357.5291 + 0.98560028  * n);
+  // Moon's argument of latitude
+  const F  = norm(93.2721  + 13.22935024 * n);
+  // Longitude of ascending node
+  const Om = norm(125.0445 -  0.05295377 * n);
+
+  const toRad = x => x * Math.PI / 180;
+
+  const lam =
+    L
+    + 6.289  * Math.sin(toRad(M))
+    - 1.274  * Math.sin(toRad(2 * F - M))
+    + 0.658  * Math.sin(toRad(2 * F))
+    - 0.214  * Math.sin(toRad(2 * M))
+    - 0.186  * Math.sin(toRad(Ms))
+    - 0.114  * Math.sin(toRad(2 * F - 2 * M))
+    + 0.059  * Math.sin(toRad(2 * F - 2 * Ms - M))
+    - 0.058  * Math.sin(toRad(2 * F - Ms - M))
+    - 0.057  * Math.sin(toRad(2 * F + M - Ms))
+    + 0.053  * Math.sin(toRad(2 * F + M))
+    - 0.046  * Math.sin(toRad(2 * F - Ms))
+    - 0.041  * Math.sin(toRad(M - Ms))
+    + 0.034  * Math.sin(toRad(2 * F - 2 * M - Ms))
+    - 0.030  * Math.sin(toRad(2 * Ms - M))
+    + 0.017  * Math.sin(toRad(Om));
+
+  return norm(lam);
+}
+
+// Sunrise/Sunset for a lat/lon (IST = UTC+5:30)
+function getSunTimes(date, lat = 25.3176, lon = 82.9739) {
+  const n   = daysSinceJ2000(date);
+  const lw  = -lon * Math.PI / 180;
+  const phi =  lat * Math.PI / 180;
+
+  const Ms  = norm(357.5291 + 0.98560028 * n) * Math.PI / 180;
+  const C   = 1.9148 * Math.sin(Ms) + 0.0200 * Math.sin(2 * Ms) + 0.0003 * Math.sin(3 * Ms);
+  const lam = norm(norm(357.5291 + 0.98560028 * n) + C + 180 + 102.9372) * Math.PI / 180;
+  const sinDec = Math.sin(lam) * Math.sin(23.4397 * Math.PI / 180);
+  const dec    = Math.asin(sinDec);
+
+  const cosH = (Math.sin(-0.0083 * Math.PI / 180) - Math.sin(phi) * sinDec)
+               / (Math.cos(phi) * Math.cos(dec));
+
+  if (Math.abs(cosH) > 1) return { sunrise: '05:45 AM', sunset: '07:00 PM' };
+
+  const H        = Math.acos(cosH) * 180 / Math.PI;
+  const transit  = 12 + (lon * 24 / 360 - n % 1 * 24) % 24 - 12;  // simplified
+  const riseUTC  = 12 - H / 15 - (lon / 15);
+  const setUTC   = 12 + H / 15 - (lon / 15);
+
+  const toIST = h => {
+    let ist = ((h + 5.5) % 24 + 24) % 24;
+    const hh = Math.floor(ist);
+    const mm = Math.round((ist - hh) * 60);
+    const ampm  = hh >= 12 ? 'PM' : 'AM';
+    const hh12  = ((hh % 12) || 12).toString().padStart(2, '0');
+    return `${hh12}:${mm.toString().padStart(2, '0')} ${ampm}`;
   };
-  return { sunrise: toTime(Jrise), sunset: toTime(Jset) };
+
+  return { sunrise: toIST(riseUTC), sunset: toIST(setUTC) };
 }
 
-function getPanchang(date = new Date()) {
-  const sunLon = sunLongitude(date);
-  const moonLon = moonLongitude(date);
-  
-  // Tithi: each 12° of elongation = 1 tithi
-  const elongation = ((moonLon - sunLon) + 360) % 360;
-  const tithiIndex = Math.floor(elongation / 12);
-  const tithi = TITHIS[tithiIndex] || 'Pratipada';
-  const paksha = tithiIndex < 15 ? 'Shukla Paksha' : 'Krishna Paksha';
+// ── MAIN EXPORT ───────────────────────────────────────────
+function getPanchang(date) {
+  // Use noon IST (06:30 UTC) for calculation — standard panchang reference time
+  const calcDate = new Date(Date.UTC(
+    date.getFullYear(), date.getMonth(), date.getDate(), 6, 30, 0
+  ));
 
-  // Nakshatra: Moon's longitude / (360/27)
-  const nakshatraIndex = Math.floor((moonLon * 27) / 360) % 27;
-  const nakshatra = NAKSHATRAS[nakshatraIndex];
+  const n         = daysSinceJ2000(calcDate);
+  const ayanamsha = lahiriAyanamsha(n);
 
-  // Yoga: (sun + moon) / (360/27)
-  const yogaIndex = Math.floor(((sunLon + moonLon) * 27) / 360) % 27;
-  const yoga = YOGAS[yogaIndex];
+  // Sidereal longitudes (tropical − ayanamsha)
+  const sunSid  = norm(sunLongitudeTropical(n)  - ayanamsha);
+  const moonSid = norm(moonLongitudeTropical(n) - ayanamsha);
 
-  // Vara (weekday)
-  const dayIndex = date.getDay();
-  const vara = VARAS[dayIndex];
-  const varaDeity = VARA_DEITIES[dayIndex];
+  // ── TITHI ────────────────────────────────────────────
+  // Every 12° of Moon−Sun elongation = 1 tithi
+  const elongation  = norm(moonSid - sunSid);
+  const tithiIndex  = Math.floor(elongation / 12) % 30;
+  const tithi       = TITHIS[tithiIndex];
+  const paksha      = tithiIndex < 15 ? 'Shukla Paksha' : 'Krishna Paksha';
 
-  // Rashi (Moon sign)
-  const rashiIndex = Math.floor(moonLon / 30);
-  const moonRashi = RASHI_NAMES[rashiIndex];
+  // ── NAKSHATRA ─────────────────────────────────────────
+  // Moon's sidereal longitude divided into 27 equal parts of 13°20' each
+  const nakshatraIndex = Math.floor((moonSid * 27) / 360) % 27;
+  const nakshatra      = NAKSHATRAS[nakshatraIndex];
 
-  // Sun rashi
-  const sunRashiIndex = Math.floor(sunLon / 30);
-  const sunRashi = RASHI_NAMES[sunRashiIndex];
+  // ── YOGA ─────────────────────────────────────────────
+  // (Sun + Moon sidereal sum) divided into 27 equal parts
+  const yogaIndex = Math.floor((norm(sunSid + moonSid) * 27) / 360) % 27;
+  const yoga      = YOGAS[yogaIndex];
 
-  // Sun times for Varanasi
+  // ── MOON RASHI ───────────────────────────────────────
+  const rashiIndex  = Math.floor(moonSid / 30) % 12;
+  const moonRashi   = RASHI_NAMES[rashiIndex];
+
+  // ── SUN RASHI ────────────────────────────────────────
+  const sunRashiIndex = Math.floor(sunSid / 30) % 12;
+  const sunRashi      = RASHI_NAMES[sunRashiIndex];
+
+  // ── VARA ─────────────────────────────────────────────
+  const dayIndex   = date.getDay();
+  const vara       = VARAS[dayIndex];
+  const varaDeity  = VARA_DEITIES[dayIndex];
+
+  // ── SUN TIMES ────────────────────────────────────────
   const { sunrise, sunset } = getSunTimes(date);
 
-  // Auspicious times (muhurta) — simplified
-  const isAuspicious = ![0, 6].includes(dayIndex) && tithiIndex !== 3 && tithiIndex !== 8;
+  // ── AUSPICIOUS ───────────────────────────────────────
+  // Inauspicious: Chaturthi (3), Ashtami (7), Navami (8), Chaturdashi (13), Amavasya (29), Sundays/Saturdays
+  const inauspiciousTithis = [3, 7, 8, 13, 29];
+  const isAuspicious = !inauspiciousTithis.includes(tithiIndex) && ![0, 6].includes(dayIndex);
 
   return {
-    date: date.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+    date: date.toLocaleDateString('en-IN', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    }),
     vara,
     varaDeity,
-    tithi,
     paksha,
+    tithi,
+    tithiIndex,
     nakshatra,
     yoga,
     moonRashi,
@@ -139,7 +197,7 @@ function getPanchang(date = new Date()) {
     sunrise,
     sunset,
     isAuspicious,
-    tithiIndex,
+    ayanamsha: ayanamsha.toFixed(2)
   };
 }
 

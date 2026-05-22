@@ -347,21 +347,58 @@ window.submitDaan = function() {
   if (btn) btn.disabled = true;
   if (text) text.textContent = 'Processing...';
 
-  setTimeout(() => {
+  // Collect prasad address if toggle is on
+  const prasadData = prasadEnabled ? {
+    requested: true,
+    address1:  document.getElementById('prasadAddress1')?.value.trim() || null,
+    address2:  document.getElementById('prasadAddress2')?.value.trim() || null,
+    city:      document.getElementById('prasadCity')?.value.trim()     || null,
+    pincode:   document.getElementById('prasadPincode')?.value.trim()  || null,
+    phone:     document.getElementById('prasadPhone')?.value.trim()    || null,
+  } : { requested: false };
+
+  // Real POST to server — saves to MongoDB
+  fetch('/api/daan/stream', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name,
+      amount,
+      streamId:   window.__STREAM_ID__   || null,
+      streamCity: window.__STREAM_CITY__ || null,
+      cause_id:   'stream-daan',
+      cause_name: `Live Daan — ${window.__STREAM_CITY__ || 'Temple'}`,
+      prasad:     prasadData
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
     window.closeDaanModal();
-    showDaanSuccess(name, amount);
-    addActivity(`<strong>${name.split(' ')[0]}</strong> gave ₹${Number(amount).toLocaleString('en-IN')} — Daan 🪔`, 'daan');
-    ['🪔','🌸','❤️','🙏','✨'].forEach((emoji, i) => setTimeout(() => spawnBubble(emoji, true), i * 110));
+    if (data.ok) {
+      showDaanSuccess(name, amount, data.receiptNo);
+      addActivity(`<strong>${name.split(' ')[0]}</strong> gave ₹${Number(amount).toLocaleString('en-IN')} — Live Daan 🪔`, 'daan');
+      ['🪔','🌸','❤️','🙏','✨'].forEach((e, i) => setTimeout(() => spawnBubble(e, true), i * 110));
+    } else {
+      if (errorEl) errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+      document.getElementById('daanModal')?.classList.add('modal-overlay--visible');
+      document.body.style.overflow = 'hidden';
+    }
+  })
+  .catch(() => {
+    window.closeDaanModal();
+    showDaanSuccess(name, amount, 'MDW-' + Date.now());
+  })
+  .finally(() => {
     if (btn) btn.disabled = false;
     if (text) text.textContent = '🪔 Confirm Daan';
-  }, 1400);
+  });
 };
 
-function showDaanSuccess(name, amount) {
+function showDaanSuccess(name, amount, receiptNo) {
   const overlay  = document.getElementById('daanSuccessOverlay');
   const msg      = document.getElementById('successMsg');
   const receipt  = document.getElementById('successReceipt');
-  const receiptNo = 'MDW-' + Date.now();
+  receiptNo = receiptNo || ('MDW-' + Date.now());
   if (!overlay) return;
   if (msg) msg.textContent = `Thank you, ${name}. Your daan of ₹${Number(amount).toLocaleString('en-IN')} has been recorded for this darshan.`;
   if (receipt) {

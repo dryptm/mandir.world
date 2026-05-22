@@ -67,6 +67,25 @@ function daysUntil(dateStr) {
   return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
 }
 
+// Enrich every festival with live isPast/isUpcoming based on TODAY's date
+// This runs at request time — never goes stale
+function enrichFestivals(list) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  return list.map(f => {
+    if (f.isDaily) return { ...f };
+    const d = new Date(f.date);
+    d.setHours(0, 0, 0, 0);
+    const diff = Math.ceil((d - now) / 86400000);
+    return {
+      ...f,
+      isPast:     diff < 0,
+      isUpcoming: diff >= 0,
+      daysAway:   diff >= 0 ? diff : null
+    };
+  });
+}
+
 // ── ROUTES ───────────────────────────────────────────────
 
 // Health check
@@ -82,7 +101,8 @@ app.get('/', async (req, res) => {
   const liveStreams        = streams.filter(s => s.isLive).slice(0, 4);
   const upcomingFestivals = festivals
     .filter(f => f.isUpcoming)
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
+    .sort((a, b) => new Date(a.date) - new Date(b.date))
+    .slice(0, 4);
   const nextBig      = upcomingFestivals[0] || null;
   const dailyEvents  = festivals.filter(f => f.isDaily);
   const popularPujas = pujas.filter(p => p.popular).slice(0, 4);
@@ -126,8 +146,8 @@ app.get('/temples', (req, res) => {
 
 // ── PUJA SEWA ─────────────────────────────────────────────
 app.get('/puja-sewa', (req, res) => {
-  const upcomingFestivals = festivals
-    .filter(f => f.isUpcoming)
+  const upcomingFestivals = enrichFestivals(festivals)
+    .filter(f => f.isUpcoming && !f.isDaily)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 5);
   res.render('puja-sewa', {
@@ -171,7 +191,7 @@ app.post('/puja-sewa', async (req, res) => {
 
 // ── SANKALP ───────────────────────────────────────────────
 app.get('/sankalp', (req, res) => {
-  const activeEvents = festivals.filter(f => f.isLive || f.isUpcoming || f.isDaily).slice(0, 8);
+  const activeEvents = enrichFestivals(festivals).filter(f => f.isLive || f.isUpcoming || f.isDaily).slice(0, 8);
   res.render('sankalp', {
     events: activeEvents, page: 'sankalp',
     success:      req.session.sankalpSuccess || null,
@@ -208,14 +228,15 @@ app.post('/sankalp', async (req, res) => {
 // ── CALENDAR ─────────────────────────────────────────────
 app.get('/calendar', (req, res) => {
   const { month = '', category = '' } = req.query;
-  let filtered = festivals.filter(f => !f.isDaily);
+  const enriched    = enrichFestivals(festivals);
+  let filtered = enriched.filter(f => !f.isDaily);
   if (month)    filtered = filtered.filter(f => f.month === month);
   if (category) filtered = filtered.filter(f => f.category === category);
-  const months      = [...new Set(festivals.filter(f => f.month !== 'Daily').map(f => f.month))];
-  const categories  = [...new Set(festivals.map(f => f.category))];
-  const dailyEvents = festivals.filter(f => f.isDaily);
-  const upcoming    = festivals.filter(f => f.isUpcoming).sort((a, b) => new Date(a.date) - new Date(b.date));
-  const past        = festivals.filter(f => f.isPast);
+  const months      = [...new Set(enriched.filter(f => f.month !== 'Daily').map(f => f.month))];
+  const categories  = [...new Set(enriched.map(f => f.category))];
+  const dailyEvents = enriched.filter(f => f.isDaily);
+  const upcoming    = enriched.filter(f => f.isUpcoming && !f.isDaily).sort((a, b) => new Date(a.date) - new Date(b.date));
+  const past        = enriched.filter(f => f.isPast && !f.isDaily);
   res.render('calendar', {
     festivals: filtered, upcoming, past, dailyEvents, months, categories,
     selectedMonth: month, selectedCategory: category, page: 'calendar', formatDate, daysUntil
@@ -223,10 +244,11 @@ app.get('/calendar', (req, res) => {
 });
 
 app.get('/calendar/:id', (req, res) => {
-  const festival = festivals.find(f => f.id === req.params.id);
+  const enriched = enrichFestivals(festivals);
+  const festival = enriched.find(f => f.id === req.params.id);
   if (!festival) return res.redirect('/calendar');
-  const related = festivals.filter(f =>
-    f.id !== festival.id && (f.deity === festival.deity || f.category === festival.category)
+  const related = enriched.filter(f =>
+    f.id !== festival.id && !f.isDaily && (f.deity === festival.deity || f.category === festival.category)
   ).slice(0, 3);
   res.render('festival-detail', { festival, related, page: 'calendar', formatDate, daysUntil });
 });
@@ -295,6 +317,47 @@ app.get('/api/stats', async (req, res) => {
     pujaBookings:   pujaCount,
     liveViewers:    streams.filter(s => s.isLive).reduce((s, st) => s + st.viewers, 0)
   });
+});
+
+// ── STREAM DAAN API (called from stream page JS modal) ────
+app.post('/api/daan/stream', async (req, res) => {
+  try {
+    const { name, amount, streamId, streamCity, cause_id, cause_name, prasad } = req.body;
+
+    if (!name || !amount || amount < 10) {
+      return res.status(400).json({ ok: false, error: 'Missing required fields' });
+    }
+
+    const donation = await Donation.create({
+      name:        name.trim(),
+      cause_id:    cause_id    || streamId  || 'stream-daan',
+      cause_name:  cause_name  || `Live Daan — ${streamCity || 'Temple'}`,
+      amount:      Number(amount),
+      streamId:    streamId   || null,
+      streamCity:  streamCity || null,
+      prasad: {
+        requested: !!(prasad && prasad.requested),
+        address1:  prasad?.address1  || null,
+        address2:  prasad?.address2  || null,
+        city:      prasad?.city      || null,
+        pincode:   prasad?.pincode   || null,
+        phone:     prasad?.phone     || null,
+      }
+    });
+
+    res.json({
+      ok:        true,
+      receiptNo: donation.receiptNo,
+      name:      donation.name,
+      amount:    donation.amount,
+      cause:     donation.cause_name,
+      timestamp: donation.createdAt
+    });
+
+  } catch (err) {
+    console.error('Stream daan error:', err.message);
+    res.status(500).json({ ok: false, error: 'Could not save donation' });
+  }
 });
 
 // 404

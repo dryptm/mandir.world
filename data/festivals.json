@@ -29,10 +29,11 @@
     "mantra": "ॐ नमः शिवाय",
     "color": "#6B21A8",
     "icon": "🕉️",
-    "isPast": false,
-    "isUpcoming": true,
+    "isDaily": false,
+    "isPast": true,
+    "isUpcoming": false,
     "isLive": false,
-    "isDaily": false
+    "daysAway": null
   },
   {
     "id": "holi-2026",
@@ -43,7 +44,7 @@
     "deity": "Lord Krishna",
     "category": "major",
     "description": "Festival of colours celebrating devotion, joy, and the victory of good over evil.",
-    "significance": "Holika Dahan symbolizes Prahlad’s protection and triumph of faith over negativity.",
+    "significance": "Holika Dahan symbolizes Prahlad's protection and triumph of faith over negativity.",
     "rituals": [
       "Holika Dahan",
       "Playing with colours",
@@ -63,10 +64,11 @@
     "mantra": "ॐ नमो भगवते वासुदेवाय",
     "color": "#EC4899",
     "icon": "🌈",
-    "isPast": false,
-    "isUpcoming": true,
+    "isDaily": false,
+    "isPast": true,
+    "isUpcoming": false,
     "isLive": false,
-    "isDaily": false
+    "daysAway": null
   },
   {
     "id": "ram-navami-2026",
@@ -96,10 +98,11 @@
     "mantra": "श्री राम जय राम जय जय राम",
     "color": "#1D4ED8",
     "icon": "🏹",
-    "isPast": false,
-    "isUpcoming": true,
+    "isDaily": false,
+    "isPast": true,
+    "isUpcoming": false,
     "isLive": false,
-    "isDaily": false
+    "daysAway": null
   },
   {
     "id": "hanuman-jayanti-2026",
@@ -129,10 +132,11 @@
     "mantra": "ॐ हनुमते नमः",
     "color": "#FF6B00",
     "icon": "🌟",
-    "isPast": false,
-    "isUpcoming": true,
+    "isDaily": false,
+    "isPast": true,
+    "isUpcoming": false,
     "isLive": false,
-    "isDaily": false
+    "daysAway": null
   },
   {
     "id": "akshaya-tritiya-2026",
@@ -163,10 +167,11 @@
     "mantra": "ॐ नमो भगवते वासुदेवाय",
     "color": "#D97706",
     "icon": "✨",
-    "isPast": false,
-    "isUpcoming": true,
+    "isDaily": false,
+    "isPast": true,
+    "isUpcoming": false,
     "isLive": false,
-    "isDaily": false
+    "daysAway": null
   },
   {
     "id": "ganga-dussehra-2026",
@@ -177,12 +182,13 @@
     "deity": "Maa Ganga",
     "category": "major",
     "description": "Celebrates the descent of Maa Ganga to Earth with holy bathing rituals and deepdaan.",
-    "significance": "Bathing in the Ganga is believed to cleanse ten kinds of sins.",
+    "significance": "Bathing in the Ganga on this day is believed to cleanse ten kinds of sins. The ghats of Varanasi, Haridwar, and Prayagraj overflow with devotees.",
     "rituals": [
       "Ganga snan",
       "Deepdaan",
       "Ganga aarti",
-      "Tarpan"
+      "Tarpan",
+      "Flower offering to the river"
     ],
     "cities": [
       "Varanasi",
@@ -196,10 +202,11 @@
     "mantra": "ॐ नमः शिवाय नमः गंगे",
     "color": "#0EA5E9",
     "icon": "🌊",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 5
   },
   {
     "id": "jagannath-rath-yatra-2026",
@@ -210,10 +217,11 @@
     "deity": "Lord Jagannath",
     "category": "major",
     "description": "The sacred chariot festival of Lord Jagannath celebrated grandly in Puri.",
-    "significance": "Pulling the Rath is considered spiritually liberating and highly meritorious.",
+    "significance": "Pulling the Rath of Lord Jagannath is considered spiritually liberating and highly meritorious. Lakhs gather at Puri each year.",
     "rituals": [
       "Rath pulling",
       "Mahaprasad distribution",
+      "Chhera pahanra by King of Puri",
       "Temple procession"
     ],
     "cities": [
@@ -228,10 +236,11 @@
     "mantra": "जय जगन्नाथ",
     "color": "#DC2626",
     "icon": "🛕",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 57
   },
   {
     "id": "guru-purnima-2026",
@@ -242,11 +251,12 @@
     "deity": "Maharishi Veda Vyasa",
     "category": "major",
     "description": "Sacred full moon day dedicated to honoring gurus and spiritual teachers.",
-    "significance": "Disciples express gratitude toward gurus and seek spiritual wisdom.",
+    "significance": "Disciples express gratitude toward gurus and seek spiritual wisdom. Birthdate of Maharishi Veda Vyasa who compiled the Vedas.",
     "rituals": [
       "Guru puja",
       "Pada puja",
-      "Guru stotram recitation"
+      "Guru stotram recitation",
+      "Offering flowers and fruits"
     ],
     "cities": [
       "Varanasi",
@@ -259,10 +269,11 @@
     "mantra": "गुरुर्ब्रह्मा गुरुर्विष्णुः",
     "color": "#7C3AED",
     "icon": "🙏",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 70
   },
   {
     "id": "raksha-bandhan-2026",
@@ -273,11 +284,12 @@
     "deity": "Lord Indra",
     "category": "family",
     "description": "Festival celebrating the sacred bond between brothers and sisters.",
-    "significance": "Rakhi symbolizes protection, affection, and lifelong care.",
+    "significance": "Rakhi symbolizes protection, affection, and lifelong care between siblings.",
     "rituals": [
       "Rakhi tying",
       "Tilak",
-      "Sweet exchange"
+      "Sweet exchange",
+      "Coconut offering to the sea (Narali Purnima)"
     ],
     "cities": [
       "Mathura",
@@ -290,10 +302,11 @@
     "mantra": "येन बद्धो बली राजा",
     "color": "#BE185D",
     "icon": "🪢",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 100
   },
   {
     "id": "janmashtami-2026",
@@ -304,11 +317,11 @@
     "deity": "Lord Shri Krishna",
     "category": "major",
     "description": "Birth anniversary of Lord Krishna celebrated with midnight puja and fasting.",
-    "significance": "Marks the divine appearance of Krishna to restore dharma.",
+    "significance": "Marks the divine appearance of Krishna to restore dharma. Mathura and Vrindavan transform into a sea of devotion.",
     "rituals": [
       "Midnight aarti",
       "Jhanki darshan",
-      "Bhajan kirtan",
+      "Bhajan kirtan all night",
       "Dahi handi"
     ],
     "cities": [
@@ -323,10 +336,11 @@
     "mantra": "ॐ नमो भगवते वासुदेवाय",
     "color": "#2563EB",
     "icon": "🦚",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 107
   },
   {
     "id": "ganesh-chaturthi-2026",
@@ -336,18 +350,19 @@
     "month": "September",
     "deity": "Lord Ganesha",
     "category": "major",
-    "description": "Celebrates the birth of Lord Ganesha with idol worship and processions.",
-    "significance": "Lord Ganesha removes obstacles and blesses new beginnings.",
+    "description": "Celebrates the birth of Lord Ganesha with idol worship and grand processions across 10 days.",
+    "significance": "Ganesha, Vighnaharta, removes obstacles and blesses all new beginnings. His 10-day festival ends with visarjan.",
     "rituals": [
       "Ganesh sthapana",
       "Modak offering",
       "Daily aarti",
-      "Ganesh visarjan"
+      "Ganesh visarjan on 10th day"
     ],
     "cities": [
       "Mumbai",
       "Pune",
-      "Nashik"
+      "Nashik",
+      "Varanasi"
     ],
     "donationCauses": [
       "Annadaan",
@@ -356,10 +371,11 @@
     "mantra": "ॐ गं गणपतये नमः",
     "color": "#F59E0B",
     "icon": "🐘",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 117
   },
   {
     "id": "sharad-navratri-2026",
@@ -370,18 +386,19 @@
     "month": "October",
     "deity": "Maa Durga",
     "category": "major",
-    "description": "Nine sacred nights devoted to Maa Durga and her divine forms.",
-    "significance": "Represents the victory of divine energy over evil and negativity.",
+    "description": "Nine sacred nights devoted to Maa Durga and her nine divine forms.",
+    "significance": "Represents the victory of divine energy over evil. Garba, fasting, and Durga Saptashati recitation fill every home.",
     "rituals": [
       "Ghatasthapana",
       "Durga Saptashati path",
-      "Garba",
-      "Kanya pujan"
+      "Garba and Dandiya",
+      "Kanya pujan on Ashtami/Navami"
     ],
     "cities": [
       "Kolkata",
       "Varanasi",
-      "Ahmedabad"
+      "Ahmedabad",
+      "Mysore"
     ],
     "donationCauses": [
       "Annadaan",
@@ -390,10 +407,11 @@
     "mantra": "ॐ दुं दुर्गायै नमः",
     "color": "#DC2626",
     "icon": "🌺",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 144
   },
   {
     "id": "dussehra-2026",
@@ -404,16 +422,18 @@
     "deity": "Lord Ram / Maa Durga",
     "category": "major",
     "description": "Celebrates the victory of Shri Ram over Ravana and Maa Durga over Mahishasura.",
-    "significance": "Represents triumph of righteousness and truth.",
+    "significance": "The most auspicious day to begin new ventures. Ravana effigies burn across Bharat. Mysore Dussehra is legendary.",
     "rituals": [
       "Ravana dahan",
       "Durga visarjan",
-      "Shami puja"
+      "Shami puja",
+      "Ayudha Puja"
     ],
     "cities": [
       "Mysore",
       "Kullu",
-      "Varanasi"
+      "Varanasi",
+      "Kolkata"
     ],
     "donationCauses": [
       "Temple Seva",
@@ -422,10 +442,11 @@
     "mantra": "जय श्री राम",
     "color": "#FF6B00",
     "icon": "🏹",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 153
   },
   {
     "id": "diwali-2026",
@@ -436,12 +457,13 @@
     "deity": "Maa Lakshmi / Lord Ganesha",
     "category": "major",
     "description": "Festival of lights celebrating prosperity, purity, and the return of Shri Ram to Ayodhya.",
-    "significance": "Homes are illuminated to welcome Maa Lakshmi and divine blessings.",
+    "significance": "Homes are illuminated with diyas to welcome Maa Lakshmi. The Amavasya night of Kartik is the most auspicious for Lakshmi puja.",
     "rituals": [
-      "Lakshmi puja",
+      "Dhanteras rituals",
+      "Lakshmi-Ganesha puja",
       "Diya lighting",
       "Rangoli",
-      "Dhanteras rituals"
+      "Midnight puja"
     ],
     "cities": [
       "Ayodhya",
@@ -450,14 +472,79 @@
     ],
     "donationCauses": [
       "Annadaan",
-      "Gau Seva"
+      "Gau Seva",
+      "Ghat Development"
     ],
     "mantra": "ॐ ह्रीं श्रीं लक्ष्मीभ्यो नमः",
     "color": "#F59E0B",
     "icon": "🪔",
+    "isDaily": false,
     "isPast": false,
     "isUpcoming": true,
     "isLive": false,
-    "isDaily": false
+    "daysAway": 172
+  },
+  {
+    "id": "ganga-aarti-daily",
+    "name": "Ganga Aarti — Dashashwamedh Ghat",
+    "hindi": "गंगा आरती, वाराणसी",
+    "date": "daily",
+    "month": "Daily",
+    "deity": "Maa Ganga",
+    "category": "daily",
+    "description": "Seven priests perform in perfect synchrony every evening at Dashashwamedh Ghat — witnessed by thousands without fail.",
+    "significance": "A ceremony that has continued for centuries. Every evening the boundary between the sacred and the everyday dissolves at the ghats of Kashi.",
+    "rituals": [
+      "Seven-priest synchronized aarti",
+      "Fire offerings",
+      "Flower garlands",
+      "Shankh and ghanta"
+    ],
+    "cities": [
+      "Varanasi"
+    ],
+    "donationCauses": [
+      "Ganga Seva",
+      "Ghat Maintenance"
+    ],
+    "mantra": "हर हर गंगे",
+    "color": "#FF6B00",
+    "icon": "🔥",
+    "isLive": true,
+    "isPast": false,
+    "isUpcoming": false,
+    "isDaily": true
+  },
+  {
+    "id": "kashi-vishwanath-aarti-daily",
+    "name": "Kashi Vishwanath Aarti",
+    "hindi": "काशी विश्वनाथ आरती",
+    "date": "daily",
+    "month": "Daily",
+    "deity": "Lord Shiva (Vishwanath)",
+    "category": "daily",
+    "description": "Five aartis performed daily at the Kashi Vishwanath Jyotirlinga. Mangala Aarti at 3 AM draws thousands before dawn.",
+    "significance": "Shiva himself is said to reside in Kashi. The daily aarti is a direct communion with the divine — the most sacred Shiva darshan available to the world.",
+    "rituals": [
+      "Mangala Aarti 3 AM",
+      "Bhog Aarti 11:30 AM",
+      "Sandhya Aarti 7 PM",
+      "Shringaar Aarti 8 PM",
+      "Shayana Aarti 10:30 PM"
+    ],
+    "cities": [
+      "Varanasi"
+    ],
+    "donationCauses": [
+      "Temple Seva",
+      "Annadaan at Kashi"
+    ],
+    "mantra": "ॐ नमः शिवाय",
+    "color": "#7C3AED",
+    "icon": "🕯️",
+    "isLive": true,
+    "isPast": false,
+    "isUpcoming": false,
+    "isDaily": true
   }
 ]

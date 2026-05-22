@@ -740,3 +740,69 @@ em{font-style:italic;font-family:var(--font-display)}
 .tdc-footer{display:flex;justify-content:space-between;align-items:center;padding:.65rem 1.1rem;background:var(--cream);border-top:1px solid var(--border-soft)}
 .tdc-viewers{font-size:.72rem;color:var(--text-soft)}
 .tdc-cta{font-size:.75rem;font-weight:600;color:var(--saffron)}
+
+/* ── CALENDAR ADDITIONS ─────────────────────────────────── */
+
+/* Next festival alert banner */
+.next-fest-alert {
+  display:flex;align-items:center;gap:1.5rem;
+  background:linear-gradient(135deg,var(--dark) 0%,var(--dark-mid) 100%);
+  border:1px solid rgba(var(--accent-rgb,200,146,42),.25);
+  border-left:4px solid var(--accent,var(--saffron));
+  border-radius:var(--r-lg);padding:1.5rem 1.75rem;
+  box-shadow:var(--shadow-md);flex-wrap:wrap;gap:1.25rem;
+}
+.nfa-icon{font-size:3rem;line-height:1;flex-shrink:0}
+.nfa-body{flex:1;min-width:220px}
+.nfa-label{font-size:.68rem;font-weight:700;color:rgba(253,246,227,.35);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem}
+.nfa-name{font-family:var(--font-display);font-size:1.5rem;font-weight:700;
+  color:var(--cream);line-height:1.2;margin-bottom:.25rem}
+.nfa-hindi{font-family:var(--font-hindi);font-size:.6em;color:var(--saffron-lt);
+  font-weight:400;margin-left:.4rem}
+.nfa-date{font-size:.8rem;color:rgba(253,246,227,.45);margin-bottom:.4rem}
+.nfa-desc{font-size:.85rem;color:rgba(253,246,227,.55);line-height:1.5}
+.nfa-countdown{flex-shrink:0;text-align:center;
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);
+  border-radius:var(--r);padding:1rem 1.25rem;min-width:110px}
+.nfa-days{font-family:var(--font-display);font-size:2.5rem;font-weight:700;
+  color:var(--saffron-lt);line-height:1}
+.nfa-days-label{font-size:.68rem;color:rgba(253,246,227,.35);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem}
+.nfa-actions{display:flex;flex-direction:column;gap:.4rem}
+
+/* Calendar section heading with count */
+.cal-section-heading{display:flex;align-items:center;gap:.75rem;
+  font-size:1.4rem;margin-bottom:1.25rem;padding-bottom:.5rem;
+  border-bottom:2px solid var(--saffron-pale)}
+.csh-count{font-family:var(--font-body);font-size:.72rem;font-weight:600;
+  background:var(--saffron-pale);color:var(--saffron);
+  padding:.2rem .6rem;border-radius:50px;border:1px solid rgba(255,107,0,.2)}
+.csh-live{display:inline-flex;align-items:center;gap:.4rem;
+  font-family:var(--font-body);font-size:.72rem;font-weight:700;
+  color:#e53e3e;text-transform:uppercase;letter-spacing:.06em}
+.csh-live span{width:7px;height:7px;background:#e53e3e;border-radius:50%;
+  animation:pulseLive 1.3s ease infinite}
+
+/* Timeline date range */
+.ctv2-date-end{font-size:.78rem;color:var(--text-soft);font-weight:400}
+
+/* Today badge */
+.ctv2-countdown--today{background:rgba(220,38,38,.15);color:#dc2626;
+  border-color:rgba(220,38,38,.3);font-weight:800}
+
+/* Mantra line in timeline card */
+.ctv2-mantra{font-family:var(--font-hindi);font-size:.95rem;color:var(--gold);
+  padding:.5rem .85rem;background:var(--gold-pale);
+  border-radius:var(--r-sm);border-left:3px solid var(--gold);
+  margin-top:.5rem;display:inline-block}
+
+/* Daily card mantra */
+.cdc-mantra{font-family:var(--font-hindi);font-size:.88rem;color:var(--gold);
+  margin-top:.5rem}
+
+/* Past festivals grid */
+.cpg2-icon{font-size:1.5rem;flex-shrink:0}
+.cpg2-hindi{font-family:var(--font-hindi);color:var(--saffron);
+  font-size:.75rem;display:block}
+.cpg2-arrow{color:var(--saffron);font-size:1rem;margin-left:auto;flex-shrink:0}
