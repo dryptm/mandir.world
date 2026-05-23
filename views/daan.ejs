@@ -1,4 +1,5 @@
 <%- include('partials/header', { title: 'Daan — Give with Dharma' }) %>
+
 <section class="page-hero page-hero--daan">
   <div class="container">
     <div class="ph-breadcrumb">Home → Daan</div>
@@ -6,9 +7,12 @@
     <p>Give with intention. Every rupee supports a real, verified cause — with full transparency and a digital receipt.</p>
   </div>
 </section>
+
 <section class="section">
   <div class="container">
+
     <% if (success && lastDonation) { %>
+    <!-- SUCCESS -->
     <div class="sankalp-success">
       <div class="success-icon">🪔</div>
       <h2>Daan Received with Gratitude</h2>
@@ -29,10 +33,13 @@
         <a href="/sankalp" class="btn btn--saffron">Register Sankalp 🙏</a>
       </div>
     </div>
+
     <% } else { %>
+
     <div class="daan-page-layout">
       <div class="daan-causes-col">
         <h2>Choose a Cause</h2>
+
         <% causes.forEach(cause => { %>
         <div class="cause-card-v2" id="<%= cause.id %>">
           <div class="ccv2-header">
@@ -44,32 +51,290 @@
             <div class="ccv2-bar"><div style="width:<%= Math.min((cause.raised/cause.goal)*100,100).toFixed(0) %>%"></div></div>
             <div class="ccv2-labels"><span>₹<%= (cause.raised/1000).toFixed(0) %>K raised</span><span>Goal: ₹<%= (cause.goal/1000).toFixed(0) %>K</span></div>
           </div>
+
           <form action="/daan" method="POST" class="cause-form-v2">
-            <input type="hidden" name="cause_id" value="<%= cause.id %>"/>
+            <input type="hidden" name="cause_id"   value="<%= cause.id %>"/>
             <input type="hidden" name="cause_name" value="<%= cause.name %>"/>
-            <div class="form-group"><label>Your Name <span class="req">*</span></label><input type="text" name="name" class="form-input" placeholder="Full name" required/></div>
+            <input type="hidden" name="tier_type"  value="basic" id="tier_type_<%= cause.id %>"/>
+            <input type="hidden" name="userLat"    id="userLat_<%= cause.id %>" value=""/>
+            <input type="hidden" name="userLon"    id="userLon_<%= cause.id %>" value=""/>
+            <input type="hidden" name="userCity"   id="userCity_<%= cause.id %>" value=""/>
+            <input type="hidden" name="userState"  id="userState_<%= cause.id %>" value=""/>
+
+            <div class="form-group">
+              <label>Your Name <span class="req">*</span></label>
+              <input type="text" name="name" class="form-input" placeholder="Full name" required/>
+            </div>
+
+            <!-- STANDARD TIERS -->
             <div class="cf-tiers">
               <label class="cf-tiers-label">Select Amount</label>
               <div class="cf-tier-row">
-                <% cause.tier.forEach(t => { %>
-                <label class="cf-tier"><input type="radio" name="amount" value="<%= t %>"/><span>₹<%= t.toLocaleString('en-IN') %></span></label>
+                <% STANDARD_TIERS.forEach(t => { %>
+                <label class="cf-tier">
+                  <input type="radio" name="amount" value="<%= t %>"/>
+                  <span>₹<%= t.toLocaleString('en-IN') %></span>
+                </label>
+                <% }) %>
+                <label class="cf-tier cf-tier--custom-label">
+                  <input type="radio" name="amount" value="custom_field"/>
+                  <span>Custom</span>
+                </label>
+              </div>
+              <input type="number" name="custom_amount" class="form-input cf-custom-input"
+                     placeholder="Enter custom amount (₹)" min="10" style="margin-top:.5rem;display:none"/>
+            </div>
+
+            <!-- SPECIAL TIERS (coming soon) -->
+            <div class="special-tiers-section">
+              <div class="st-label">✦ Special Seva Options</div>
+              <div class="st-note">Available once our temple partnerships are live</div>
+              <div class="special-tiers-grid">
+                <% SPECIAL_TIERS.forEach(st => { %>
+                <button type="button"
+                  class="special-tier-btn"
+                  onclick="showComingSoon('<%= st.label %>', '<%= st.desc %>', '<%= cause.pujaCity %>', '<%= st.type %>')">
+                  <div class="stb-amount">
+                    ₹<%= st.amount.toLocaleString('en-IN') %>
+                    <% if (st.type === 'prasad' || st.type === 'premium') { %>
+                    <span class="stb-ship">+ shipping</span>
+                    <% } %>
+                  </div>
+                  <div class="stb-label"><%= st.label %></div>
+                  <div class="stb-desc"><%= st.desc %></div>
+                  <div class="stb-soon-tag">Coming Soon</div>
+                </button>
                 <% }) %>
               </div>
-              <input type="number" name="custom_amount" class="form-input" placeholder="Or enter custom amount (₹)" min="10" style="margin-top:0.5rem"/>
             </div>
-            <div class="form-group"><label>PAN <span class="optional">(for 80G receipt)</span></label><input type="text" name="pan" class="form-input" placeholder="ABCDE1234F" maxlength="10"/></div>
-            <button type="submit" class="btn btn--gold btn--large" style="width:100%">🪔 Give Daan to <%= cause.name %></button>
+
+            <div class="form-group" style="margin-top:.75rem">
+              <label>PAN <span class="optional">(for 80G receipt)</span></label>
+              <input type="text" name="pan" class="form-input" placeholder="ABCDE1234F" maxlength="10"/>
+            </div>
+
+            <button type="submit" class="btn btn--gold btn--large" style="width:100%">
+              🪔 Give Daan to <%= cause.name %>
+            </button>
           </form>
         </div>
         <% }) %>
       </div>
+
+      <!-- SIDEBAR -->
       <div class="daan-sidebar-col">
-        <div class="ds-card"><h3>Why Give on Mandir.World?</h3><ul><li>✅ 100% goes to the cause</li><li>✅ Digital receipt instantly</li><li>✅ No middlemen</li><li>✅ Causes selected for impact</li><li>✅ Regular updates on cause progress</li></ul></div>
-        <div class="ds-card ds-card--saffron"><h3>धर्मो रक्षति रक्षितः</h3><p><em>"Dharma protects those who protect Dharma."</em></p><p>Your daan is not charity — it is Dharma. It returns to you multiplied.</p></div>
-        <div class="ds-card"><h3>🙏 After Giving</h3><p>Register a Sankalp or book a Puja to complete your spiritual practice.</p><a href="/sankalp" class="btn btn--saffron" style="margin-top:0.75rem;display:block;text-align:center">Register Sankalp</a><a href="/puja-sewa" class="btn btn--outline" style="margin-top:0.5rem;display:block;text-align:center">Book a Puja</a></div>
+        <div class="ds-card">
+          <h3>Why Give on Mandir.World?</h3>
+          <ul>
+            <li>✅ 100% goes to the cause</li>
+            <li>✅ Digital receipt instantly</li>
+            <li>✅ No middlemen</li>
+            <li>✅ Regular cause updates</li>
+          </ul>
+        </div>
+        <div class="ds-card ds-card--saffron">
+          <h3>धर्मो रक्षति रक्षितः</h3>
+          <p><em>"Dharma protects those who protect Dharma."</em></p>
+          <p>Your daan returns to you multiplied.</p>
+        </div>
+        <div class="ds-card" id="locationCard">
+          <h3>📍 Your Location</h3>
+          <p id="locationStatus" style="font-size:.82rem;color:var(--text-soft)">
+            Sharing your location helps us calculate accurate shipping charges for prasad delivery.
+          </p>
+          <button onclick="requestLocation()" class="btn btn--outline btn--sm" id="locationBtn" style="margin-top:.5rem">
+            Share Location
+          </button>
+        </div>
+        <div class="ds-card">
+          <h3>✦ Special Seva</h3>
+          <p style="font-size:.82rem;color:var(--text-soft)">
+            Personalised sankalp, prasad dispatch, and premium seva options are coming once our temple partnerships are confirmed.
+          </p>
+        </div>
       </div>
     </div>
     <% } %>
   </div>
 </section>
+
+<!-- COMING SOON MODAL -->
+<div class="modal-overlay" id="comingSoonModal" onclick="closeComingSoonOutside(event)">
+  <div class="modal-box" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-flame">🛕</span>
+        <div>
+          <div class="modal-title" id="csModalTitle">Coming Soon</div>
+          <div class="modal-subtitle">Special Seva</div>
+        </div>
+      </div>
+      <button class="modal-close" onclick="closeComingSoon()">✕</button>
+    </div>
+
+    <div style="padding:1.5rem">
+      <div class="cs-desc" id="csModalDesc"></div>
+
+      <div class="cs-info-box">
+        <div class="cs-icon">🤝</div>
+        <div>
+          <strong>Available after Temple Partnerships</strong>
+          <p>We are currently in conversations with pandits and temple trusts to set up this seva. Once the partnerships are confirmed, this option will be activated.</p>
+        </div>
+      </div>
+
+      <div class="cs-shipping-info" id="csShippingInfo" style="display:none">
+        <div class="cs-ship-row">
+          <span>Seva amount</span>
+          <strong id="csSevaAmount">—</strong>
+        </div>
+        <div class="cs-ship-row">
+          <span>Estimated shipping</span>
+          <strong id="csShippingCost">Calculating...</strong>
+        </div>
+        <div class="cs-ship-row cs-ship-total">
+          <span>Approx. total</span>
+          <strong id="csTotal">—</strong>
+        </div>
+        <p class="cs-ship-note">Exact shipping confirmed at checkout · Based on your location</p>
+      </div>
+
+      <div style="display:flex;gap:.75rem;margin-top:1.25rem">
+        <button onclick="closeComingSoon()" class="btn btn--outline" style="flex:1">Close</button>
+        <a href="/sankalp" class="btn btn--saffron" style="flex:1;text-align:center">Record Sankalp 🙏</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── CUSTOM AMOUNT TOGGLE ─────────────────────────────────
+document.querySelectorAll('.cf-tier input[type="radio"]').forEach(radio => {
+  radio.addEventListener('change', function() {
+    const form   = this.closest('form');
+    const custom = form.querySelector('.cf-custom-input');
+    if (this.value === 'custom_field') {
+      custom.style.display = 'block';
+      custom.required = true;
+    } else {
+      custom.style.display = 'none';
+      custom.required = false;
+    }
+  });
+});
+
+// ── LOCATION ─────────────────────────────────────────────
+let userCoords = JSON.parse(localStorage.getItem('mw_location') || 'null');
+
+function requestLocation() {
+  const btn = document.getElementById('locationBtn');
+  const status = document.getElementById('locationStatus');
+  btn.textContent = 'Getting location...';
+  btn.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      localStorage.setItem('mw_location', JSON.stringify(userCoords));
+      // Reverse geocode using open API
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${userCoords.lat}&lon=${userCoords.lon}&format=json`)
+        .then(r => r.json())
+        .then(data => {
+          userCoords.city  = data.address?.city || data.address?.town || data.address?.village || '';
+          userCoords.state = data.address?.state || '';
+          localStorage.setItem('mw_location', JSON.stringify(userCoords));
+          status.innerHTML = `✅ <strong>${userCoords.city || 'Location saved'}</strong>, ${userCoords.state}`;
+          btn.style.display = 'none';
+          fillLocationFields();
+        })
+        .catch(() => {
+          status.textContent = '✅ Location saved (city lookup failed)';
+          btn.style.display = 'none';
+          fillLocationFields();
+        });
+    },
+    err => {
+      status.textContent = 'Location access denied. Shipping will use standard rates.';
+      btn.textContent = 'Try Again';
+      btn.disabled = false;
+    },
+    { timeout: 8000 }
+  );
+}
+
+function fillLocationFields() {
+  if (!userCoords) return;
+  document.querySelectorAll('[id^="userLat_"]').forEach(el => el.value = userCoords.lat || '');
+  document.querySelectorAll('[id^="userLon_"]').forEach(el => el.value = userCoords.lon || '');
+  document.querySelectorAll('[id^="userCity_"]').forEach(el => el.value = userCoords.city || '');
+  document.querySelectorAll('[id^="userState_"]').forEach(el => el.value = userCoords.state || '');
+}
+
+// Load saved location on page load
+if (userCoords) {
+  const status = document.getElementById('locationStatus');
+  if (status && userCoords.city) {
+    status.innerHTML = `✅ <strong>${userCoords.city}</strong>, ${userCoords.state}`;
+    document.getElementById('locationBtn').style.display = 'none';
+  }
+  fillLocationFields();
+}
+
+// ── COMING SOON MODAL ─────────────────────────────────────
+function showComingSoon(label, desc, pujaCity, type) {
+  document.getElementById('csModalTitle').textContent = label;
+  document.getElementById('csModalDesc').textContent  = desc;
+
+  // Show shipping estimate for prasad/premium
+  const shippingDiv = document.getElementById('csShippingInfo');
+  const amounts = { sankalp: 1001, prasad: 3001, premium: 4001 };
+  const amt = amounts[type] || 1001;
+
+  if (type === 'prasad' || type === 'premium') {
+    shippingDiv.style.display = 'block';
+    document.getElementById('csSevaAmount').textContent = '₹' + amt.toLocaleString('en-IN');
+    document.getElementById('csShippingCost').textContent = 'Calculating...';
+    document.getElementById('csTotal').textContent = '—';
+
+    // Calculate shipping
+    if (userCoords) {
+      fetch('/api/shipping', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userLat: userCoords.lat, userLon: userCoords.lon, pujaCity })
+      })
+      .then(r => r.json())
+      .then(data => {
+        const ship = data.shippingCost;
+        document.getElementById('csShippingCost').textContent =
+          ship === 0 ? 'Free (nearby)' : '₹' + ship.toLocaleString('en-IN');
+        document.getElementById('csTotal').textContent =
+          '₹' + (amt + ship).toLocaleString('en-IN');
+      })
+      .catch(() => {
+        document.getElementById('csShippingCost').textContent = '₹149 (standard)';
+        document.getElementById('csTotal').textContent = '₹' + (amt + 149).toLocaleString('en-IN');
+      });
+    } else {
+      document.getElementById('csShippingCost').textContent = 'Share location for exact cost';
+      document.getElementById('csTotal').textContent = '₹' + amt.toLocaleString('en-IN') + ' + shipping';
+    }
+  } else {
+    shippingDiv.style.display = 'none';
+  }
+
+  document.getElementById('comingSoonModal').classList.add('modal-overlay--visible');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeComingSoon() {
+  document.getElementById('comingSoonModal').classList.remove('modal-overlay--visible');
+  document.body.style.overflow = '';
+}
+function closeComingSoonOutside(e) {
+  if (e.target === document.getElementById('comingSoonModal')) closeComingSoon();
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeComingSoon(); });
+</script>
+
 <%- include('partials/footer') %>

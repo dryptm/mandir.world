@@ -5,27 +5,47 @@ const donationSchema = new mongoose.Schema({
   name:       { type: String, required: true, trim: true },
   cause_id:   { type: String, required: true },
   cause_name: { type: String, required: true },
-  amount:     { type: Number, required: true, min: 10 },
+  amount:     { type: Number, required: true, min: 1 },
   pan:        { type: String, default: null, uppercase: true, trim: true },
 
-  // Stream-specific daan fields (populated when donated from a live stream)
+  // Tier type — determines what the devotee receives
+  // basic | sankalp | prasad | premium
+  tier_type: {
+    type: String,
+    enum: ['basic', 'sankalp', 'prasad', 'premium'],
+    default: 'basic'
+  },
+
+  // Stream-specific (when donated from a live darshan page)
   streamId:   { type: String, default: null },
   streamCity: { type: String, default: null },
 
-  // Prasad delivery (for premium daan ₹501+)
+  // User location (captured from browser geolocation)
+  userLocation: {
+    lat:     { type: Number, default: null },
+    lon:     { type: Number, default: null },
+    city:    { type: String, default: null },
+    state:   { type: String, default: null },
+    country: { type: String, default: null }
+  },
+
+  // Prasad / Premium delivery
   prasad: {
-    requested: { type: Boolean, default: false },
-    address1:  { type: String, default: null },
-    address2:  { type: String, default: null },
-    city:      { type: String, default: null },
-    pincode:   { type: String, default: null },
-    phone:     { type: String, default: null },
+    requested:     { type: Boolean, default: false },
+    shippingCost:  { type: Number,  default: 0 },
+    address1:      { type: String,  default: null },
+    address2:      { type: String,  default: null },
+    city:          { type: String,  default: null },
+    state:         { type: String,  default: null },
+    pincode:       { type: String,  default: null },
+    phone:         { type: String,  default: null },
+    pujaCity:      { type: String,  default: null },
+    distanceKm:    { type: Number,  default: null }
   }
 }, {
   timestamps: true
 });
 
-// Generate receipt number before saving
 donationSchema.pre('save', function (next) {
   if (!this.receiptNo) {
     this.receiptNo = `MDW-${Date.now()}`;

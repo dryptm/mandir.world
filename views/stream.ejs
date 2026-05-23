@@ -119,30 +119,44 @@
 
           <div class="sdw-tiers-label">Select Amount</div>
           <div class="sdw-tiers" id="sdwTiers">
-            <button class="sdw-tier" data-amount="51"   onclick="selectTier(this,51)">
-              <span class="sdw-tier-amt">&#x20B9;51</span>
+            <button class="sdw-tier" data-amount="11"  onclick="selectTier(this,11)">
+              <span class="sdw-tier-amt">&#x20B9;11</span>
               <span class="sdw-tier-tag">Seva</span>
             </button>
-            <button class="sdw-tier" data-amount="251"  onclick="selectTier(this,251)">
-              <span class="sdw-tier-amt">&#x20B9;251</span>
+            <button class="sdw-tier" data-amount="51"  onclick="selectTier(this,51)">
+              <span class="sdw-tier-amt">&#x20B9;51</span>
+              <span class="sdw-tier-tag">Daan</span>
+            </button>
+            <button class="sdw-tier" data-amount="101" onclick="selectTier(this,101)">
+              <span class="sdw-tier-amt">&#x20B9;101</span>
               <span class="sdw-tier-tag">Annadaan</span>
             </button>
-            <button class="sdw-tier" data-amount="501"  onclick="selectTier(this,501)">
-              <span class="sdw-tier-amt">&#x20B9;501</span>
-              <span class="sdw-tier-tag sdw-premium-tag">&#x2726; Prasad</span>
-            </button>
-            <button class="sdw-tier" data-amount="1100" onclick="selectTier(this,1100)">
-              <span class="sdw-tier-amt">&#x20B9;1,100</span>
-              <span class="sdw-tier-tag sdw-premium-tag">&#x2726; Prasad</span>
-            </button>
-            <button class="sdw-tier" data-amount="5100" onclick="selectTier(this,5100)">
-              <span class="sdw-tier-amt">&#x20B9;5,100</span>
-              <span class="sdw-tier-tag sdw-premium-tag">&#x2726; Premium</span>
+            <button class="sdw-tier" data-amount="251" onclick="selectTier(this,251)">
+              <span class="sdw-tier-amt">&#x20B9;251</span>
+              <span class="sdw-tier-tag">Gau Seva</span>
             </button>
             <button class="sdw-tier sdw-tier--custom" onclick="selectTier(this,'custom')">
               <span class="sdw-tier-amt">Custom</span>
               <span class="sdw-tier-tag">Any amount</span>
             </button>
+          </div>
+          <!-- Special tiers — coming soon -->
+          <div class="sdw-special-tiers">
+            <div class="sdw-special-label">✦ Special Seva — Coming Soon</div>
+            <div class="sdw-special-row">
+              <button type="button" class="sdw-special-btn" onclick="streamComingSoon('Personalised Sankalp', 1001, 'sankalp')">
+                <span>&#x20B9;1,001</span>
+                <span>Personalised Sankalp</span>
+              </button>
+              <button type="button" class="sdw-special-btn" onclick="streamComingSoon('Prasad Dispatch', 3001, 'prasad')">
+                <span>&#x20B9;3,001+</span>
+                <span>Prasad Delivery</span>
+              </button>
+              <button type="button" class="sdw-special-btn" onclick="streamComingSoon('Name in Puja + Prasad', 4001, 'premium')">
+                <span>&#x20B9;4,001+</span>
+                <span>Name + Prasad</span>
+              </button>
+            </div>
           </div>
 
           <div class="sdw-prasad-badge" id="sdwPrasadBadge">
@@ -264,8 +278,19 @@
 // Inject server-side viewer count into main.js ticker
 window.__STREAM_VIEWERS__ = <%= stream.viewers %>;
 window.__STREAM_MIN_VIEWERS__ = <%= stream.viewers - 300 %>;
-window.__STREAM_ID__ = '<%= stream.id %>';
+window.__STREAM_ID__   = '<%= stream.id %>';
 window.__STREAM_CITY__ = '<%= stream.city %>';
+
+// Coming soon handler for special tiers on stream page
+window.streamComingSoon = function(label, amount, type) {
+  const msgs = {
+    sankalp: 'The pandit will include your name in the puja mantra.',
+    prasad:  'Blessed prasad from this stream delivered to your doorstep.',
+    premium: 'Your name in the puja + prasad delivered to your address.'
+  };
+  const ship = (type === 'prasad' || type === 'premium') ? ' + shipping charges' : '';
+  alert('✦ ' + label + '\n₹' + amount.toLocaleString('en-IN') + ship + '\n\n' + msgs[type] + '\n\nThis service will be activated once our temple partnerships are confirmed. 🙏');
+};
 </script>
 <% } %>
 

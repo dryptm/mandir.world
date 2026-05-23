@@ -54,6 +54,7 @@ app.use(session({
 
 // ── STATIC DATA (festivals/streams/pujas never change at runtime) ──
 const festivals = require('./data/festivals.json');
+const cities    = require('./data/cities.json');
 const streams   = require('./data/streams.json');
 const pujas     = require('./data/pujas.json');
 
@@ -65,6 +66,26 @@ function formatDate(d) {
 function daysUntil(dateStr) {
   if (!dateStr || dateStr === 'daily') return null;
   return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
+}
+
+// Haversine distance in km between two lat/lon points
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2)**2 +
+            Math.cos(lat1 * Math.PI/180) * Math.cos(lat2 * Math.PI/180) *
+            Math.sin(dLon/2)**2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+}
+
+// Shipping cost slab based on distance
+function calcShipping(km) {
+  if (km <  100)  return 0;    // same city / nearby — free
+  if (km <  500)  return 99;
+  if (km < 1000)  return 149;
+  if (km < 2000)  return 199;
+  return 249;
 }
 
 // Enrich every festival with live isPast/isUpcoming based on TODAY's date
@@ -255,16 +276,25 @@ app.get('/calendar/:id', (req, res) => {
 
 // ── DAAN ─────────────────────────────────────────────────
 app.get('/daan', (req, res) => {
+  // Standard tiers (all causes): 11, 21, 51, 101, 251
+  // Special tiers (coming after temple partnerships): 1001, 3001+ship, 4001+ship
+  const STANDARD_TIERS = [11, 21, 51, 101, 251];
+  const SPECIAL_TIERS  = [
+    { amount: 1001, type: 'sankalp', label: 'Personalised Sankalp', desc: 'Pandit includes your name in the puja' },
+    { amount: 3001, type: 'prasad',  label: 'Prasad Dispatch',      desc: 'Blessed prasad delivered to your address (+shipping)' },
+    { amount: 4001, type: 'premium', label: 'Name + Prasad',        desc: 'Your name in puja & prasad dispatch (+shipping)' }
+  ];
+
   const causes = [
-    { id:'gau-seva',   name:'Gau Seva',             hindi:'गौ सेवा',           description:'Support the care and feeding of sacred cows at verified goshalas in Varanasi and Mathura.',   icon:'🐄', raised:384600, goal:1000000, tier:[51,251,501,1100,5100] },
-    { id:'annadaan',   name:'Annadaan at Kashi',    hindi:'अन्नदान',           description:'Fund daily meals for pilgrims, priests, and the underprivileged at the ghats of Varanasi.',   icon:'🍛', raised:241200, goal:500000,  tier:[51,251,1100,5100]   },
-    { id:'ganga-seva', name:'Ganga Safai Abhiyan',  hindi:'गंगा सफाई',         description:'Support ghat cleaning drives and Ganga river conservation efforts.',                           icon:'🌊', raised:161900, goal:300000,  tier:[51,501,1100,2100]   },
-    { id:'vidya-daan', name:'Vidya Daan',            hindi:'विद्या दान',        description:'Provide education, books, and scholarships to children near temple towns.',                     icon:'📚', raised:94000,  goal:250000,  tier:[51,251,501,1100]    },
-    { id:'ghat-dev',   name:'Ghat Preservation',    hindi:'घाट संरक्षण',       description:'Contribute to the restoration of ancient ghats in Varanasi and Haridwar.',                     icon:'🏛️', raised:178000, goal:500000,  tier:[251,501,1100,5100]  },
-    { id:'platform',   name:'Support Mandir.World', hindi:'मंदिर.वर्ल्ड सेवा', description:'Help us build better streams and bring darshan to those who cannot travel.',                  icon:'📡', raised:84800,  goal:200000,  tier:[51,251,501,1100]    }
+    { id:'gau-seva',   name:'Gau Seva',             hindi:'गौ सेवा',           description:'Support the care and feeding of sacred cows at verified goshalas in Varanasi and Mathura.',   icon:'🐄', raised:384600, goal:1000000, pujaCity:'Varanasi' },
+    { id:'annadaan',   name:'Annadaan at Kashi',    hindi:'अन्नदान',           description:'Fund daily meals for pilgrims, priests, and the underprivileged at the ghats of Varanasi.',   icon:'🍛', raised:241200, goal:500000,  pujaCity:'Varanasi' },
+    { id:'ganga-seva', name:'Ganga Safai Abhiyan',  hindi:'गंगा सफाई',         description:'Support ghat cleaning drives and Ganga river conservation efforts.',                           icon:'🌊', raised:161900, goal:300000,  pujaCity:'Haridwar' },
+    { id:'vidya-daan', name:'Vidya Daan',            hindi:'विद्या दान',        description:'Provide education, books, and scholarships to children near temple towns.',                     icon:'📚', raised:94000,  goal:250000,  pujaCity:'Varanasi' },
+    { id:'ghat-dev',   name:'Ghat Preservation',    hindi:'घाट संरक्षण',       description:'Contribute to the restoration of ancient ghats in Varanasi and Haridwar.',                     icon:'🏛️', raised:178000, goal:500000,  pujaCity:'Varanasi' },
+    { id:'platform',   name:'Support Mandir.World', hindi:'मंदिर.वर्ल्ड सेवा', description:'Help us build better streams and bring darshan to those who cannot travel.',                  icon:'📡', raised:84800,  goal:200000,  pujaCity:'Varanasi' }
   ];
   res.render('daan', {
-    causes, page: 'daan',
+    causes, STANDARD_TIERS, SPECIAL_TIERS, cities, page: 'daan',
     success:      req.session.donationSuccess || null,
     lastDonation: req.session.lastDonation || null,
     formatDate
@@ -274,14 +304,22 @@ app.get('/daan', (req, res) => {
 });
 
 app.post('/daan', async (req, res) => {
-  const { name, cause_id, cause_name, amount, custom_amount, pan } = req.body;
+  const { name, cause_id, cause_name, amount, custom_amount, pan,
+          tier_type, userLat, userLon, userCity, userState } = req.body;
   const finalAmount = parseInt(custom_amount) || parseInt(amount);
   if (!name || !cause_id || !finalAmount) return res.redirect('/daan?error=missing');
   try {
     const donation = await Donation.create({
       name, cause_id, cause_name,
-      amount: finalAmount,
-      pan:    pan || null
+      amount:    finalAmount,
+      pan:       pan || null,
+      tier_type: tier_type || 'basic',
+      userLocation: {
+        lat:   userLat   ? parseFloat(userLat)   : null,
+        lon:   userLon   ? parseFloat(userLon)   : null,
+        city:  userCity  || null,
+        state: userState || null
+      }
     });
     req.session.donationSuccess = true;
     req.session.lastDonation    = {
@@ -358,6 +396,21 @@ app.post('/api/daan/stream', async (req, res) => {
     console.error('Stream daan error:', err.message);
     res.status(500).json({ ok: false, error: 'Could not save donation' });
   }
+});
+
+// ── SHIPPING CALCULATOR ──────────────────────────────────
+app.post('/api/shipping', (req, res) => {
+  const { userLat, userLon, pujaCity } = req.body;
+  if (!userLat || !userLon || !pujaCity) {
+    return res.json({ shippingCost: 149, distanceKm: null, note: 'Location unavailable — standard rate applied' });
+  }
+  const dest = cities[pujaCity];
+  if (!dest) {
+    return res.json({ shippingCost: 149, distanceKm: null, note: 'City not in database' });
+  }
+  const km   = Math.round(haversineKm(parseFloat(userLat), parseFloat(userLon), dest.lat, dest.lon));
+  const cost = calcShipping(km);
+  res.json({ shippingCost: cost, distanceKm: km, pujaCity, note: cost === 0 ? 'Free — nearby delivery' : null });
 });
 
 // 404

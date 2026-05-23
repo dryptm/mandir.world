@@ -440,3 +440,44 @@ document.addEventListener('DOMContentLoaded', () => {
   initAnchorScroll();
   initStreamPage();
 });
+
+// ══════════════════════════════════════════
+// LOCATION — global handler
+// ══════════════════════════════════════════
+function requestLocationGlobal() {
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const coords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${coords.lat}&lon=${coords.lon}&format=json`)
+        .then(r => r.json())
+        .then(data => {
+          coords.city  = data.address?.city || data.address?.town || data.address?.village || '';
+          coords.state = data.address?.state || '';
+          localStorage.setItem('mw_location', JSON.stringify(coords));
+          dismissLocationBanner();
+        })
+        .catch(() => {
+          localStorage.setItem('mw_location', JSON.stringify(coords));
+          dismissLocationBanner();
+        });
+    },
+    () => dismissLocationBanner(),
+    { timeout: 8000 }
+  );
+}
+
+function dismissLocationBanner() {
+  const b = document.getElementById('locationBanner');
+  if (b) b.style.display = 'none';
+  localStorage.setItem('mw_loc_dismissed', '1');
+}
+
+// Show banner if location not yet saved and not dismissed
+document.addEventListener('DOMContentLoaded', () => {
+  const saved     = localStorage.getItem('mw_location');
+  const dismissed = localStorage.getItem('mw_loc_dismissed');
+  if (!saved && !dismissed) {
+    const banner = document.getElementById('locationBanner');
+    if (banner) setTimeout(() => banner.style.display = 'flex', 2000);
+  }
+});

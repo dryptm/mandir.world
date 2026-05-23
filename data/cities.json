@@ -1,0 +1,20 @@
+{
+  "Varanasi":   { "lat": 25.3176, "lon": 82.9739, "state": "Uttar Pradesh" },
+  "Ayodhya":    { "lat": 26.7922, "lon": 82.1998, "state": "Uttar Pradesh" },
+  "Haridwar":   { "lat": 29.9457, "lon": 78.1642, "state": "Uttarakhand"   },
+  "Mathura":    { "lat": 27.4924, "lon": 77.6737, "state": "Uttar Pradesh" },
+  "Vrindavan":  { "lat": 27.5794, "lon": 77.6964, "state": "Uttar Pradesh" },
+  "Prayagraj":  { "lat": 25.4358, "lon": 81.8463, "state": "Uttar Pradesh" },
+  "Gaya":       { "lat": 24.7955, "lon": 85.0002, "state": "Bihar"         },
+  "Kedarnath":  { "lat": 30.7352, "lon": 79.0669, "state": "Uttarakhand"   },
+  "Badrinath":  { "lat": 30.7433, "lon": 79.4938, "state": "Uttarakhand"   },
+  "Puri":       { "lat": 19.8135, "lon": 85.8312, "state": "Odisha"        },
+  "Somnath":    { "lat": 20.8880, "lon": 70.4017, "state": "Gujarat"       },
+  "Tirupati":   { "lat": 13.6288, "lon": 79.4192, "state": "Andhra Pradesh"},
+  "Madurai":    { "lat": 9.9252,  "lon": 78.1198, "state": "Tamil Nadu"    },
+  "Ujjain":     { "lat": 23.1765, "lon": 75.7885, "state": "Madhya Pradesh"},
+  "Nashik":     { "lat": 19.9975, "lon": 73.7898, "state": "Maharashtra"   },
+  "Rishikesh":  { "lat": 30.0869, "lon": 78.2676, "state": "Uttarakhand"   },
+  "Dwarka":     { "lat": 22.2394, "lon": 68.9678, "state": "Gujarat"       },
+  "Rameswaram": { "lat": 9.2881,  "lon": 79.3174, "state": "Tamil Nadu"    }
+}

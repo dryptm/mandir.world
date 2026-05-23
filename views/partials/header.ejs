@@ -14,6 +14,13 @@
 </head>
 <body>
 
+<!-- LOCATION BANNER (shown once if location not yet saved) -->
+<div class="location-banner" id="locationBanner" style="display:none">
+  <span>📍 Share your location for accurate prasad delivery charges</span>
+  <button onclick="requestLocationGlobal()" class="loc-banner-btn">Allow</button>
+  <button onclick="dismissLocationBanner()" class="loc-banner-close">✕</button>
+</div>
+
 <!-- TOP BAR -->
 <div class="topbar">
   <div class="topbar-inner">
