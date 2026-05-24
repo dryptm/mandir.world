@@ -42,10 +42,7 @@
             <button class="reaction-btn" data-emoji="🪔" onclick="sendReaction('🪔')">🪔</button>
             <button class="reaction-btn" data-emoji="🌸" onclick="sendReaction('🌸')">🌸</button>
           </div>
-          <div class="reaction-bar-right">
-            <a href="/daan" class="btn btn--gold btn--sm">🪔 Give Daan</a>
-            <a href="/sankalp?event=<%= stream.id %>" class="btn btn--primary btn--sm">🙏 Sankalp</a>
-          </div>
+
         </div>
 
         <!-- LIVE ACTIVITY FEED -->
@@ -82,26 +79,6 @@
 
       <!-- SIDEBAR -->
       <div class="stream-sidebar">
-        <!-- Quick Sankalp -->
-        <div class="sidebar-widget sankalp-widget">
-          <h3>🙏 Quick Sankalp</h3>
-          <p>Record your intention for this darshan</p>
-          <form action="/sankalp" method="POST">
-            <input type="hidden" name="event" value="<%= stream.id %>" />
-            <input type="hidden" name="city" value="<%= stream.city %>" />
-            <div class="form-group">
-              <input type="text" name="name" placeholder="Your full name" required class="form-input" />
-            </div>
-            <div class="form-group">
-              <input type="text" name="gotra" placeholder="Gotra (optional)" class="form-input" />
-            </div>
-            <div class="form-group">
-              <textarea name="wish" placeholder="Your sankalp / wish..." required class="form-input form-textarea" rows="3"></textarea>
-            </div>
-            <button type="submit" class="btn btn--primary" style="width:100%">Record Sankalp →</button>
-          </form>
-        </div>
-
         <!-- ── PROMINENT DAAN WIDGET ── -->
         <div class="stream-daan-widget">
           <div class="sdw-header">
@@ -174,6 +151,26 @@
             <span>·</span>
             <span>100% to cause</span>
           </div>
+        </div>
+
+        <!-- Quick Sankalp -->
+        <div class="sidebar-widget sankalp-widget">
+          <h3>🙏 Quick Sankalp</h3>
+          <p>Record your intention for this darshan</p>
+          <form action="/sankalp" method="POST">
+            <input type="hidden" name="event" value="<%= stream.id %>" />
+            <input type="hidden" name="city" value="<%= stream.city %>" />
+            <div class="form-group">
+              <input type="text" name="name" placeholder="Your full name" required class="form-input" />
+            </div>
+            <div class="form-group">
+              <input type="text" name="gotra" placeholder="Gotra (optional)" class="form-input" />
+            </div>
+            <div class="form-group">
+              <textarea name="wish" placeholder="Your sankalp / wish..." required class="form-input form-textarea" rows="3"></textarea>
+            </div>
+            <button type="submit" class="btn btn--primary" style="width:100%">Record Sankalp →</button>
+          </form>
         </div>
 
         <!-- Related Streams -->
