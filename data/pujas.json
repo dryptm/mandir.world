@@ -1,12 +1,508 @@
 [
-  {"id":"rudrabhishek","name":"Rudrabhishek","hindi":"रुद्राभिषेक","deity":"Lord Shiva","duration":"45 mins","price":1100,"description":"Panchamrit abhishek of the Shiva lingam with milk, curd, honey, ghee, and sugar, followed by Bilva patra offering and Rudrashtakam recitation.","includes":["Panchamrit abhishek","Bilva patra offering","Rudrashtakam patha","Prasad (Vibhuti)"],"icon":"🕉️","popular":true,"prasad":true},
-  {"id":"satyanarayan-katha","name":"Satyanarayan Katha","hindi":"सत्यनारायण कथा","deity":"Lord Vishnu","duration":"2 hrs","price":2100,"description":"The complete recitation of Shri Satyanarayan Vrat Katha by a qualified pandit. Performed for new beginnings, housewarmings, and fulfillment of desires.","includes":["Full katha recitation","Panchamrit","Panchopachar puja","Prasad (Sheera)"],"icon":"🙏","popular":true,"prasad":true},
-  {"id":"ganesh-puja","name":"Ganesh Puja","hindi":"गणेश पूजा","deity":"Lord Ganesha","duration":"30 mins","price":501,"description":"Shodashopachar puja of Lord Ganesha. Performed before any new beginning — travel, business, marriage, or any important undertaking.","includes":["Shodashopachar puja","Modak offering","Ganesh Stotram","Prasad"],"icon":"🐘","popular":true,"prasad":false},
-  {"id":"lakshmi-puja","name":"Lakshmi Puja","hindi":"लक्ष्मी पूजा","deity":"Maa Lakshmi","duration":"1 hr","price":1100,"description":"Mahalakshmi puja for prosperity, wealth, and abundance. Performed with lotus flowers, saffron, and Shri Sukta recitation.","includes":["Shri Sukta recitation","Lotus flower offering","Kumkum archana","Prasad (Kheer)"],"icon":"🪷","popular":false,"prasad":true},
-  {"id":"durga-puja","name":"Durga Saptashati Patha","hindi":"दुर्गा सप्तशती पाठ","deity":"Maa Durga","duration":"3 hrs","price":3100,"description":"Complete recitation of all 700 verses of Durga Saptashati (Devi Mahatmya) by a qualified pandit. Most powerful on Navratri days.","includes":["Full Saptashati recitation","Devi puja","Kumkum archana","Prasad"],"icon":"🌺","popular":true,"prasad":true},
-  {"id":"pind-daan","name":"Pind Daan & Tarpan","hindi":"पिंड दान व तर्पण","deity":"Pitru Devata","duration":"2 hrs","price":5100,"description":"Complete pind daan and tarpan ceremony on the banks of the Ganga at Varanasi or Gaya. Performed for the liberation of ancestors.","includes":["Tarpan to 16 generations","Pind daan","Brahmin bhojan","Ganga jal dispatch"],"icon":"🪔","popular":false,"prasad":false},
-  {"id":"hanuman-puja","name":"Hanuman Puja & Sundarkand","hindi":"हनुमान पूजा","deity":"Lord Hanuman","duration":"2 hrs","price":1100,"description":"Complete Sundarkand path followed by Hanuman puja with sindoor, red flowers, and sesame oil. Most effective on Tuesdays and Saturdays.","includes":["Sundarkand path","Sindoor offering","Bajrang Baan","Prasad (Besan Ladoo)"],"icon":"🌟","popular":true,"prasad":true},
-  {"id":"navgrah-shanti","name":"Navgrah Shanti Puja","hindi":"नवग्रह शांति पूजा","deity":"Navagrahas","duration":"3 hrs","price":3100,"description":"Puja and homa for the pacification of all nine planetary energies. Recommended for those facing career difficulties, health issues, or astrological doshas.","includes":["Navgrah puja","Homa with specific materials","Navgrah stotra","Remedies guidance"],"icon":"⭐","popular":false,"prasad":false},
-  {"id":"vivah-puja","name":"Vivah Saptapadi Puja","hindi":"विवाह षट्कर्म","deity":"Lord Vishnu / Agni Dev","duration":"4 hrs","price":11000,"description":"Complete traditional Hindu wedding ceremony with seven sacred steps around the sacred fire. Full Vedic vidhi conducted by a qualified Vedic pandit.","includes":["Ganeshacha puja","Vivah homa","Saptapadi","Mangalsutra dharana","Full Vedic vidhi"],"icon":"💐","popular":false,"prasad":false},
-  {"id":"griha-pravesh","name":"Griha Pravesh Puja","hindi":"गृह प्रवेश पूजा","deity":"Vastu Devata / Lord Ganesha","duration":"3 hrs","price":5100,"description":"Vastu puja and housewarming ceremony for a new home. Ensures positive energy, Vastu balance, and divine blessings for all inhabitants.","includes":["Vastu shanti","Navgrah homa","Satyanarayan katha","Cow and Brahmin feeding"],"icon":"🏠","popular":false,"prasad":false}
+  {
+    "id": "rudrabhishek",
+    "name": "Rudrabhishek",
+    "hindi": "रुद्राभिषेक",
+    "deity": "Lord Shiva",
+    "duration": "45 mins",
+    "price": 1100,
+    "description": "Panchamrit abhishek of the Shiva lingam with milk, curd, honey, ghee, and sugar, followed by Bilva patra offering and Rudrashtakam recitation.",
+    "includes": [
+      "Panchamrit abhishek",
+      "Bilva patra offering",
+      "Rudrashtakam patha",
+      "Prasad (Vibhuti)"
+    ],
+    "icon": "🕉️",
+    "popular": true,
+    "prasad": true,
+    "purpose": "For personal wellbeing, health, removal of obstacles, marriage blessings, and spiritual progress.",
+    "notFor": [
+      "Ancestor liberation — for that, book Pind Daan & Tarpan",
+      "Birth of child — book Satyanarayan Katha instead"
+    ],
+    "compatibleOccasions": [
+      "Personal wellbeing",
+      "Health recovery",
+      "Marriage / Anniversary",
+      "Spiritual progress",
+      "Festival",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Devotee Name",
+        "placeholder": "Your full name (as per tradition)",
+        "required": true
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "e.g. Bharadwaj, Kashyap (optional)",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "satyanarayan-katha",
+    "name": "Satyanarayan Katha",
+    "hindi": "सत्यनारायण कथा",
+    "deity": "Lord Vishnu",
+    "duration": "2 hrs",
+    "price": 2100,
+    "description": "Complete recitation of Shri Satyanarayan Vrat Katha by a qualified pandit. Performed for new beginnings, housewarmings, and fulfillment of desires.",
+    "includes": [
+      "Full katha recitation",
+      "Panchamrit",
+      "Panchopachar puja",
+      "Prasad (Sheera)"
+    ],
+    "icon": "🙏",
+    "popular": true,
+    "prasad": true,
+    "purpose": "For new beginnings, housewarming, marriage celebration, birth of child, business launch, and general family prosperity.",
+    "notFor": [
+      "Ancestor liberation — for that, book Pind Daan & Tarpan"
+    ],
+    "compatibleOccasions": [
+      "New home / Griha Pravesh",
+      "Marriage / Anniversary",
+      "Birth of child",
+      "Business start",
+      "Family prosperity",
+      "Festival",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Family Head / Main Devotee",
+        "placeholder": "Head of family name",
+        "required": true
+      },
+      {
+        "id": "family_members",
+        "label": "All Family Members",
+        "placeholder": "List all names separated by comma — e.g. Ramesh, Sita, Arjun",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "Family gotra (optional)",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "ganesh-puja",
+    "name": "Ganesh Puja",
+    "hindi": "गणेश पूजा",
+    "deity": "Lord Ganesha",
+    "duration": "30 mins",
+    "price": 501,
+    "description": "Shodashopachar puja of Lord Ganesha. Performed before any new beginning — business, travel, marriage, or any important undertaking.",
+    "includes": [
+      "Shodashopachar puja",
+      "Modak offering",
+      "Ganesh Stotram",
+      "Prasad"
+    ],
+    "icon": "🐘",
+    "popular": true,
+    "prasad": false,
+    "purpose": "Always performed first — before any new beginning, business launch, exam, travel, or marriage.",
+    "notFor": [
+      "Ancestor liberation",
+      "Health recovery (Navgrah Shanti is more appropriate)"
+    ],
+    "compatibleOccasions": [
+      "New home / Griha Pravesh",
+      "Business start",
+      "Marriage / Anniversary",
+      "Birth of child",
+      "Personal wellbeing",
+      "Festival",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Your Name",
+        "placeholder": "Your full name",
+        "required": true
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "Optional",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "lakshmi-puja",
+    "name": "Lakshmi Puja",
+    "hindi": "लक्ष्मी पूजा",
+    "deity": "Maa Lakshmi",
+    "duration": "1 hr",
+    "price": 1100,
+    "description": "Mahalakshmi puja for prosperity, wealth, and abundance. Performed with lotus flowers, saffron, and Shri Sukta recitation.",
+    "includes": [
+      "Shri Sukta recitation",
+      "Lotus flower offering",
+      "Kumkum archana",
+      "Prasad (Kheer)"
+    ],
+    "icon": "🪷",
+    "popular": false,
+    "prasad": true,
+    "purpose": "For business prosperity, financial stability, home abundance, and Diwali puja.",
+    "notFor": [
+      "Ancestor liberation",
+      "Health recovery"
+    ],
+    "compatibleOccasions": [
+      "Business start",
+      "Family prosperity",
+      "New home / Griha Pravesh",
+      "Festival",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Your Name / Business Owner",
+        "placeholder": "Your name or business owner's name",
+        "required": true
+      },
+      {
+        "id": "business_name",
+        "label": "Business Name",
+        "placeholder": "If for business (optional)",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "durga-puja",
+    "name": "Durga Saptashati Patha",
+    "hindi": "दुर्गा सप्तशती पाठ",
+    "deity": "Maa Durga",
+    "duration": "3 hrs",
+    "price": 3100,
+    "description": "Complete recitation of all 700 verses of Durga Saptashati by a qualified pandit. Most powerful on Navratri days.",
+    "includes": [
+      "Full Saptashati recitation",
+      "Devi puja",
+      "Kumkum archana",
+      "Prasad"
+    ],
+    "icon": "🌺",
+    "popular": true,
+    "prasad": true,
+    "purpose": "For protection from negative energies, health recovery, family safety, and Navratri observance.",
+    "notFor": [
+      "Ancestor liberation — book Pind Daan instead",
+      "Marriage (Vivah Puja is appropriate)"
+    ],
+    "compatibleOccasions": [
+      "Personal wellbeing",
+      "Health recovery",
+      "Family prosperity",
+      "Festival",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Devotee Name",
+        "placeholder": "Your full name",
+        "required": true
+      },
+      {
+        "id": "family_members",
+        "label": "Family Members (optional)",
+        "placeholder": "Other names to be included in the puja",
+        "type": "textarea",
+        "required": false
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "Optional",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "pind-daan",
+    "name": "Pind Daan & Tarpan",
+    "hindi": "पिंड दान व तर्पण",
+    "deity": "Pitru Devata",
+    "duration": "2 hrs",
+    "price": 5100,
+    "description": "Complete pind daan and tarpan ceremony on the banks of the Ganga at Varanasi or at Gaya. For the liberation of departed ancestors.",
+    "includes": [
+      "Tarpan to 16 generations",
+      "Pind daan",
+      "Brahmin bhojan",
+      "Ganga jal dispatch"
+    ],
+    "icon": "🪔",
+    "popular": false,
+    "prasad": false,
+    "purpose": "Exclusively for ancestor liberation (Pitru Moksha). Performed during Pitru Paksha, death anniversary, or any time for departed souls.",
+    "notFor": [
+      "Personal wellbeing",
+      "Business",
+      "Marriage",
+      "New home — these need different pujas"
+    ],
+    "compatibleOccasions": [
+      "Ancestor liberation (Shraddha)",
+      "Pitru Paksha",
+      "Death anniversary",
+      "Mahalaya",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Your Name (Karta)",
+        "placeholder": "Name of the person performing the shraddha",
+        "required": true
+      },
+      {
+        "id": "gotra",
+        "label": "Your Gotra",
+        "placeholder": "Your gotra",
+        "required": true
+      },
+      {
+        "id": "departed_name",
+        "label": "Departed Soul's Name",
+        "placeholder": "Name of the person who has passed away",
+        "required": true
+      },
+      {
+        "id": "departed_relation",
+        "label": "Relation",
+        "placeholder": "e.g. Father, Mother, Grandfather",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "hanuman-puja",
+    "name": "Hanuman Puja & Sundarkand",
+    "hindi": "हनुमान पूजा",
+    "deity": "Lord Hanuman",
+    "duration": "2 hrs",
+    "price": 1100,
+    "description": "Complete Sundarkand path followed by Hanuman puja with sindoor, red flowers, and sesame oil.",
+    "includes": [
+      "Sundarkand path",
+      "Sindoor offering",
+      "Bajrang Baan",
+      "Prasad (Besan Ladoo)"
+    ],
+    "icon": "🌟",
+    "popular": true,
+    "prasad": true,
+    "purpose": "For protection, overcoming fears, removing black magic, job/career issues, and general strength.",
+    "notFor": [
+      "Ancestor liberation",
+      "Marriage"
+    ],
+    "compatibleOccasions": [
+      "Personal wellbeing",
+      "Health recovery",
+      "Family prosperity",
+      "Festival",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Devotee Name",
+        "placeholder": "Your full name",
+        "required": true
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "Optional",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "navgrah-shanti",
+    "name": "Navgrah Shanti Puja",
+    "hindi": "नवग्रह शांति पूजा",
+    "deity": "Navagrahas",
+    "duration": "3 hrs",
+    "price": 3100,
+    "description": "Puja and homa for the pacification of all nine planetary energies. For career difficulties, health issues, or astrological doshas.",
+    "includes": [
+      "Navgrah puja",
+      "Homa with specific materials",
+      "Navgrah stotra",
+      "Remedies guidance"
+    ],
+    "icon": "⭐",
+    "popular": false,
+    "prasad": false,
+    "purpose": "For resolving astrological doshas, career obstacles, health issues caused by planetary afflictions, and Shani/Rahu/Ketu problems.",
+    "notFor": [
+      "Ancestor liberation",
+      "Marriage ceremonies",
+      "New home"
+    ],
+    "compatibleOccasions": [
+      "Health recovery",
+      "Personal wellbeing",
+      "Career / Job issues",
+      "Astrological dosha",
+      "Other"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Your Name",
+        "placeholder": "Your full name",
+        "required": true
+      },
+      {
+        "id": "date_of_birth",
+        "label": "Date of Birth",
+        "placeholder": "DD/MM/YYYY — for horoscope matching",
+        "required": false
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "Optional",
+        "required": false
+      }
+    ]
+  },
+  {
+    "id": "vivah-puja",
+    "name": "Vivah Saptapadi Puja",
+    "hindi": "विवाह षट्कर्म",
+    "deity": "Lord Vishnu / Agni Dev",
+    "duration": "4 hrs",
+    "price": 11000,
+    "description": "Complete traditional Hindu wedding ceremony with seven sacred steps around the sacred fire. Full Vedic vidhi by a qualified Vedic pandit.",
+    "includes": [
+      "Ganesh puja",
+      "Vivah homa",
+      "Saptapadi",
+      "Mangalsutra dharana",
+      "Full Vedic vidhi"
+    ],
+    "icon": "💐",
+    "popular": false,
+    "prasad": false,
+    "purpose": "Exclusively for Hindu marriage ceremonies.",
+    "notFor": [
+      "Ancestor liberation",
+      "Health recovery",
+      "Business — these need different pujas"
+    ],
+    "compatibleOccasions": [
+      "Marriage ceremony"
+    ],
+    "nameFields": [
+      {
+        "id": "groom_name",
+        "label": "Groom's Full Name",
+        "placeholder": "Dulhe ka poora naam",
+        "required": true
+      },
+      {
+        "id": "groom_gotra",
+        "label": "Groom's Gotra",
+        "placeholder": "Dulhe ka gotra",
+        "required": true
+      },
+      {
+        "id": "bride_name",
+        "label": "Bride's Full Name",
+        "placeholder": "Dulhan ka poora naam",
+        "required": true
+      },
+      {
+        "id": "bride_gotra",
+        "label": "Bride's Gotra",
+        "placeholder": "Dulhan ka gotra",
+        "required": true
+      },
+      {
+        "id": "wedding_date",
+        "label": "Wedding Date",
+        "placeholder": "DD/MM/YYYY",
+        "required": true
+      }
+    ]
+  },
+  {
+    "id": "griha-pravesh",
+    "name": "Griha Pravesh Puja",
+    "hindi": "गृह प्रवेश पूजा",
+    "deity": "Vastu Devata / Lord Ganesha",
+    "duration": "3 hrs",
+    "price": 5100,
+    "description": "Vastu puja and housewarming ceremony for a new home. Ensures positive energy, Vastu balance, and divine blessings for all inhabitants.",
+    "includes": [
+      "Vastu shanti",
+      "Navgrah homa",
+      "Satyanarayan katha",
+      "Cow and Brahmin feeding"
+    ],
+    "icon": "🏠",
+    "popular": false,
+    "prasad": false,
+    "purpose": "Exclusively for entering a new home or after major renovation. Ensures Vastu balance and divine blessings for the household.",
+    "notFor": [
+      "Ancestor liberation",
+      "Marriage",
+      "Health recovery"
+    ],
+    "compatibleOccasions": [
+      "New home / Griha Pravesh"
+    ],
+    "nameFields": [
+      {
+        "id": "devotee_name",
+        "label": "Family Head's Name",
+        "placeholder": "Ghar ke mukhiya ka naam",
+        "required": true
+      },
+      {
+        "id": "family_members",
+        "label": "All Family Members",
+        "placeholder": "All names who will live in the home",
+        "type": "textarea",
+        "required": true
+      },
+      {
+        "id": "home_address",
+        "label": "New Home Address",
+        "placeholder": "Full address of the new home",
+        "type": "textarea",
+        "required": true
+      },
+      {
+        "id": "gotra",
+        "label": "Gotra",
+        "placeholder": "Family gotra",
+        "required": false
+      }
+    ]
+  }
 ]

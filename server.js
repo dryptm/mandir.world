@@ -182,16 +182,28 @@ app.get('/puja-sewa', (req, res) => {
 });
 
 app.post('/puja-sewa', async (req, res) => {
-  const { puja_id, puja_name, devotee_name, gotra, occasion, preferred_date, phone, email } = req.body;
+  const b = req.body;
   try {
     const booking = await PujaBooking.create({
-      puja_id, puja_name,
-      devotee_name,
-      gotra:          gotra || 'Not specified',
-      occasion,
-      preferred_date,
-      phone,
-      email:          email || null
+      puja_id:           b.puja_id,
+      puja_name:         b.puja_name,
+      occasion:          b.occasion,
+      preferred_date:    b.preferred_date,
+      phone:             b.phone,
+      email:             b.email             || null,
+      devotee_name:      b.devotee_name      || null,
+      gotra:             b.gotra             || null,
+      family_members:    b.family_members    || null,
+      groom_name:        b.groom_name        || null,
+      groom_gotra:       b.groom_gotra       || null,
+      bride_name:        b.bride_name        || null,
+      bride_gotra:       b.bride_gotra       || null,
+      wedding_date:      b.wedding_date      || null,
+      departed_name:     b.departed_name     || null,
+      departed_relation: b.departed_relation || null,
+      business_name:     b.business_name     || null,
+      home_address:      b.home_address      || null,
+      date_of_birth:     b.date_of_birth     || null
     });
     req.session.pujaSuccess     = true;
     req.session.lastPujaBooking = {

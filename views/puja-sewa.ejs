@@ -4,11 +4,11 @@
   <div class="container">
     <div class="ph-breadcrumb">Home → Puja Sewa</div>
     <h1>Puja Sewa <span class="ph-hindi">पूजा सेवा</span></h1>
-    <p>Remote pujas performed by qualified pandits at real temples. Video proof delivered to you within 48 hours.</p>
+    <p>Remote pujas by qualified Vedic pandits. The right puja for the right purpose — with proof video delivered to you.</p>
     <div class="ph-trust-row">
       <span>✓ Qualified Vedic pandits</span>
       <span>✓ Video proof delivered</span>
-      <span>✓ Prasad dispatch available</span>
+      <span>✓ Contextual — right puja, right purpose</span>
       <span>✓ Digital receipt</span>
     </div>
   </div>
@@ -20,48 +20,48 @@
     <div class="booking-success">
       <div class="bs-icon">🙏</div>
       <h2>Puja Booking Confirmed</h2>
-      <p>Your <strong><%= lastBooking.puja_name %></strong> has been booked for <strong><%= lastBooking.devotee_name %></strong>.</p>
+      <p>Your <strong><%= lastBooking.puja_name %></strong> has been booked.</p>
       <div class="sankalp-certificate">
         <div class="cert-header"><span>🙏</span><h3>Puja Booking Receipt</h3><span>🙏</span></div>
         <div class="cert-body">
           <div class="cert-row"><span>Booking No</span><strong><%= lastBooking.bookingNo %></strong></div>
           <div class="cert-row"><span>Puja</span><strong><%= lastBooking.puja_name %></strong></div>
-          <div class="cert-row"><span>Devotee</span><strong><%= lastBooking.devotee_name %></strong></div>
-          <% if (lastBooking.gotra !== 'Not specified') { %><div class="cert-row"><span>Gotra</span><strong><%= lastBooking.gotra %></strong></div><% } %>
           <div class="cert-row"><span>Occasion</span><strong><%= lastBooking.occasion %></strong></div>
-          <div class="cert-row"><span>Preferred Date</span><strong><%= lastBooking.preferred_date %></strong></div>
+          <div class="cert-row"><span>Date</span><strong><%= lastBooking.preferred_date %></strong></div>
           <div class="cert-row"><span>Status</span><strong style="color:#16a34a">✓ Confirmed</strong></div>
         </div>
-        <div class="cert-footer">Our team will contact you at <%= lastBooking.phone %> within 24 hours to confirm your pandit and logistics.</div>
+        <div class="cert-footer">Our team will contact you at <%= lastBooking.phone %> within 24 hours.</div>
       </div>
       <a href="/puja-sewa" class="btn btn--outline" style="margin-top:1.5rem">Book Another Puja</a>
     </div>
   </div>
 </section>
+
 <% } else { %>
 
 <!-- HOW IT WORKS -->
 <section class="section" style="padding-bottom:0">
   <div class="container">
     <div class="how-it-works">
-      <div class="hiw-step"><div class="hiw-num">1</div><strong>Choose Puja</strong><span>Select from our list of verified Vedic pujas</span></div>
+      <div class="hiw-step"><div class="hiw-num">1</div><strong>Choose Puja</strong><span>Select the right puja for your purpose</span></div>
       <div class="hiw-arrow">→</div>
-      <div class="hiw-step"><div class="hiw-num">2</div><strong>Fill Details</strong><span>Name, gotra, occasion, preferred date</span></div>
+      <div class="hiw-step"><div class="hiw-num">2</div><strong>Fill Details</strong><span>Names, occasion, and relevant information</span></div>
       <div class="hiw-arrow">→</div>
-      <div class="hiw-step"><div class="hiw-num">3</div><strong>We Confirm</strong><span>Our team contacts you within 24 hours</span></div>
+      <div class="hiw-step"><div class="hiw-num">3</div><strong>We Confirm</strong><span>Our pandit contacts you within 24 hours</span></div>
       <div class="hiw-arrow">→</div>
-      <div class="hiw-step"><div class="hiw-num">4</div><strong>Puja Performed</strong><span>Video proof and prasad delivered to you</span></div>
+      <div class="hiw-step"><div class="hiw-num">4</div><strong>Proof Delivered</strong><span>Video proof and prasad sent to you</span></div>
     </div>
   </div>
 </section>
 
-<!-- PUJAS LIST -->
 <section class="section">
   <div class="container">
     <div class="pujas-layout">
       <div class="pujas-list">
         <% pujas.forEach(puja => { %>
         <div class="puja-card" id="<%= puja.id %>">
+
+          <!-- PUJA HEADER -->
           <div class="puja-card-header">
             <span class="puja-icon"><%= puja.icon %></span>
             <div class="puja-title-group">
@@ -73,59 +73,86 @@
               <div class="puja-duration">⏱ <%= puja.duration %></div>
             </div>
           </div>
+
           <p class="puja-desc"><%= puja.description %></p>
+
+          <!-- PURPOSE BANNER -->
+          <div class="puja-purpose-banner">
+            <div class="ppb-for">
+              <strong>✓ Best for:</strong> <%= puja.purpose %>
+            </div>
+            <% if (puja.notFor && puja.notFor.length > 0) { %>
+            <div class="ppb-not">
+              <strong>✗ Not for:</strong>
+              <% puja.notFor.forEach(n => { %><span><%= n %></span><% }) %>
+            </div>
+            <% } %>
+          </div>
+
+          <!-- INCLUDES -->
           <div class="puja-includes">
             <strong>Includes:</strong>
             <% puja.includes.forEach(item => { %><span>✓ <%= item %></span><% }) %>
           </div>
           <% if (puja.prasad) { %><div class="puja-prasad-tag">🌸 Prasad dispatch available</div><% } %>
 
+          <!-- BOOKING FORM -->
           <form action="/puja-sewa" method="POST" class="puja-book-form">
-            <input type="hidden" name="puja_id" value="<%= puja.id %>" />
-            <input type="hidden" name="puja_name" value="<%= puja.name %>" />
-            <div class="pbf-row">
-              <div class="form-group">
-                <label>Devotee Name <span class="req">*</span></label>
-                <input type="text" name="devotee_name" class="form-input" placeholder="Your full name" required />
-              </div>
-              <div class="form-group">
-                <label>Gotra <span class="optional">(optional)</span></label>
-                <input type="text" name="gotra" class="form-input" placeholder="e.g. Bharadwaj" />
-              </div>
+            <input type="hidden" name="puja_id"   value="<%= puja.id %>"/>
+            <input type="hidden" name="puja_name" value="<%= puja.name %>"/>
+
+            <!-- OCCASION SELECTOR — only compatible ones shown -->
+            <div class="form-group">
+              <label>Occasion / Purpose <span class="req">*</span></label>
+              <select name="occasion" class="form-input form-select" required
+                      onchange="updateNameFields('<%= puja.id %>', this.value)">
+                <option value="">Select the purpose of this puja...</option>
+                <% puja.compatibleOccasions.forEach(occ => { %>
+                <option value="<%= occ %>"><%= occ %></option>
+                <% }) %>
+              </select>
             </div>
-            <div class="pbf-row">
+
+            <!-- DYNAMIC NAME FIELDS — contextual per nameFields config -->
+            <div class="puja-name-fields" id="nameFields_<%= puja.id %>">
+              <% puja.nameFields.forEach(field => { %>
               <div class="form-group">
-                <label>Occasion / Purpose <span class="req">*</span></label>
-                <select name="occasion" class="form-input form-select" required>
-                  <option value="">Select occasion...</option>
-                  <option>Personal wellbeing</option>
-                  <option>Family prosperity</option>
-                  <option>New home / Griha Pravesh</option>
-                  <option>Business start</option>
-                  <option>Marriage / Anniversary</option>
-                  <option>Birth of child</option>
-                  <option>Health recovery</option>
-                  <option>Ancestor liberation</option>
-                  <option>Festival</option>
-                  <option>Other</option>
-                </select>
+                <label>
+                  <%= field.label %>
+                  <% if (field.required) { %><span class="req">*</span><% } else { %><span class="optional">(optional)</span><% } %>
+                </label>
+                <% if (field.type === 'textarea') { %>
+                <textarea name="<%= field.id %>" class="form-input form-textarea" rows="2"
+                  placeholder="<%= field.placeholder %>"
+                  <%= field.required ? 'required' : '' %>></textarea>
+                <% } else { %>
+                <input type="<%= field.id === 'date_of_birth' || field.id === 'wedding_date' ? 'text' : 'text' %>"
+                  name="<%= field.id %>"
+                  class="form-input"
+                  placeholder="<%= field.placeholder %>"
+                  <%= field.required ? 'required' : '' %>/>
+                <% } %>
               </div>
+              <% }) %>
+            </div>
+
+            <!-- PREFERRED DATE + CONTACT -->
+            <div class="pbf-row">
               <div class="form-group">
                 <label>Preferred Date <span class="req">*</span></label>
-                <input type="date" name="preferred_date" class="form-input" required />
+                <input type="date" name="preferred_date" class="form-input" required/>
               </div>
-            </div>
-            <div class="pbf-row">
               <div class="form-group">
                 <label>Mobile Number <span class="req">*</span></label>
-                <input type="tel" name="phone" class="form-input" placeholder="10-digit mobile" maxlength="10" required />
-              </div>
-              <div class="form-group">
-                <label>Email <span class="optional">(for receipt)</span></label>
-                <input type="email" name="email" class="form-input" placeholder="your@email.com" />
+                <input type="tel" name="phone" class="form-input" placeholder="10-digit mobile" maxlength="10" required/>
               </div>
             </div>
-            <button type="submit" class="btn btn--gold btn--large" style="width:100%;margin-top:0.5rem">
+            <div class="form-group">
+              <label>Email <span class="optional">(for video proof delivery)</span></label>
+              <input type="email" name="email" class="form-input" placeholder="your@email.com"/>
+            </div>
+
+            <button type="submit" class="btn btn--gold btn--large" style="width:100%;margin-top:.5rem">
               Book <%= puja.name %> — ₹<%= puja.price.toLocaleString('en-IN') %>+
             </button>
           </form>
@@ -137,35 +164,41 @@
       <div class="puja-sidebar">
         <div class="ps-card">
           <h3>📅 Auspicious Upcoming Dates</h3>
-          <p style="font-size:0.82rem;color:var(--text-soft);margin-bottom:0.75rem">Best days to schedule your puja:</p>
           <% upcomingFestivals.forEach(f => { %>
-          <div class="ps-date-item" style="--accent:<%= f.color %>">
+          <div class="ps-date-item">
             <span><%= f.icon %></span>
             <div>
               <strong><%= f.name %></strong>
               <span><%= formatDate(f.date) %></span>
-              <% const d = daysUntil(f.date); if(d&&d>0){%><span class="ps-days"><%= d %>d</span><%}%>
             </div>
           </div>
           <% }) %>
         </div>
         <div class="ps-card ps-card--saffron">
-          <h3>🙏 Why Book With Us?</h3>
-          <ul>
-            <li>Qualified Vedic pandits with Kashi tradition</li>
-            <li>Video proof of every ritual</li>
-            <li>Mantra recitation included</li>
-            <li>Prasad dispatched to your address</li>
-            <li>Digital receipt for your records</li>
-          </ul>
+          <h3>🙏 Why Contextual Matters</h3>
+          <p>Not every puja serves every purpose. A Rudrabhishek cannot liberate ancestors — only Pind Daan can. We match the right ritual to the right intent, so your faith is honoured correctly.</p>
         </div>
         <div class="ps-card">
-          <h3>❓ Have Questions?</h3>
-          <p>Write to us at <strong>pujas@mandir.world</strong> or WhatsApp us at <strong>+91 XXXXX XXXXX</strong></p>
+          <h3>❓ Not sure which puja?</h3>
+          <p>Write to <strong>pujas@mandir.world</strong> with your purpose and we'll guide you to the right one.</p>
         </div>
       </div>
     </div>
   </div>
 </section>
 <% } %>
+
+<script>
+// Show/hide a gentle reminder when occasion changes (already filtered, this is extra UX)
+function updateNameFields(pujaId, occasion) {
+  // Nothing to toggle — all name fields are always shown for clarity
+  // This hook can be used for future dynamic behaviour
+}
+
+// Date min
+document.querySelectorAll('input[type="date"]').forEach(i => {
+  i.min = new Date().toISOString().split('T')[0];
+});
+</script>
+
 <%- include('partials/footer') %>

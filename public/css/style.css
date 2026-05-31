@@ -1060,3 +1060,34 @@ em{font-style:italic;font-family:var(--font-display)}
   /* Collapse any section/page padding that adds whitespace */
   .stream-page        { padding: 1rem 0 2rem; }
 }
+
+/* ── PUJA PURPOSE BANNER ───────────────────────────────── */
+.puja-purpose-banner {
+  background: var(--cream);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--r);
+  padding: .9rem 1.1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.ppb-for {
+  font-size: .84rem;
+  color: #15803d;
+  line-height: 1.5;
+}
+.ppb-for strong { color: #15803d; }
+.ppb-not {
+  font-size: .8rem;
+  color: var(--text-soft);
+  display: flex;
+  flex-direction: column;
+  gap: .2rem;
+}
+.ppb-not strong { color: #dc2626; font-size: .8rem; }
+.ppb-not span::before { content: "  → "; color: #dc2626; }
+.ppb-not span { display: block; line-height: 1.4; padding-left: .75rem; }
+
+/* Name fields section spacing */
+.puja-name-fields { margin-bottom: .5rem; }
