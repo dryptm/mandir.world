@@ -13,6 +13,10 @@ const { getPanchang } = require('./panchang');
 const Sankalp     = require('./models/Sankalp');
 const Donation    = require('./models/Donation');
 const PujaBooking = require('./models/PujaBooking');
+const Festival    = require('./models/Festival');
+const Stream      = require('./models/Stream');
+const PujaModel   = require('./models/Puja');
+const City        = require('./models/City');
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -52,11 +56,13 @@ app.use(session({
   cookie: { secure: isProd, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
-// ── STATIC DATA (festivals/streams/pujas never change at runtime) ──
-const festivals = require('./data/festivals.json');
-const cities    = require('./data/cities.json');
-const streams   = require('./data/streams.json');
-const pujas     = require('./data/pujas.json');
+// ── DATA — loaded purely from MongoDB ────────────────────
+// JSON files are only used by scripts/seed.js (one-time setup)
+// Server always reads from DB; run 'npm run seed' once to populate
+let festivals = [];
+let streams   = [];
+let pujas     = [];
+let citiesMap = {};
 
 // ── HELPERS ──────────────────────────────────────────────
 function formatDate(d) {
@@ -120,12 +126,13 @@ app.get('/health', async (req, res) => {
 app.get('/', async (req, res) => {
   const panchang          = getPanchang(new Date());
   const liveStreams        = streams.filter(s => s.isLive).slice(0, 4);
-  const upcomingFestivals = festivals
-    .filter(f => f.isUpcoming)
+  const enrichedHome      = enrichFestivals(festivals);
+  const upcomingFestivals = enrichedHome
+    .filter(f => f.isUpcoming && !f.isDaily)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 4);
   const nextBig      = upcomingFestivals[0] || null;
-  const dailyEvents  = festivals.filter(f => f.isDaily);
+  const dailyEvents  = enrichedHome.filter(f => f.isDaily);
   const popularPujas = pujas.filter(p => p.popular).slice(0, 4);
 
   // Live counts from MongoDB
@@ -416,7 +423,7 @@ app.post('/api/shipping', (req, res) => {
   if (!userLat || !userLon || !pujaCity) {
     return res.json({ shippingCost: 149, distanceKm: null, note: 'Location unavailable — standard rate applied' });
   }
-  const dest = cities[pujaCity];
+  const dest = citiesMap[pujaCity];
   if (!dest) {
     return res.json({ shippingCost: 149, distanceKm: null, note: 'City not in database' });
   }
@@ -429,8 +436,34 @@ app.post('/api/shipping', (req, res) => {
 app.use((req, res) => res.status(404).render('404', { page: '' }));
 
 // ── START ─────────────────────────────────────────────────
+
+// ── DB DATA LOADER ────────────────────────────────────────
+async function loadDataFromDB() {
+  // Always reads from DB — no JSON fallback
+  // If collections are empty, run: npm run seed
+  const [dbFestivals, dbStreams, dbPujas, dbCities] = await Promise.all([
+    Festival.find({ active: true }).lean(),
+    Stream.find({ active: true }).lean(),
+    PujaModel.find({ active: true }).lean(),
+    City.find({}).lean()
+  ]);
+
+  festivals = dbFestivals;
+  streams   = dbStreams;
+  pujas     = dbPujas;
+  citiesMap = {};
+  dbCities.forEach(c => { citiesMap[c.name] = { lat: c.lat, lon: c.lon, state: c.state }; });
+
+  console.log(`✅  DB → ${festivals.length} festivals | ${streams.length} streams | ${pujas.length} pujas | ${dbCities.length} cities`);
+}
+
 async function start() {
   await connectDB();
+  // Load data from DB (enriches the JSON defaults)
+  await loadDataFromDB();
+  // Refresh every 5 minutes so employee edits reflect without restart
+  setInterval(loadDataFromDB, 5 * 60 * 1000);
+
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🕉️  Mandir.World → http://localhost:${PORT}  [${isProd ? 'production' : 'development'}]\n`);
   });

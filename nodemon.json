@@ -1,0 +1,5 @@
+{
+  "watch": ["server.js", "models/", "views/", "public/", "panchang.js"],
+  "ignore": ["data/", "scripts/", "node_modules/"],
+  "ext": "js,ejs,css"
+}
