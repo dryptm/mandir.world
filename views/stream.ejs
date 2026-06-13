@@ -19,8 +19,8 @@
           <!-- VIDEO + OVERLAID BUBBLE LAYER -->
           <div class="video-outer">
             <div class="video-embed">
-              <iframe src="https://www.youtube.com/embed/<%= stream.youtubeVideoId %>?autoplay=1&mute=1" 
-                title="<%= stream.title %>"; referrerpolicy="strict-origin-when-cross-origin"></iframe>
+              <iframe src="https://www.youtube.com/embed/<%= stream.youtubeVideoId %>?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&iv_load_policy=3&disablekb=1&fs=0" 
+                title="<%= stream.title %>" referrerpolicy="strict-origin-when-cross-origin"></iframe>
             </div>
 
             <% if (stream.isLive) { %>
