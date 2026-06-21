@@ -21,7 +21,7 @@
             <% if (stream.isLive) { %>
             <!-- LIVE: cropped iframe, zero YouTube chrome ever visible -->
             <div class="video-embed video-embed--cropped">
-              <iframe id="liveIframe" src="https://www.youtube.com/embed/<%= stream.youtubeVideoId %>?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1"
+              <iframe id="liveIframe" src="https://www.youtube.com/embed/<%= stream.youtubeVideoId %>?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&iv_load_policy=3&disablekb=1&fs=0&playsinline=1&enablejsapi=1"
                 title="<%= stream.title %>" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay"></iframe>
             </div>
             <div class="bubble-zone" id="bubbleZone" aria-hidden="true"></div>
@@ -284,14 +284,23 @@ window.__STREAM_MIN_VIEWERS__ = <%= stream.viewers - 300 %>;
 window.__STREAM_ID__   = '<%= stream.id %>';
 window.__STREAM_CITY__ = '<%= stream.city %>';
 
-// Tap-to-unmute: reload iframe without mute param on user gesture
-// (browsers require a real click/tap before allowing audio autoplay)
+// Tap-to-unmute: send postMessage commands to the already-playing iframe.
+// No reload/navigation happens, so the click's "user gesture" stays valid
+// even on strict mobile browsers (iOS Safari, Chrome Android).
 window.unmuteLiveStream = function() {
   const iframe = document.getElementById('liveIframe');
   const btn    = document.getElementById('unmuteBtn');
-  if (!iframe) return;
-  const newSrc = iframe.src.replace('autoplay=1&mute=1', 'autoplay=1');
-  iframe.src = newSrc;
+  if (!iframe || !iframe.contentWindow) return;
+
+  const send = (func) => {
+    iframe.contentWindow.postMessage(JSON.stringify({
+      event: 'command', func, args: []
+    }), '*');
+  };
+
+  send('unMute');
+  send('playVideo');
+
   if (btn) btn.style.display = 'none';
 };
 
