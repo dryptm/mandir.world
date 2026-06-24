@@ -1,5 +1,9 @@
 require('dotenv').config();
 
+const Razorpay              = require('razorpay');
+const crypto                = require('crypto');
+const { sendDaanReceipt, sendDaanSMS } = require('./utils/notify');
+
 const express    = require('express');
 const bodyParser = require('body-parser');
 const session    = require('express-session');
@@ -21,6 +25,12 @@ const City        = require('./models/City');
 const app    = express();
 const PORT   = process.env.PORT || 3000;
 const isProd = process.env.NODE_ENV === 'production';
+
+// ── RAZORPAY ──────────────────────────────────────────────
+const razorpay = new Razorpay({
+  key_id:     process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET
+});
 
 // ── SECURITY & COMPRESSION ───────────────────────────────
 app.use(compression());
@@ -312,10 +322,23 @@ app.get('/daan', (req, res) => {
     { id:'ghat-dev',   name:'Ghat Preservation',    hindi:'घाट संरक्षण',       description:'Contribute to the restoration of ancient ghats in Varanasi and Haridwar.',                     icon:'🏛️', raised:178000, goal:500000,  pujaCity:'Varanasi' },
     { id:'platform',   name:'Support Mandir.World', hindi:'मंदिर.वर्ल्ड सेवा', description:'Help us build better streams and bring darshan to those who cannot travel.',                  icon:'📡', raised:84800,  goal:200000,  pujaCity:'Varanasi' }
   ];
+  // Build lastDonation from query params (Razorpay redirect) or session (fallback)
+  let lastDonation = req.session.lastDonation || null;
+  if (req.query.success === '1' && req.query.receipt) {
+    lastDonation = {
+      receiptNo:  req.query.receipt,
+      name:       req.query.name,
+      amount:     Number(req.query.amount) / 100,
+      cause_name: req.query.cause,
+      paymentId:  req.query.payId,
+      timestamp:  new Date().toISOString()
+    };
+  }
+
   res.render('daan', {
     causes, STANDARD_TIERS, SPECIAL_TIERS, cities, page: 'daan',
-    success:      req.session.donationSuccess || null,
-    lastDonation: req.session.lastDonation || null,
+    success:      (req.query.success === '1') || req.session.donationSuccess || null,
+    lastDonation,
     formatDate
   });
   req.session.donationSuccess = null;
@@ -323,13 +346,14 @@ app.get('/daan', (req, res) => {
 });
 
 app.post('/daan', async (req, res) => {
-  const { name, cause_id, cause_name, amount, custom_amount, pan,
+  const { name, phone, email, cause_id, cause_name, amount, custom_amount, pan,
           tier_type, userLat, userLon, userCity, userState } = req.body;
   const finalAmount = parseInt(custom_amount) || parseInt(amount);
   if (!name || !cause_id || !finalAmount) return res.redirect('/daan?error=missing');
   try {
     const donation = await Donation.create({
-      name, cause_id, cause_name,
+      name, phone: phone || null, email: email || null,
+      cause_id, cause_name,
       amount:    finalAmount,
       pan:       pan || null,
       tier_type: tier_type || 'basic',
@@ -379,19 +403,31 @@ app.get('/api/stats', async (req, res) => {
 // ── STREAM DAAN API (called from stream page JS modal) ────
 app.post('/api/daan/stream', async (req, res) => {
   try {
-    const { name, amount, streamId, streamCity, cause_id, cause_name, prasad } = req.body;
+    const { name, phone, email, pan, amount, streamId, streamCity, cause_id, cause_name, prasad, userLocation } = req.body;
 
     if (!name || !amount || amount < 10) {
       return res.status(400).json({ ok: false, error: 'Missing required fields' });
     }
+    if (!phone || !/^\d{10}$/.test(phone)) {
+      return res.status(400).json({ ok: false, error: 'Valid 10-digit mobile number is required' });
+    }
 
     const donation = await Donation.create({
       name:        name.trim(),
+      phone:       phone.trim(),
+      email:       email?.trim() || null,
+      pan:         pan?.trim()   || null,
       cause_id:    cause_id    || streamId  || 'stream-daan',
       cause_name:  cause_name  || `Live Daan — ${streamCity || 'Temple'}`,
       amount:      Number(amount),
       streamId:    streamId   || null,
       streamCity:  streamCity || null,
+      userLocation: userLocation ? {
+        lat:   userLocation.lat   || null,
+        lon:   userLocation.lon   || null,
+        city:  userLocation.city  || null,
+        state: userLocation.state || null
+      } : {},
       prasad: {
         requested: !!(prasad && prasad.requested),
         address1:  prasad?.address1  || null,
@@ -430,6 +466,133 @@ app.post('/api/shipping', (req, res) => {
   const km   = Math.round(haversineKm(parseFloat(userLat), parseFloat(userLon), dest.lat, dest.lon));
   const cost = calcShipping(km);
   res.json({ shippingCost: cost, distanceKm: km, pujaCity, note: cost === 0 ? 'Free — nearby delivery' : null });
+});
+
+// ── PAYMENT ROUTES ───────────────────────────────────────
+
+// Step 1: Create Razorpay order
+app.post('/api/payment/create-order', async (req, res) => {
+  try {
+    const { amount, name, email, phone, cause_id, cause_name, streamId, streamCity, tier_type } = req.body;
+
+    if (!amount || amount < 10)  return res.status(400).json({ ok: false, error: 'Invalid amount' });
+    if (!name)                   return res.status(400).json({ ok: false, error: 'Name is required' });
+    if (!phone || !/^\d{10}$/.test(phone)) return res.status(400).json({ ok: false, error: 'Valid 10-digit mobile required' });
+
+    const order = await razorpay.orders.create({
+      amount:          Math.round(amount * 100),  // Razorpay expects paise
+      currency:        'INR',
+      receipt:         `MDW-${Date.now()}`,
+      payment_capture: 1,  // auto-capture on authorization — moves to "paid" immediately
+      notes: { name, email: email || '', phone, cause_id, cause_name: cause_name || '', streamId: streamId || '' }
+    });
+
+    res.json({
+      ok:        true,
+      orderId:   order.id,
+      amount:    order.amount,
+      currency:  order.currency,
+      keyId:     process.env.RAZORPAY_KEY_ID,
+      prefill: { name, email: email || '', contact: phone }
+    });
+  } catch (err) {
+    console.error('Create order error:', err.message, err.error || '');
+    res.status(500).json({ ok: false, error: 'Could not create payment order' });
+  }
+});
+
+// Step 2: Verify payment signature + save donation + send receipts
+app.post('/api/payment/verify', async (req, res) => {
+  try {
+    const {
+      razorpay_order_id, razorpay_payment_id, razorpay_signature,
+      name, phone, email, pan, amount, cause_id, cause_name,
+      streamId, streamCity, tier_type, prasad, userLocation
+    } = req.body;
+
+    // Verify Razorpay signature
+    const expectedSig = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (expectedSig !== razorpay_signature) {
+      return res.status(400).json({ ok: false, error: 'Payment verification failed — signature mismatch' });
+    }
+
+    // Save donation to MongoDB
+    const donation = await Donation.create({
+      name,
+      phone:      phone || null,
+      email:      email || null,
+      pan:        pan   || null,
+      cause_id:   cause_id   || 'daan',
+      cause_name: cause_name || 'Mandir.World Daan',
+      amount:     Number(amount) / 100,   // convert paise back to rupees
+      tier_type:  tier_type || 'basic',
+      streamId:   streamId   || null,
+      streamCity: streamCity || null,
+      payment: {
+        provider:   'razorpay',
+        orderId:    razorpay_order_id,
+        paymentId:  razorpay_payment_id,
+        status:     'paid'
+      },
+      userLocation: userLocation || {},
+      prasad: prasad?.requested ? {
+        requested: true,
+        address1:  prasad.address1  || null,
+        address2:  prasad.address2  || null,
+        city:      prasad.city      || null,
+        pincode:   prasad.pincode   || null,
+        phone:     prasad.phone     || null,
+      } : { requested: false }
+    });
+
+    // Send email + SMS confirmations (non-blocking)
+    const receiptData = {
+      name,
+      email,
+      phone,
+      amount:    donation.amount,
+      cause_name: donation.cause_name,
+      receiptNo: donation.receiptNo,
+      createdAt: donation.createdAt
+    };
+    sendDaanReceipt(receiptData).catch(() => {});
+    sendDaanSMS(receiptData).catch(() => {});
+
+    res.json({
+      ok:        true,
+      receiptNo: donation.receiptNo,
+      name:      donation.name,
+      amount:    donation.amount,
+      cause:     donation.cause_name,
+      paymentId: razorpay_payment_id
+    });
+
+  } catch (err) {
+    console.error('Payment verify error:', err.message);
+    res.status(500).json({ ok: false, error: 'Payment verification failed' });
+  }
+});
+
+// Step 3: Handle Razorpay webhooks (payment.captured for server-side confirmation)
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), (req, res) => {
+  const sig  = req.headers['x-razorpay-signature'];
+  const body = req.body.toString();
+  const expectedSig = crypto
+    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+    .update(body)
+    .digest('hex');
+
+  if (sig !== expectedSig) return res.status(400).send('Invalid signature');
+
+  const event = JSON.parse(body);
+  if (event.event === 'payment.captured') {
+    console.log('Webhook: payment captured —', event.payload.payment.entity.id);
+  }
+  res.json({ status: 'ok' });
 });
 
 // 404

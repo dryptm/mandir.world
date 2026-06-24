@@ -325,20 +325,26 @@ window.closeDaanModalOutside = function(e) {
 
 window.submitDaan = function() {
   const name    = document.getElementById('daanName')?.value.trim();
+  const phone   = document.getElementById('daanPhone')?.value.trim();
+  const email   = document.getElementById('daanEmail')?.value.trim();
+  const pan     = document.getElementById('daanPan')?.value.trim();
   const amount  = isCustom ? customAmountValue : selectedAmount;
   const errorEl = document.getElementById('modalError');
 
-  if (!name) { if (errorEl) errorEl.textContent = 'Please enter your name.'; return; }
+  if (!name)  { if (errorEl) errorEl.textContent = 'Please enter your name.'; return; }
+  if (!phone) { if (errorEl) errorEl.textContent = 'Please enter your mobile number.'; return; }
+  if (!/^\d{10}$/.test(phone)) { if (errorEl) errorEl.textContent = 'Please enter a valid 10-digit mobile number.'; return; }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { if (errorEl) errorEl.textContent = 'Please enter a valid email address.'; return; }
   if (!amount || amount < 10) { if (errorEl) errorEl.textContent = 'Please select or enter a valid amount (min ₹10).'; return; }
 
   if (prasadEnabled) {
     const addr1  = document.getElementById('prasadAddress1')?.value.trim();
     const city   = document.getElementById('prasadCity')?.value.trim();
     const pin    = document.getElementById('prasadPincode')?.value.trim();
-    const phone  = document.getElementById('prasadPhone')?.value.trim();
-    if (!addr1 || !city || !pin || !phone) { if (errorEl) errorEl.textContent = 'Please fill all delivery address fields for Prasad.'; return; }
+    const dPhone = document.getElementById('prasadPhone')?.value.trim();
+    if (!addr1 || !city || !pin || !dPhone) { if (errorEl) errorEl.textContent = 'Please fill all delivery address fields for Prasad.'; return; }
     if (!/^\d{6}$/.test(pin))  { if (errorEl) errorEl.textContent = 'Please enter a valid 6-digit PIN code.'; return; }
-    if (!/^\d{10}$/.test(phone)) { if (errorEl) errorEl.textContent = 'Please enter a valid 10-digit mobile number.'; return; }
+    if (!/^\d{10}$/.test(dPhone)) { if (errorEl) errorEl.textContent = 'Please enter a valid 10-digit mobile number for delivery.'; return; }
   }
 
   if (errorEl) errorEl.textContent = '';
@@ -347,7 +353,6 @@ window.submitDaan = function() {
   if (btn) btn.disabled = true;
   if (text) text.textContent = 'Processing...';
 
-  // Collect prasad address if toggle is on
   const prasadData = prasadEnabled ? {
     requested: true,
     address1:  document.getElementById('prasadAddress1')?.value.trim() || null,
@@ -357,38 +362,101 @@ window.submitDaan = function() {
     phone:     document.getElementById('prasadPhone')?.value.trim()    || null,
   } : { requested: false };
 
-  // Real POST to server — saves to MongoDB
-  fetch('/api/daan/stream', {
+  const savedLoc = JSON.parse(localStorage.getItem('mw_location') || 'null');
+
+  // Step 1: Create Razorpay order on server
+  fetch('/api/payment/create-order', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      name,
       amount,
-      streamId:   window.__STREAM_ID__   || null,
-      streamCity: window.__STREAM_CITY__ || null,
+      name, phone, email: email || null,
       cause_id:   'stream-daan',
       cause_name: `Live Daan — ${window.__STREAM_CITY__ || 'Temple'}`,
-      prasad:     prasadData
+      streamId:   window.__STREAM_ID__   || null,
+      streamCity: window.__STREAM_CITY__ || null,
     })
   })
   .then(r => r.json())
-  .then(data => {
-    window.closeDaanModal();
-    if (data.ok) {
-      showDaanSuccess(name, amount, data.receiptNo);
-      addActivity(`<strong>${name.split(' ')[0]}</strong> gave ₹${Number(amount).toLocaleString('en-IN')} — Live Daan 🪔`, 'daan');
-      ['🪔','🌸','❤️','🙏','✨'].forEach((e, i) => setTimeout(() => spawnBubble(e, true), i * 110));
-    } else {
-      if (errorEl) errorEl.textContent = data.error || 'Something went wrong. Please try again.';
+  .then(orderData => {
+    if (!orderData.ok) throw new Error(orderData.error);
+
+    // Re-enable button — Razorpay takes over from here
+    if (btn) btn.disabled = false;
+    if (text) text.textContent = '🪔 Confirm Daan';
+
+    // Step 2: Open Razorpay checkout
+    const rzp = new Razorpay({
+      key:         orderData.keyId,
+      order_id:    orderData.orderId,
+      amount:      orderData.amount,
+      currency:    orderData.currency,
+      name:        'Mandir.World',
+      description: `Live Daan — ${window.__STREAM_CITY__ || 'Temple'}`,
+      image:       '/favicon.svg',
+      prefill:     orderData.prefill,
+      theme:       { color: '#FF6B00' },
+      retry:       { enabled: true, max_count: 3 },
+      modal: {
+        ondismiss: () => {
+          document.getElementById('daanModal')?.classList.add('modal-overlay--visible');
+          document.body.style.overflow = 'hidden';
+          if (btn) btn.disabled = false;
+          if (text) text.textContent = '🪔 Confirm Daan';
+        }
+      },
+      handler: function(response) {
+        // Step 3: Verify payment + save to DB + send receipts
+        fetch('/api/payment/verify', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            name, phone, email: email || null, pan: pan || null,
+            amount:    orderData.amount,
+            cause_id:  'stream-daan',
+            cause_name: `Live Daan — ${window.__STREAM_CITY__ || 'Temple'}`,
+            streamId:   window.__STREAM_ID__   || null,
+            streamCity: window.__STREAM_CITY__ || null,
+            prasad:     prasadData,
+            userLocation: savedLoc || null
+          })
+        })
+        .then(r => r.json())
+        .then(data => {
+          window.closeDaanModal();
+          if (data.ok) {
+            showDaanSuccess(name, data.amount, data.receiptNo);
+            addActivity(`<strong>${name.split(' ')[0]}</strong> gave ₹${Number(data.amount).toLocaleString('en-IN')} — Live Daan 🪔`, 'daan');
+            ['🪔','🌸','❤️','🙏','✨'].forEach((e, i) => setTimeout(() => spawnBubble(e, true), i * 110));
+          } else {
+            if (errorEl) errorEl.textContent = data.error || 'Verification failed. Contact support.';
+          }
+        })
+        .catch(() => {
+          window.closeDaanModal();
+          showDaanSuccess(name, amount, response.razorpay_payment_id);
+        });
+      }
+    });
+
+    rzp.on('payment.failed', function(response) {
+      console.error('Razorpay payment failed:', response.error);
       document.getElementById('daanModal')?.classList.add('modal-overlay--visible');
       document.body.style.overflow = 'hidden';
-    }
-  })
-  .catch(() => {
+      if (errorEl) errorEl.textContent =
+        'Payment failed: ' + (response.error.description || response.error.reason || 'Please try again.');
+      if (btn) btn.disabled = false;
+      if (text) text.textContent = '🪔 Confirm Daan';
+    });
+
+    rzp.open();
     window.closeDaanModal();
-    showDaanSuccess(name, amount, 'MDW-' + Date.now());
   })
-  .finally(() => {
+  .catch(err => {
+    if (errorEl) errorEl.textContent = err.message || 'Could not initiate payment. Please try again.';
     if (btn) btn.disabled = false;
     if (text) text.textContent = '🪔 Confirm Daan';
   });

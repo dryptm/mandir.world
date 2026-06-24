@@ -65,6 +65,14 @@
               <label>Your Name <span class="req">*</span></label>
               <input type="text" name="name" class="form-input" placeholder="Full name" required/>
             </div>
+            <div class="form-group">
+              <label>Mobile Number <span class="req">*</span></label>
+              <input type="tel" name="phone" class="form-input" placeholder="10-digit mobile" maxlength="10" required/>
+            </div>
+            <div class="form-group">
+              <label>Email <span class="optional">(for receipt)</span></label>
+              <input type="email" name="email" class="form-input" placeholder="your@email.com"/>
+            </div>
 
             <!-- STANDARD TIERS -->
             <div class="cf-tiers">
@@ -113,7 +121,8 @@
               <input type="text" name="pan" class="form-input" placeholder="ABCDE1234F" maxlength="10"/>
             </div>
 
-            <button type="submit" class="btn btn--gold btn--large" style="width:100%">
+            <button type="button" class="btn btn--gold btn--large" style="width:100%"
+              onclick="initiateDaanPayment(this)">
               🪔 Give Daan to <%= cause.name %>
             </button>
           </form>
@@ -335,6 +344,106 @@ function closeComingSoonOutside(e) {
   if (e.target === document.getElementById('comingSoonModal')) closeComingSoon();
 }
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeComingSoon(); });
+</script>
+
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+function initiateDaanPayment(btn) {
+  const form       = btn.closest('form');
+  const causeId    = form.querySelector('[name="cause_id"]').value;
+  const causeName  = form.querySelector('[name="cause_name"]').value;
+  const name       = form.querySelector('[name="name"]')?.value.trim();
+  const phone      = form.querySelector('[name="phone"]')?.value.trim();
+  const email      = form.querySelector('[name="email"]')?.value.trim();
+  const pan        = form.querySelector('[name="pan"]')?.value.trim();
+  const tierType   = form.querySelector('[id^="tier_type_"]')?.value || 'basic';
+  const customAmt  = form.querySelector('[name="custom_amount"]')?.value;
+  const radioAmt   = form.querySelector('[name="amount"]:checked')?.value;
+  const amount     = parseInt(customAmt) || (radioAmt === 'custom_field' ? 0 : parseInt(radioAmt));
+  const userLat    = form.querySelector('[id^="userLat_"]')?.value;
+  const userLon    = form.querySelector('[id^="userLon_"]')?.value;
+  const userCity   = form.querySelector('[id^="userCity_"]')?.value;
+  const userState  = form.querySelector('[id^="userState_"]')?.value;
+
+  if (!name)  { alert('Please enter your name.'); return; }
+  if (!phone || !/^\d{10}$/.test(phone)) { alert('Please enter a valid 10-digit mobile number.'); return; }
+  if (!amount || amount < 10) { alert('Please select or enter a valid amount (min ₹10).'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Opening payment...';
+
+  fetch('/api/payment/create-order', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ amount, name, phone, email: email || null, cause_id: causeId, cause_name: causeName, tier_type: tierType })
+  })
+  .then(r => r.json())
+  .then(orderData => {
+    if (!orderData.ok) throw new Error(orderData.error);
+
+    btn.disabled = false;
+    btn.textContent = '🪔 Give Daan';
+
+    const rzp = new Razorpay({
+      key:         orderData.keyId,
+      order_id:    orderData.orderId,
+      amount:      orderData.amount,
+      currency:    orderData.currency,
+      name:        'Mandir.World',
+      description: causeName,
+      image:       '/favicon.svg',
+      prefill:     orderData.prefill,
+      theme:       { color: '#FF6B00' },
+      modal:  { ondismiss: () => { btn.disabled = false; btn.textContent = '🪔 Give Daan'; } },
+      retry:  { enabled: true, max_count: 3 },
+      handler: function(response) {
+        fetch('/api/payment/verify', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            name, phone, email: email || null, pan: pan || null,
+            amount:    orderData.amount,
+            cause_id:  causeId,
+            cause_name: causeName,
+            tier_type:  tierType,
+            userLocation: userLat ? { lat: parseFloat(userLat), lon: parseFloat(userLon), city: userCity, state: userState } : null
+          })
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok) {
+            // Redirect to success with receipt details
+            const params = new URLSearchParams({
+              receipt:  data.receiptNo,
+              name:     data.name,
+              amount:   data.amount,
+              cause:    data.cause,
+              payId:    data.paymentId
+            });
+            window.location.href = '/daan?success=1&' + params.toString();
+          } else {
+            alert('Payment verified but saving failed. Contact support with Payment ID: ' + response.razorpay_payment_id);
+          }
+        });
+      }
+    });
+    rzp.on('payment.failed', function(response) {
+      console.error('Razorpay failed:', response.error);
+      alert('Payment failed: ' + (response.error.description || response.error.reason || 'Please try a different method.'));
+      btn.disabled = false;
+      btn.textContent = '🪔 Give Daan';
+    });
+    rzp.open();
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.textContent = '🪔 Give Daan';
+    alert(err.message || 'Could not initiate payment. Please try again.');
+  });
+}
 </script>
 
 <%- include('partials/footer') %>

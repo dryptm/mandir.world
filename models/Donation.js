@@ -3,10 +3,12 @@ const mongoose = require('mongoose');
 const donationSchema = new mongoose.Schema({
   receiptNo:  { type: String, unique: true },
   name:       { type: String, required: true, trim: true },
+  phone:      { type: String, default: null, trim: true },
+  email:      { type: String, default: null, trim: true, lowercase: true },
+  pan:        { type: String, default: null, uppercase: true, trim: true },
   cause_id:   { type: String, required: true },
   cause_name: { type: String, required: true },
   amount:     { type: Number, required: true, min: 1 },
-  pan:        { type: String, default: null, uppercase: true, trim: true },
 
   // Tier type — determines what the devotee receives
   // basic | sankalp | prasad | premium
@@ -30,6 +32,14 @@ const donationSchema = new mongoose.Schema({
   },
 
   // Prasad / Premium delivery
+  // Payment gateway details
+  payment: {
+    provider:  { type: String, default: 'razorpay' },
+    orderId:   { type: String, default: null },
+    paymentId: { type: String, default: null },
+    status:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
+  },
+
   prasad: {
     requested:     { type: Boolean, default: false },
     shippingCost:  { type: Number,  default: 0 },
