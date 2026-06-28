@@ -118,4 +118,174 @@ async function sendDaanSMS({ name, phone, amount, receiptNo }) {
   }
 }
 
-module.exports = { sendDaanReceipt, sendDaanSMS };
+// sendDaanReceipt and sendDaanSMS exported below with all functions
+
+// ── SANKALP CONFIRMATION ──────────────────────────────────
+async function sendSankalpConfirmation({ name, phone, email, event, wish, number, city }) {
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f5f0e8;font-family:'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr><td align="center" style="padding:32px 16px">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#1A0F00;border-radius:12px;overflow:hidden;max-width:100%">
+      <tr><td style="padding:32px 32px 16px;text-align:center">
+        <div style="font-size:36px">🙏</div>
+        <h1 style="color:#C8922A;font-size:22px;margin:8px 0 4px;font-family:Georgia,serif">Mandir.World</h1>
+        <p style="color:rgba(253,246,227,.45);font-size:12px;letter-spacing:2px;margin:0">DIGITAL DARSHAN PLATFORM</p>
+      </td></tr>
+      <tr><td style="padding:24px 32px">
+        <h2 style="color:#FDF6E3;font-size:18px;margin:0 0 16px">✅ Sankalp Registered</h2>
+        <p style="color:rgba(253,246,227,.7);font-size:14px;line-height:1.6;margin:0 0 24px">
+          Dear <strong style="color:#FDF6E3">${name}</strong>, your sankalp has been received and recorded before the divine. May it be fulfilled. 🕉️
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,.05);border-radius:8px;overflow:hidden">
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Sankalp No</td>
+            <td style="padding:12px 16px;color:#C8922A;font-size:13px;font-weight:bold">#${number}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Occasion</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:13px">${event}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">City</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:13px">${city}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Your Wish</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:14px;font-style:italic">${wish}</td>
+          </tr>
+        </table>
+        <p style="color:rgba(253,246,227,.4);font-size:12px;margin:24px 0 0;text-align:center">
+          ॐ विष्णुर्विष्णुर्विष्णुः — Mandir.World
+        </p>
+      </td></tr>
+      <tr><td style="padding:16px 32px 28px;text-align:center;border-top:1px solid rgba(200,146,42,.15)">
+        <p style="color:rgba(253,246,227,.3);font-size:11px;margin:0">mandir.world · Digital Darshan Platform</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+
+  if (email && process.env.SMTP_USER) {
+    try {
+      await transporter.sendMail({
+        from:    process.env.EMAIL_FROM || 'Mandir.World <mandir.world@walkupwagon.com>',
+        to:      email,
+        subject: `🙏 Sankalp Registered — #${number} | ${event}`,
+        html
+      });
+      console.log(`Sankalp confirmation email sent to ${email}`);
+    } catch (err) {
+      console.error('Sankalp email failed:', err.message);
+    }
+  }
+
+  if (phone && process.env.FAST2SMS_API_KEY) {
+    const message = `Dear ${name}, your sankalp #${number} for ${event} is registered on Mandir.World. May your wish be fulfilled. 🙏 - mandir.world`;
+    try {
+      const res = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        method:  'POST',
+        headers: { authorization: process.env.FAST2SMS_API_KEY, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ route: 'q', message, numbers: phone })
+      });
+      const data = await res.json();
+      if (data.return) console.log(`Sankalp SMS sent to ${phone}`);
+    } catch (err) {
+      console.error('Sankalp SMS failed:', err.message);
+    }
+  }
+}
+
+// ── PUJA BOOKING CONFIRMATION ─────────────────────────────
+async function sendPujaConfirmation({ name, phone, email, puja_name, occasion, preferred_date, bookingNo, amount }) {
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f5f0e8;font-family:'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr><td align="center" style="padding:32px 16px">
+    <table width="560" cellpadding="0" cellspacing="0" style="background:#1A0F00;border-radius:12px;overflow:hidden;max-width:100%">
+      <tr><td style="padding:32px 32px 16px;text-align:center">
+        <div style="font-size:36px">🪔</div>
+        <h1 style="color:#C8922A;font-size:22px;margin:8px 0 4px;font-family:Georgia,serif">Mandir.World</h1>
+        <p style="color:rgba(253,246,227,.45);font-size:12px;letter-spacing:2px;margin:0">DIGITAL DARSHAN PLATFORM</p>
+      </td></tr>
+      <tr><td style="padding:24px 32px">
+        <h2 style="color:#FDF6E3;font-size:18px;margin:0 0 16px">✅ Puja Booking Confirmed</h2>
+        <p style="color:rgba(253,246,227,.7);font-size:14px;line-height:1.6;margin:0 0 24px">
+          Dear <strong style="color:#FDF6E3">${name}</strong>, your <strong style="color:#C8922A">${puja_name}</strong> has been booked and payment confirmed. Our pandit team will contact you within 24 hours.
+        </p>
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:rgba(255,255,255,.05);border-radius:8px;overflow:hidden">
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Booking No</td>
+            <td style="padding:12px 16px;color:#C8922A;font-size:13px;font-weight:bold">${bookingNo}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Puja</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:13px;font-weight:bold">${puja_name}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Occasion</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:13px">${occasion}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Preferred Date</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:13px">${preferred_date}</td>
+          </tr>
+          <tr style="border-bottom:1px solid rgba(255,255,255,.08)">
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Amount Paid</td>
+            <td style="padding:12px 16px;color:#FDF6E3;font-size:16px;font-weight:bold">₹${Number(amount).toLocaleString('en-IN')}</td>
+          </tr>
+          <tr>
+            <td style="padding:12px 16px;color:rgba(253,246,227,.45);font-size:13px">Status</td>
+            <td style="padding:12px 16px;color:#16a34a;font-size:13px;font-weight:bold">✓ Confirmed & Paid</td>
+          </tr>
+        </table>
+        <p style="color:rgba(253,246,227,.4);font-size:12px;margin:24px 0 0;text-align:center">
+          धर्मो रक्षति रक्षितः — Mandir.World
+        </p>
+      </td></tr>
+      <tr><td style="padding:16px 32px 28px;text-align:center;border-top:1px solid rgba(200,146,42,.15)">
+        <p style="color:rgba(253,246,227,.3);font-size:11px;margin:0">mandir.world · Digital Darshan Platform</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+
+  if (email && process.env.SMTP_USER) {
+    try {
+      await transporter.sendMail({
+        from:    process.env.EMAIL_FROM || 'Mandir.World <mandir.world@walkupwagon.com>',
+        to:      email,
+        subject: `🪔 Puja Confirmed — ${puja_name} | ${bookingNo}`,
+        html
+      });
+      console.log(`Puja confirmation email sent to ${email}`);
+    } catch (err) {
+      console.error('Puja email failed:', err.message);
+    }
+  }
+
+  if (phone && process.env.FAST2SMS_API_KEY) {
+    const message = `Dear ${name}, your ${puja_name} (${bookingNo}) is confirmed on Mandir.World. Our pandit will contact you within 24 hours. Jai Shri Ram 🙏 - mandir.world`;
+    try {
+      const res = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+        method:  'POST',
+        headers: { authorization: process.env.FAST2SMS_API_KEY, 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ route: 'q', message, numbers: phone })
+      });
+      const data = await res.json();
+      if (data.return) console.log(`Puja SMS sent to ${phone}`);
+    } catch (err) {
+      console.error('Puja SMS failed:', err.message);
+    }
+  }
+}
+
+module.exports = { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation };

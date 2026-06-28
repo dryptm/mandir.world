@@ -34,6 +34,12 @@ const pujaBookingSchema = new mongoose.Schema({
   // Astrology
   date_of_birth:  { type: String, default: null },
 
+  payment: {
+    provider:  { type: String, default: 'razorpay' },
+    orderId:   { type: String, default: null },
+    paymentId: { type: String, default: null },
+    status:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
+  },
   status: {
     type: String,
     enum: ['Pending', 'Confirmed', 'Completed', 'Cancelled'],

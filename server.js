@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const Razorpay              = require('razorpay');
 const crypto                = require('crypto');
-const { sendDaanReceipt, sendDaanSMS } = require('./utils/notify');
+const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation } = require('./utils/notify');
 
 const express    = require('express');
 const bodyParser = require('body-parser');
@@ -188,10 +188,23 @@ app.get('/puja-sewa', (req, res) => {
     .filter(f => f.isUpcoming && !f.isDaily)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 5);
+
+  // Handle redirect from Razorpay payment success
+  let lastBooking = req.session.lastPujaBooking || null;
+  if (req.query.success === '1' && req.query.booking) {
+    lastBooking = {
+      bookingNo:  req.query.booking,
+      puja_name:  req.query.puja,
+      devotee_name: req.query.name,
+      amount:     req.query.amount,
+      status:     'Confirmed'
+    };
+  }
+
   res.render('puja-sewa', {
     pujas, upcomingFestivals, page: 'puja',
-    success:     req.session.pujaSuccess || null,
-    lastBooking: req.session.lastPujaBooking || null,
+    success:     (req.query.success === '1') || req.session.pujaSuccess || null,
+    lastBooking,
     formatDate, daysUntil
   });
   req.session.pujaSuccess     = null;
@@ -253,11 +266,15 @@ app.get('/sankalp', (req, res) => {
 });
 
 app.post('/sankalp', async (req, res) => {
-  const { name, gotra, wish, event, city } = req.body;
+  const { name, gotra, wish, event, city, phone, email } = req.body;
   if (!name || !wish || !event) return res.redirect('/sankalp?error=missing');
+  if (!phone || !/^\d{10}$/.test(phone)) return res.redirect('/sankalp?error=phone');
   try {
     const sankalp = await Sankalp.create({
-      name, gotra, wish, event, city: city || 'Varanasi'
+      name, gotra, wish, event,
+      city:  city  || 'Varanasi',
+      phone: phone || null,
+      email: email || null
     });
     req.session.sankalpSuccess = true;
     req.session.lastSankalp    = {
@@ -269,6 +286,13 @@ app.post('/sankalp', async (req, res) => {
       city:      sankalp.city,
       timestamp: sankalp.createdAt
     };
+    // Send email + SMS confirmation (non-blocking)
+    sendSankalpConfirmation({
+      name, phone, email,
+      event, wish,
+      number: sankalp.number,
+      city:   sankalp.city
+    }).catch(() => {});
   } catch (err) {
     console.error('Sankalp error:', err.message);
   }
@@ -466,6 +490,103 @@ app.post('/api/shipping', (req, res) => {
   const km   = Math.round(haversineKm(parseFloat(userLat), parseFloat(userLon), dest.lat, dest.lon));
   const cost = calcShipping(km);
   res.json({ shippingCost: cost, distanceKm: km, pujaCity, note: cost === 0 ? 'Free — nearby delivery' : null });
+});
+
+// ── PUJA PAYMENT ROUTES ──────────────────────────────────
+
+app.post('/api/payment/puja/create-order', async (req, res) => {
+  try {
+    const { puja_id, puja_name, amount, name, phone, email, occasion } = req.body;
+    if (!amount || !name || !phone) return res.status(400).json({ ok: false, error: 'Missing required fields' });
+    if (!/^\d{10}$/.test(phone)) return res.status(400).json({ ok: false, error: 'Valid 10-digit mobile required' });
+
+    const order = await razorpay.orders.create({
+      amount:          Math.round(amount * 100),
+      currency:        'INR',
+      receipt:         `MDW-P-${Date.now()}`,
+      payment_capture: 1,
+      notes:           { name, phone, email: email || '', puja_id, puja_name, occasion }
+    });
+
+    res.json({
+      ok:       true,
+      orderId:  order.id,
+      amount:   order.amount,
+      currency: order.currency,
+      keyId:    process.env.RAZORPAY_KEY_ID,
+      prefill:  { name, email: email || '', contact: phone }
+    });
+  } catch (err) {
+    console.error('Puja order error:', err.message);
+    res.status(500).json({ ok: false, error: 'Could not create payment order' });
+  }
+});
+
+app.post('/api/payment/puja/verify', async (req, res) => {
+  try {
+    const {
+      razorpay_order_id, razorpay_payment_id, razorpay_signature,
+      name, phone, email, gotra, puja_id, puja_name,
+      occasion, preferred_date, amount, ...rest
+    } = req.body;
+
+    // Verify signature
+    const expectedSig = crypto
+      .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+    if (expectedSig !== razorpay_signature) {
+      return res.status(400).json({ ok: false, error: 'Payment verification failed' });
+    }
+
+    // Save booking to MongoDB
+    const booking = await PujaBooking.create({
+      puja_id, puja_name,
+      devotee_name:      name,
+      gotra:             gotra || 'Not specified',
+      occasion,
+      preferred_date,
+      phone,
+      email:             email || null,
+      groom_name:        rest.groom_name        || null,
+      groom_gotra:       rest.groom_gotra       || null,
+      bride_name:        rest.bride_name        || null,
+      bride_gotra:       rest.bride_gotra       || null,
+      wedding_date:      rest.wedding_date      || null,
+      departed_name:     rest.departed_name     || null,
+      departed_relation: rest.departed_relation || null,
+      business_name:     rest.business_name     || null,
+      home_address:      rest.home_address      || null,
+      family_members:    rest.family_members    || null,
+      date_of_birth:     rest.date_of_birth     || null,
+      payment: {
+        provider:  'razorpay',
+        orderId:   razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        status:    'paid'
+      },
+      status: 'Confirmed'
+    });
+
+    // Send confirmation notifications
+    sendPujaConfirmation({
+      name, phone, email,
+      puja_name, occasion, preferred_date,
+      bookingNo: booking.bookingNo,
+      amount:    Number(amount) / 100
+    }).catch(() => {});
+
+    res.json({
+      ok:        true,
+      bookingNo: booking.bookingNo,
+      name:      booking.devotee_name,
+      puja_name: booking.puja_name,
+      amount:    Number(amount) / 100
+    });
+  } catch (err) {
+    console.error('Puja verify error:', err.message);
+    res.status(500).json({ ok: false, error: 'Booking could not be saved' });
+  }
 });
 
 // ── PAYMENT ROUTES ───────────────────────────────────────

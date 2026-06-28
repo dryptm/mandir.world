@@ -6,9 +6,11 @@ const sankalpSchema = new mongoose.Schema({
   wish:      { type: String, required: true, trim: true },
   event:     { type: String, required: true },
   city:      { type: String, default: 'Varanasi' },
+  phone:     { type: String, default: null, trim: true },
+  email:     { type: String, default: null, trim: true, lowercase: true },
   number:    { type: Number },
 }, {
-  timestamps: true   // adds createdAt + updatedAt automatically
+  timestamps: true
 });
 
 // Auto-increment sankalp number before saving

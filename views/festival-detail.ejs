@@ -42,7 +42,6 @@
       <% } %>
       <div class="fd-cta-row">
         <a href="/sankalp" class="btn btn--primary btn--large">Register My Sankalp 🙏</a>
-        <a href="/daan" class="btn btn--gold btn--large">Give Daan 🪔</a>
         <a href="/puja-sewa" class="btn btn--outline btn--large">Book a Puja</a>
       </div>
     </div>
@@ -58,7 +57,7 @@
         <h3 style="margin-top:1.5rem">Celebrated In</h3>
         <div class="fd-city-list"><% festival.cities.forEach(c=>{%><span><%= c %></span><%})%></div>
         <h3 style="margin-top:1.5rem">Give Daan For</h3>
-        <% festival.donationCauses.forEach(c => { %><a href="/daan" class="fsc-cause-link">🪔 <%= c %></a><% }) %>
+        <% festival.donationCauses.forEach(c => { %><span class="fsc-cause-link">🙏 <%= c %></span><% }) %>
       </div>
       <% if (related.length > 0) { %>
       <div class="fd-side-card">

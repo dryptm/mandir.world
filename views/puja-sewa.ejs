@@ -152,7 +152,8 @@
               <input type="email" name="email" class="form-input" placeholder="your@email.com"/>
             </div>
 
-            <button type="submit" class="btn btn--gold btn--large" style="width:100%;margin-top:.5rem">
+            <button type="button" class="btn btn--gold btn--large" style="width:100%;margin-top:.5rem"
+              onclick="initiatePujaPayment(this, <%= puja.price %>)">
               Book <%= puja.name %> — ₹<%= puja.price.toLocaleString('en-IN') %>+
             </button>
           </form>
@@ -199,6 +200,97 @@ function updateNameFields(pujaId, occasion) {
 document.querySelectorAll('input[type="date"]').forEach(i => {
   i.min = new Date().toISOString().split('T')[0];
 });
+</script>
+
+<script>
+function initiatePujaPayment(btn, price) {
+  const form       = btn.closest('form');
+  const puja_id    = form.querySelector('[name="puja_id"]').value;
+  const puja_name  = form.querySelector('[name="puja_name"]').value;
+  const occasion   = form.querySelector('[name="occasion"]')?.value;
+  const name       = form.querySelector('[name="devotee_name"]')?.value?.trim();
+  const phone      = form.querySelector('[name="phone"]')?.value?.trim();
+  const email      = form.querySelector('[name="email"]')?.value?.trim();
+  const date       = form.querySelector('[name="preferred_date"]')?.value;
+
+  if (!occasion) { alert('Please select the occasion / purpose.'); return; }
+  if (!name)     { alert('Please enter the devotee name.'); return; }
+  if (!phone || !/^\d{10}$/.test(phone)) { alert('Please enter a valid 10-digit mobile number.'); return; }
+  if (!date)     { alert('Please select a preferred date.'); return; }
+
+  // Collect all dynamic name fields
+  const extraFields = {};
+  ['groom_name','groom_gotra','bride_name','bride_gotra','wedding_date',
+   'departed_name','departed_relation','business_name','home_address',
+   'family_members','date_of_birth','gotra'].forEach(f => {
+    const el = form.querySelector(`[name="${f}"]`);
+    if (el && el.value.trim()) extraFields[f] = el.value.trim();
+  });
+
+  btn.disabled    = true;
+  btn.textContent = 'Opening payment...';
+
+  fetch('/api/payment/puja/create-order', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ puja_id, puja_name, amount: price, name, phone, email: email||null, occasion })
+  })
+  .then(r => r.json())
+  .then(orderData => {
+    if (!orderData.ok) throw new Error(orderData.error);
+
+    btn.disabled    = false;
+    btn.textContent = `Book ${puja_name} — ₹${price.toLocaleString('en-IN')}+`;
+
+    const rzp = new Razorpay({
+      key:         orderData.keyId,
+      order_id:    orderData.orderId,
+      amount:      orderData.amount,
+      currency:    orderData.currency,
+      name:        'Mandir.World',
+      description: puja_name,
+      image:       '/favicon.svg',
+      prefill:     orderData.prefill,
+      theme:       { color: '#FF6B00' },
+      retry:       { enabled: true, max_count: 3 },
+      modal:       { ondismiss: () => { btn.disabled = false; } },
+      handler: function(response) {
+        fetch('/api/payment/puja/verify', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            razorpay_order_id:   response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature:  response.razorpay_signature,
+            name, phone, email: email||null,
+            puja_id, puja_name, occasion,
+            preferred_date: date,
+            amount: orderData.amount,
+            ...extraFields
+          })
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.ok) {
+            window.location.href = `/puja-sewa?success=1&booking=${data.bookingNo}&puja=${encodeURIComponent(data.puja_name)}&name=${encodeURIComponent(data.name)}&amount=${data.amount}`;
+          } else {
+            alert('Payment done but booking failed. Contact support. Payment ID: ' + response.razorpay_payment_id);
+          }
+        });
+      }
+    });
+    rzp.on('payment.failed', function(r) {
+      btn.disabled = false;
+      alert('Payment failed: ' + (r.error.description || 'Please try again.'));
+    });
+    rzp.open();
+  })
+  .catch(err => {
+    btn.disabled = false;
+    btn.textContent = `Book ${puja_name} — ₹${price.toLocaleString('en-IN')}+`;
+    alert(err.message || 'Could not initiate payment.');
+  });
+}
 </script>
 
 <%- include('partials/footer') %>
