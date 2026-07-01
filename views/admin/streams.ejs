@@ -1,0 +1,51 @@
+<%- include('layout-top', { title: 'Streams', page: 'streams' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>Temple Streams</h2>
+    <span class="count"><%= streams.length %> streams</span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Temple</th><th>City</th><th>Deity</th><th>YouTube Video ID</th><th>Live</th><th>Viewers</th><th>Active</th>
+    </tr></thead>
+    <tbody>
+    <% streams.forEach(s => { %>
+    <tr>
+      <td>
+        <strong><%= s.title %></strong>
+        <div style="color:rgba(253,246,227,.35);font-size:.7rem"><%= s.hindi %></div>
+      </td>
+      <td><%= s.city %>, <%= s.state %></td>
+      <td style="color:rgba(253,246,227,.55)"><%= s.deity %></td>
+      <td>
+        <form method="POST" action="/admin/streams/<%= s._id %>/update" style="display:flex;gap:.4rem;align-items:center">
+          <input type="text" name="youtubeVideoId" value="<%= s.youtubeVideoId %>"
+            style="background:rgba(255,255,255,.05);border:1px solid rgba(200,146,42,.2);border-radius:6px;padding:.3rem .6rem;color:#FDF6E3;font-size:.75rem;width:130px;outline:none"/>
+          <button type="submit" class="action-btn">Save</button>
+        </form>
+      </td>
+      <td>
+        <form method="POST" action="/admin/streams/<%= s._id %>/toggle-live">
+          <label class="toggle">
+            <input type="checkbox" <%= s.isLive ? 'checked' : '' %> onchange="this.form.submit()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </form>
+      </td>
+      <td><%= s.viewers?.toLocaleString('en-IN') || 0 %></td>
+      <td>
+        <form method="POST" action="/admin/streams/<%= s._id %>/toggle-active">
+          <label class="toggle">
+            <input type="checkbox" <%= s.active !== false ? 'checked' : '' %> onchange="this.form.submit()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('layout-bottom') %>

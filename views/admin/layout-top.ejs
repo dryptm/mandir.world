@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title><%= title %> — Mandir.World Admin</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#0f0800;font-family:'Inter',system-ui,sans-serif;color:#FDF6E3;display:flex;min-height:100vh}
+
+    /* SIDEBAR */
+    .sidebar{width:220px;background:#1A0F00;border-right:1px solid rgba(200,146,42,.15);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100}
+    .sb-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid rgba(200,146,42,.1)}
+    .sb-logo .om{color:#C8922A;font-size:1.4rem}
+    .sb-logo h2{font-size:.95rem;color:#FDF6E3;margin:.2rem 0 .1rem}
+    .sb-logo p{font-size:.65rem;color:rgba(253,246,227,.3);letter-spacing:1.5px;text-transform:uppercase}
+    .sb-nav{padding:.75rem 0;flex:1}
+    .sb-section{padding:.4rem 1rem .2rem;font-size:.62rem;color:rgba(253,246,227,.25);letter-spacing:1.5px;text-transform:uppercase}
+    .sb-link{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.25rem;color:rgba(253,246,227,.55);font-size:.82rem;text-decoration:none;transition:all .15s;border-left:3px solid transparent}
+    .sb-link:hover{color:#FDF6E3;background:rgba(255,255,255,.04)}
+    .sb-link.active{color:#C8922A;background:rgba(200,146,42,.08);border-left-color:#C8922A}
+    .sb-link .icon{width:16px;text-align:center;font-size:.9rem}
+    .sb-footer{padding:1rem 1.25rem;border-top:1px solid rgba(200,146,42,.1)}
+    .sb-footer a{color:rgba(253,246,227,.3);font-size:.75rem;text-decoration:none}
+    .sb-footer a:hover{color:#FDF6E3}
+
+    /* MAIN */
+    .main{margin-left:220px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+    .topbar{background:#1A0F00;border-bottom:1px solid rgba(200,146,42,.1);padding:.85rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+    .topbar h1{font-size:1.05rem;font-weight:600;color:#FDF6E3}
+    .topbar-right{display:flex;align-items:center;gap:1rem}
+    .tb-live{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:rgba(253,246,227,.45)}
+    .tb-live-dot{width:6px;height:6px;background:#22c55e;border-radius:50%;animation:pulse 1.5s ease infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .tb-logout{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(253,246,227,.6);padding:.35rem .85rem;border-radius:6px;font-size:.78rem;text-decoration:none;transition:all .2s}
+    .tb-logout:hover{background:rgba(220,38,38,.15);border-color:rgba(220,38,38,.3);color:#f87171}
+    .content{padding:2rem;flex:1}
+
+    /* CARDS */
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem;margin-bottom:2rem}
+    .stat-card{background:#1A0F00;border:1px solid rgba(200,146,42,.15);border-radius:12px;padding:1.25rem 1.5rem}
+    .stat-card .sc-label{font-size:.72rem;color:rgba(253,246,227,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
+    .stat-card .sc-value{font-size:1.9rem;font-weight:700;color:#FDF6E3;line-height:1}
+    .stat-card .sc-sub{font-size:.75rem;color:rgba(253,246,227,.35);margin-top:.3rem}
+    .stat-card.gold .sc-value{color:#C8922A}
+    .stat-card.green .sc-value{color:#22c55e}
+
+    /* TABLE */
+    .section-card{background:#1A0F00;border:1px solid rgba(200,146,42,.12);border-radius:12px;overflow:hidden;margin-bottom:1.5rem}
+    .section-header{padding:1rem 1.5rem;border-bottom:1px solid rgba(200,146,42,.1);display:flex;align-items:center;justify-content:space-between}
+    .section-header h2{font-size:.95rem;font-weight:600}
+    .section-header .count{background:rgba(200,146,42,.15);color:#C8922A;padding:.2rem .6rem;border-radius:50px;font-size:.72rem;font-weight:600}
+    table{width:100%;border-collapse:collapse}
+    thead th{padding:.7rem 1rem;text-align:left;font-size:.7rem;color:rgba(253,246,227,.35);text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid rgba(255,255,255,.06)}
+    tbody td{padding:.8rem 1rem;font-size:.82rem;color:rgba(253,246,227,.75);border-bottom:1px solid rgba(255,255,255,.04)}
+    tbody tr:last-child td{border-bottom:none}
+    tbody tr:hover td{background:rgba(255,255,255,.02)}
+    .badge{padding:.2rem .55rem;border-radius:50px;font-size:.68rem;font-weight:600}
+    .badge-green{background:rgba(34,197,94,.15);color:#22c55e}
+    .badge-yellow{background:rgba(234,179,8,.15);color:#eab308}
+    .badge-red{background:rgba(220,38,38,.15);color:#f87171}
+    .badge-blue{background:rgba(59,130,246,.15);color:#60a5fa}
+    .action-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:rgba(253,246,227,.7);padding:.25rem .6rem;border-radius:6px;font-size:.72rem;cursor:pointer;text-decoration:none;transition:all .15s}
+    .action-btn:hover{background:rgba(200,146,42,.15);border-color:rgba(200,146,42,.3);color:#C8922A}
+    .action-btn.danger:hover{background:rgba(220,38,38,.15);border-color:rgba(220,38,38,.3);color:#f87171}
+    .empty-state{padding:2.5rem;text-align:center;color:rgba(253,246,227,.3);font-size:.85rem}
+
+    /* TOGGLE */
+    .toggle-wrap{display:flex;align-items:center;gap:.5rem}
+    .toggle{position:relative;width:36px;height:20px}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:rgba(255,255,255,.15);border-radius:50px;cursor:pointer;transition:.25s}
+    .toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s}
+    .toggle input:checked + .toggle-slider{background:#22c55e}
+    .toggle input:checked + .toggle-slider::before{transform:translateX(16px)}
+
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <div class="sb-logo">
+    <div class="om">🕉️</div>
+    <h2>Mandir.World</h2>
+    <p>Admin Panel</p>
+  </div>
+  <nav class="sb-nav">
+    <div class="sb-section">Overview</div>
+    <a href="/admin" class="sb-link <%= page==='dashboard' ? 'active' : '' %>"><span class="icon">📊</span> Dashboard</a>
+
+    <div class="sb-section">Transactions</div>
+    <a href="/admin/donations" class="sb-link <%= page==='donations' ? 'active' : '' %>"><span class="icon">🪔</span> Donations</a>
+    <a href="/admin/bookings"  class="sb-link <%= page==='bookings'  ? 'active' : '' %>"><span class="icon">🙏</span> Puja Bookings</a>
+    <a href="/admin/sankalpas" class="sb-link <%= page==='sankalpas' ? 'active' : '' %>"><span class="icon">🕉️</span> Sankalpas</a>
+
+    <div class="sb-section">Content</div>
+    <a href="/admin/streams"   class="sb-link <%= page==='streams'   ? 'active' : '' %>"><span class="icon">📺</span> Streams</a>
+    <a href="/admin/festivals" class="sb-link <%= page==='festivals' ? 'active' : '' %>"><span class="icon">📅</span> Festivals</a>
+    <a href="/admin/pujas"     class="sb-link <%= page==='pujas'     ? 'active' : '' %>"><span class="icon">🛕</span> Pujas</a>
+
+    <div class="sb-section">Site</div>
+    <a href="/" target="_blank" class="sb-link"><span class="icon">🌐</span> View Site</a>
+  </nav>
+  <div class="sb-footer">
+    <a href="/admin/logout">← Logout</a>
+  </div>
+</div>
+
+<div class="main">
+  <div class="topbar">
+    <h1><%= title %></h1>
+    <div class="topbar-right">
+      <div class="tb-live"><div class="tb-live-dot"></div> Live</div>
+      <a href="/admin/logout" class="tb-logout">Logout</a>
+    </div>
+  </div>
+  <div class="content">

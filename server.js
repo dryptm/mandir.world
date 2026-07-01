@@ -492,6 +492,153 @@ app.post('/api/shipping', (req, res) => {
   res.json({ shippingCost: cost, distanceKm: km, pujaCity, note: cost === 0 ? 'Free — nearby delivery' : null });
 });
 
+// ── ADMIN ─────────────────────────────────────────────────
+
+// Auth middleware
+function requireAdmin(req, res, next) {
+  if (req.session.adminLoggedIn) return next();
+  res.redirect('/admin/login');
+}
+
+// Login
+app.get('/admin/login', (req, res) => {
+  if (req.session.adminLoggedIn) return res.redirect('/admin');
+  res.render('admin/login', { error: null });
+});
+
+app.post('/admin/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+    req.session.adminLoggedIn = true;
+    return res.redirect('/admin');
+  }
+  res.render('admin/login', { error: 'Invalid username or password' });
+});
+
+app.get('/admin/logout', (req, res) => {
+  req.session.adminLoggedIn = false;
+  res.redirect('/admin/login');
+});
+
+// Dashboard
+app.get('/admin', requireAdmin, async (req, res) => {
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  const [donationAgg, donationCount, paidCount, recentDonations,
+         bookingCount, bookingToday, recentBookings,
+         sankalpCount, sankalpToday, recentSankalpas] = await Promise.all([
+    Donation.aggregate([{ $match: { 'payment.status': 'paid' } }, { $group: { _id: null, total: { $sum: '$amount' } } }]),
+    Donation.countDocuments(),
+    Donation.countDocuments({ 'payment.status': 'paid' }),
+    Donation.find().sort({ createdAt: -1 }).limit(8).lean(),
+    PujaBooking.countDocuments(),
+    PujaBooking.countDocuments({ createdAt: { $gte: today } }),
+    PujaBooking.find().sort({ createdAt: -1 }).limit(6).lean(),
+    Sankalp.countDocuments(),
+    Sankalp.countDocuments({ createdAt: { $gte: today } }),
+    Sankalp.find().sort({ createdAt: -1 }).limit(6).lean()
+  ]);
+
+  const totalRevenue = donationAgg[0]?.total || 0;
+  const liveCount    = streams.filter(s => s.isLive).length;
+  const liveViewers  = streams.filter(s => s.isLive).reduce((a, s) => a + (s.viewers || 0), 0);
+
+  res.render('admin/dashboard', {
+    totalRevenue, donationCount, paidCount, recentDonations,
+    bookingCount, bookingToday, recentBookings,
+    sankalpCount, sankalpToday, recentSankalpas,
+    liveCount, liveViewers
+  });
+});
+
+// Donations
+app.get('/admin/donations', requireAdmin, async (req, res) => {
+  const donations = await Donation.find().sort({ createdAt: -1 }).limit(200).lean();
+  res.render('admin/donations', { donations });
+});
+
+// Puja Bookings
+app.get('/admin/bookings', requireAdmin, async (req, res) => {
+  const bookings = await PujaBooking.find().sort({ createdAt: -1 }).limit(200).lean();
+  res.render('admin/bookings', { bookings });
+});
+
+app.post('/admin/bookings/:id/status', requireAdmin, async (req, res) => {
+  await PujaBooking.findByIdAndUpdate(req.params.id, { status: req.body.status });
+  res.redirect('/admin/bookings');
+});
+
+// Sankalpas
+app.get('/admin/sankalpas', requireAdmin, async (req, res) => {
+  const sankalpas = await Sankalp.find().sort({ createdAt: -1 }).limit(200).lean();
+  res.render('admin/sankalpas', { sankalpas });
+});
+
+// Streams
+app.get('/admin/streams', requireAdmin, async (req, res) => {
+  const dbStreams = await Stream.find().sort({ city: 1 }).lean();
+  res.render('admin/streams', { streams: dbStreams });
+});
+
+app.post('/admin/streams/:id/update', requireAdmin, async (req, res) => {
+  await Stream.findByIdAndUpdate(req.params.id, { youtubeVideoId: req.body.youtubeVideoId });
+  await loadDataFromDB();
+  res.redirect('/admin/streams');
+});
+
+app.post('/admin/streams/:id/toggle-live', requireAdmin, async (req, res) => {
+  const s = await Stream.findById(req.params.id);
+  await Stream.findByIdAndUpdate(req.params.id, { isLive: !s.isLive });
+  await loadDataFromDB();
+  res.redirect('/admin/streams');
+});
+
+app.post('/admin/streams/:id/toggle-active', requireAdmin, async (req, res) => {
+  const s = await Stream.findById(req.params.id);
+  await Stream.findByIdAndUpdate(req.params.id, { active: !s.active });
+  await loadDataFromDB();
+  res.redirect('/admin/streams');
+});
+
+// Festivals
+app.get('/admin/festivals', requireAdmin, async (req, res) => {
+  const dbFestivals = await Festival.find().sort({ date: 1 }).lean();
+  res.render('admin/festivals', { festivals: dbFestivals });
+});
+
+app.post('/admin/festivals/:id/toggle-active', requireAdmin, async (req, res) => {
+  const f = await Festival.findById(req.params.id);
+  await Festival.findByIdAndUpdate(req.params.id, { active: !f.active });
+  await loadDataFromDB();
+  res.redirect('/admin/festivals');
+});
+
+// Pujas
+app.get('/admin/pujas', requireAdmin, async (req, res) => {
+  const dbPujas = await PujaModel.find().sort({ name: 1 }).lean();
+  res.render('admin/pujas', { pujas: dbPujas });
+});
+
+app.post('/admin/pujas/:id/update-price', requireAdmin, async (req, res) => {
+  await PujaModel.findByIdAndUpdate(req.params.id, { price: Number(req.body.price) });
+  await loadDataFromDB();
+  res.redirect('/admin/pujas');
+});
+
+app.post('/admin/pujas/:id/toggle-popular', requireAdmin, async (req, res) => {
+  const p = await PujaModel.findById(req.params.id);
+  await PujaModel.findByIdAndUpdate(req.params.id, { popular: !p.popular });
+  await loadDataFromDB();
+  res.redirect('/admin/pujas');
+});
+
+app.post('/admin/pujas/:id/toggle-active', requireAdmin, async (req, res) => {
+  const p = await PujaModel.findById(req.params.id);
+  await PujaModel.findByIdAndUpdate(req.params.id, { active: !p.active });
+  await loadDataFromDB();
+  res.redirect('/admin/pujas');
+});
+
 // ── PUJA PAYMENT ROUTES ──────────────────────────────────
 
 app.post('/api/payment/puja/create-order', async (req, res) => {

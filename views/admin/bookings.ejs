@@ -1,0 +1,63 @@
+<%- include('layout-top', { title: 'Puja Bookings', page: 'bookings' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>All Puja Bookings</h2>
+    <span class="count"><%= bookings.length %> records</span>
+  </div>
+  <% if (bookings.length === 0) { %>
+  <div class="empty-state">No bookings yet</div>
+  <% } else { %>
+  <table>
+    <thead><tr>
+      <th>Booking No</th><th>Devotee</th><th>Puja</th><th>Occasion</th>
+      <th>Preferred Date</th><th>Phone</th><th>Payment</th><th>Status</th><th>Action</th>
+    </tr></thead>
+    <tbody>
+    <% bookings.forEach(b => { %>
+    <tr>
+      <td style="color:#C8922A;font-size:.72rem"><%= b.bookingNo %></td>
+      <td>
+        <strong><%= b.devotee_name %></strong>
+        <% if (b.gotra) { %><div style="color:rgba(253,246,227,.35);font-size:.7rem">Gotra: <%= b.gotra %></div><% } %>
+        <% if (b.groom_name) { %><div style="color:rgba(253,246,227,.35);font-size:.7rem">🤵 <%= b.groom_name %> & 👰 <%= b.bride_name %></div><% } %>
+        <% if (b.departed_name) { %><div style="color:rgba(253,246,227,.35);font-size:.7rem">In memory of: <%= b.departed_name %> (<%= b.departed_relation %>)</div><% } %>
+      </td>
+      <td><%= b.puja_name %></td>
+      <td><%= b.occasion %></td>
+      <td><%= b.preferred_date %></td>
+      <td><%= b.phone %><% if (b.email) { %><br/><span style="font-size:.7rem;color:rgba(253,246,227,.4)"><%= b.email %></span><% } %></td>
+      <td>
+        <span class="badge <%= b.payment?.status === 'paid' ? 'badge-green' : 'badge-yellow' %>">
+          <%= b.payment?.status || 'pending' %>
+        </span>
+      </td>
+      <td>
+        <span class="badge <%= b.status === 'Completed' ? 'badge-green' : b.status === 'Confirmed' ? 'badge-blue' : b.status === 'Cancelled' ? 'badge-red' : 'badge-yellow' %>">
+          <%= b.status %>
+        </span>
+      </td>
+      <td>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <% if (b.status !== 'Completed') { %>
+          <form method="POST" action="/admin/bookings/<%= b._id %>/status" style="display:inline">
+            <input type="hidden" name="status" value="Completed"/>
+            <button type="submit" class="action-btn">✓ Done</button>
+          </form>
+          <% } %>
+          <% if (b.status !== 'Cancelled') { %>
+          <form method="POST" action="/admin/bookings/<%= b._id %>/status" style="display:inline">
+            <input type="hidden" name="status" value="Cancelled"/>
+            <button type="submit" class="action-btn danger">✕ Cancel</button>
+          </form>
+          <% } %>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('layout-bottom') %>

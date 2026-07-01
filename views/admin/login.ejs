@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Login — Mandir.World</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#0f0800;min-height:100vh;display:flex;align-items:center;justify-content:center;font-family:'Inter',system-ui,sans-serif}
+    .login-card{background:#1A0F00;border:1px solid rgba(200,146,42,.2);border-radius:16px;padding:2.5rem;width:100%;max-width:380px}
+    .login-logo{text-align:center;margin-bottom:2rem}
+    .login-logo .om{font-size:2.5rem;color:#C8922A}
+    .login-logo h1{color:#FDF6E3;font-size:1.3rem;margin:.5rem 0 .25rem}
+    .login-logo p{color:rgba(253,246,227,.35);font-size:.75rem;letter-spacing:2px;text-transform:uppercase}
+    .form-group{margin-bottom:1rem}
+    label{display:block;color:rgba(253,246,227,.55);font-size:.8rem;margin-bottom:.4rem}
+    input{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(200,146,42,.2);border-radius:8px;padding:.7rem 1rem;color:#FDF6E3;font-size:.9rem;outline:none;transition:border-color .2s}
+    input:focus{border-color:#C8922A}
+    .btn-login{width:100%;background:#FF6B00;color:#fff;border:none;border-radius:8px;padding:.8rem;font-size:.95rem;font-weight:600;cursor:pointer;margin-top:.5rem;transition:background .2s}
+    .btn-login:hover{background:#e05d00}
+    .error{background:rgba(220,38,38,.1);border:1px solid rgba(220,38,38,.3);color:#f87171;padding:.65rem 1rem;border-radius:8px;font-size:.82rem;margin-bottom:1rem}
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="login-logo">
+      <div class="om">🕉️</div>
+      <h1>Mandir.World</h1>
+      <p>Admin Panel</p>
+    </div>
+    <% if (error) { %><div class="error"><%= error %></div><% } %>
+    <form method="POST" action="/admin/login">
+      <div class="form-group">
+        <label>Username</label>
+        <input type="text" name="username" autocomplete="username" required autofocus/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" name="password" autocomplete="current-password" required/>
+      </div>
+      <button type="submit" class="btn-login">Login →</button>
+    </form>
+  </div>
+</body>
+</html>

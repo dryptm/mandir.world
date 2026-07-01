@@ -1,0 +1,51 @@
+<%- include('layout-top', { title: 'Pujas', page: 'pujas' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>Puja Catalogue</h2>
+    <span class="count"><%= pujas.length %> pujas</span>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Puja</th><th>Deity</th><th>Duration</th><th>Price</th><th>Popular</th><th>Active</th>
+    </tr></thead>
+    <tbody>
+    <% pujas.forEach(p => { %>
+    <tr>
+      <td>
+        <span style="font-size:1.1rem;margin-right:.4rem"><%= p.icon %></span>
+        <strong><%= p.name %></strong>
+        <div style="color:rgba(253,246,227,.35);font-size:.7rem;font-family:'Noto Sans Devanagari',sans-serif"><%= p.hindi %></div>
+      </td>
+      <td style="color:rgba(253,246,227,.55)"><%= p.deity %></td>
+      <td><%= p.duration %></td>
+      <td>
+        <form method="POST" action="/admin/pujas/<%= p._id %>/update-price" style="display:flex;gap:.4rem;align-items:center">
+          <input type="number" name="price" value="<%= p.price %>"
+            style="background:rgba(255,255,255,.05);border:1px solid rgba(200,146,42,.2);border-radius:6px;padding:.3rem .6rem;color:#C8922A;font-size:.85rem;width:90px;font-weight:600;outline:none"/>
+          <button type="submit" class="action-btn">Save</button>
+        </form>
+      </td>
+      <td>
+        <form method="POST" action="/admin/pujas/<%= p._id %>/toggle-popular">
+          <label class="toggle">
+            <input type="checkbox" <%= p.popular ? 'checked' : '' %> onchange="this.form.submit()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </form>
+      </td>
+      <td>
+        <form method="POST" action="/admin/pujas/<%= p._id %>/toggle-active">
+          <label class="toggle">
+            <input type="checkbox" <%= p.active !== false ? 'checked' : '' %> onchange="this.form.submit()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </form>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<%- include('layout-bottom') %>

@@ -1,0 +1,35 @@
+<%- include('layout-top', { title: 'Sankalpas', page: 'sankalpas' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>All Sankalpas</h2>
+    <span class="count"><%= sankalpas.length %> records</span>
+  </div>
+  <% if (sankalpas.length === 0) { %>
+  <div class="empty-state">No sankalpas yet</div>
+  <% } else { %>
+  <table>
+    <thead><tr>
+      <th>#</th><th>Name</th><th>Gotra</th><th>Event</th><th>City</th>
+      <th>Wish</th><th>Phone</th><th>Email</th><th>Date</th>
+    </tr></thead>
+    <tbody>
+    <% sankalpas.forEach(s => { %>
+    <tr>
+      <td style="color:#C8922A;font-weight:700">#<%= s.number %></td>
+      <td><strong><%= s.name %></strong></td>
+      <td style="color:rgba(253,246,227,.5)"><%= s.gotra || '—' %></td>
+      <td><%= s.event %></td>
+      <td><%= s.city %></td>
+      <td style="font-style:italic;color:rgba(253,246,227,.65);max-width:200px"><%= s.wish %></td>
+      <td><%= s.phone || '—' %></td>
+      <td style="font-size:.75rem"><%= s.email || '—' %></td>
+      <td style="font-size:.75rem"><%= new Date(s.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('layout-bottom') %>

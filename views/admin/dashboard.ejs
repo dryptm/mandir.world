@@ -1,0 +1,118 @@
+<%- include('layout-top', { title: 'Dashboard', page: 'dashboard' }) %>
+
+<div class="stat-grid">
+  <div class="stat-card gold">
+    <div class="sc-label">Total Revenue</div>
+    <div class="sc-value">₹<%= totalRevenue.toLocaleString('en-IN') %></div>
+    <div class="sc-sub"><%= paidCount %> successful payments</div>
+  </div>
+  <div class="stat-card">
+    <div class="sc-label">Puja Bookings</div>
+    <div class="sc-value"><%= bookingCount %></div>
+    <div class="sc-sub"><%= bookingToday %> today</div>
+  </div>
+  <div class="stat-card">
+    <div class="sc-label">Sankalpas</div>
+    <div class="sc-value"><%= sankalpCount %></div>
+    <div class="sc-sub"><%= sankalpToday %> today</div>
+  </div>
+  <div class="stat-card green">
+    <div class="sc-label">Live Viewers</div>
+    <div class="sc-value"><%= liveViewers.toLocaleString('en-IN') %></div>
+    <div class="sc-sub"><%= liveCount %> temples streaming</div>
+  </div>
+</div>
+
+<!-- RECENT DONATIONS -->
+<div class="section-card">
+  <div class="section-header">
+    <h2>Recent Donations</h2>
+    <div style="display:flex;gap:.75rem;align-items:center">
+      <span class="count"><%= donationCount %> total</span>
+      <a href="/admin/donations" class="action-btn">View All</a>
+    </div>
+  </div>
+  <% if (recentDonations.length === 0) { %>
+  <div class="empty-state">No donations yet</div>
+  <% } else { %>
+  <table>
+    <thead><tr>
+      <th>Name</th><th>Amount</th><th>Cause</th><th>Phone</th><th>Status</th><th>Date</th>
+    </tr></thead>
+    <tbody>
+    <% recentDonations.forEach(d => { %>
+    <tr>
+      <td><strong><%= d.name %></strong></td>
+      <td style="color:#C8922A;font-weight:600">₹<%= d.amount.toLocaleString('en-IN') %></td>
+      <td><%= d.cause_name %></td>
+      <td><%= d.phone || '—' %></td>
+      <td>
+        <span class="badge <%= d.payment?.status === 'paid' ? 'badge-green' : 'badge-yellow' %>">
+          <%= d.payment?.status || 'pending' %>
+        </span>
+      </td>
+      <td><%= new Date(d.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) %></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<!-- RECENT BOOKINGS -->
+<div class="section-card">
+  <div class="section-header">
+    <h2>Recent Puja Bookings</h2>
+    <a href="/admin/bookings" class="action-btn">View All</a>
+  </div>
+  <% if (recentBookings.length === 0) { %>
+  <div class="empty-state">No bookings yet</div>
+  <% } else { %>
+  <table>
+    <thead><tr>
+      <th>Booking No</th><th>Devotee</th><th>Puja</th><th>Date</th><th>Amount</th><th>Status</th>
+    </tr></thead>
+    <tbody>
+    <% recentBookings.forEach(b => { %>
+    <tr>
+      <td style="color:#C8922A;font-size:.75rem"><%= b.bookingNo %></td>
+      <td><strong><%= b.devotee_name %></strong><br/><span style="color:rgba(253,246,227,.35);font-size:.72rem"><%= b.phone %></span></td>
+      <td><%= b.puja_name %></td>
+      <td><%= b.preferred_date %></td>
+      <td style="color:#C8922A;font-weight:600">₹<%= (b.payment?.amount || 0).toLocaleString?.('en-IN') || '—' %></td>
+      <td><span class="badge <%= b.status === 'Confirmed' ? 'badge-blue' : b.status === 'Completed' ? 'badge-green' : 'badge-yellow' %>"><%= b.status %></span></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<!-- RECENT SANKALPAS -->
+<div class="section-card">
+  <div class="section-header">
+    <h2>Recent Sankalpas</h2>
+    <a href="/admin/sankalpas" class="action-btn">View All</a>
+  </div>
+  <% if (recentSankalpas.length === 0) { %>
+  <div class="empty-state">No sankalpas yet</div>
+  <% } else { %>
+  <table>
+    <thead><tr><th>#</th><th>Name</th><th>Event</th><th>Wish</th><th>Phone</th><th>Date</th></tr></thead>
+    <tbody>
+    <% recentSankalpas.forEach(s => { %>
+    <tr>
+      <td style="color:#C8922A;font-weight:600">#<%= s.number %></td>
+      <td><strong><%= s.name %></strong></td>
+      <td><%= s.event %></td>
+      <td style="font-style:italic;color:rgba(253,246,227,.6)"><%= s.wish?.substring(0,60) %><%= s.wish?.length > 60 ? '...' : '' %></td>
+      <td><%= s.phone || '—' %></td>
+      <td><%= new Date(s.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) %></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('layout-bottom') %>

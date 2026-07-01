@@ -1,0 +1,39 @@
+<%- include('layout-top', { title: 'Donations', page: 'donations' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>All Donations</h2>
+    <span class="count"><%= donations.length %> records</span>
+  </div>
+  <% if (donations.length === 0) { %>
+  <div class="empty-state">No donations yet</div>
+  <% } else { %>
+  <table>
+    <thead><tr>
+      <th>Receipt No</th><th>Name</th><th>Amount</th><th>Cause</th>
+      <th>Phone</th><th>Email</th><th>Payment ID</th><th>Status</th><th>Date</th>
+    </tr></thead>
+    <tbody>
+    <% donations.forEach(d => { %>
+    <tr>
+      <td style="color:#C8922A;font-size:.72rem"><%= d.receiptNo %></td>
+      <td><strong><%= d.name %></strong></td>
+      <td style="color:#C8922A;font-weight:700">₹<%= d.amount.toLocaleString('en-IN') %></td>
+      <td><%= d.cause_name %></td>
+      <td><%= d.phone || '—' %></td>
+      <td style="font-size:.75rem"><%= d.email || '—' %></td>
+      <td style="font-size:.7rem;color:rgba(253,246,227,.4)"><%= d.payment?.paymentId || '—' %></td>
+      <td>
+        <span class="badge <%= d.payment?.status === 'paid' ? 'badge-green' : d.payment?.status === 'failed' ? 'badge-red' : 'badge-yellow' %>">
+          <%= d.payment?.status || 'pending' %>
+        </span>
+      </td>
+      <td style="font-size:.75rem"><%= new Date(d.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></td>
+    </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  <% } %>
+</div>
+
+<%- include('layout-bottom') %>
