@@ -77,8 +77,10 @@ em{font-style:italic;font-family:var(--font-display)}
 .nav-arrow{font-size:.65rem;opacity:.5}
 
 /* DROPDOWN */
-.nav-dropdown{position:absolute;top:calc(100% + .5rem);left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:.5rem;min-width:260px;opacity:0;pointer-events:none;transition:all .2s;z-index:300}
-.nav-item--has-dropdown:hover .nav-dropdown{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+.nav-dropdown{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--shadow-lg);padding:.5rem;padding-top:1rem;min-width:260px;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;z-index:300;margin-top:0}
+/* Invisible bridge fills the gap between nav item and dropdown so hover never breaks */
+.nav-dropdown::before{content:'';position:absolute;top:-.75rem;left:0;right:0;height:.75rem}
+.nav-item--has-dropdown:hover .nav-dropdown{opacity:1;pointer-events:all;transform:translateX(-50%)}
 .nd-item{display:flex;align-items:center;gap:.75rem;padding:.6rem .75rem;border-radius:var(--r-sm);transition:background .15s}
 .nd-item:hover{background:var(--saffron-pale)}
 .nd-icon{font-size:1.3rem;flex-shrink:0}
