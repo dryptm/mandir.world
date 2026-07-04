@@ -2,6 +2,8 @@ require('dotenv').config();
 
 const Razorpay              = require('razorpay');
 const crypto                = require('crypto');
+const MongoStore            = require('connect-mongo');
+const bcrypt                = require('bcrypt');
 const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation } = require('./utils/notify');
 
 const express    = require('express');
@@ -62,7 +64,16 @@ app.use(bodyParser.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'mandir-world-dev-secret',
   resave: false,
-  saveUninitialized: true,
+  saveUninitialized: false,
+  // Store sessions in MongoDB — survives server restarts and Railway redeploys
+  store: process.env.MONGODB_URI
+    ? MongoStore.create({
+        mongoUrl:   process.env.MONGODB_URI,
+        dbName:     'mandirworld',
+        collectionName: 'sessions',
+        ttl:        24 * 60 * 60  // 24 hours in seconds
+      })
+    : undefined,   // falls back to in-memory in dev without DB
   cookie: { secure: isProd, httpOnly: true, maxAge: 24 * 60 * 60 * 1000 }
 }));
 
@@ -211,47 +222,6 @@ app.get('/puja-sewa', (req, res) => {
   req.session.lastPujaBooking = null;
 });
 
-app.post('/puja-sewa', async (req, res) => {
-  const b = req.body;
-  try {
-    const booking = await PujaBooking.create({
-      puja_id:           b.puja_id,
-      puja_name:         b.puja_name,
-      occasion:          b.occasion,
-      preferred_date:    b.preferred_date,
-      phone:             b.phone,
-      email:             b.email             || null,
-      devotee_name:      b.devotee_name      || null,
-      gotra:             b.gotra             || null,
-      family_members:    b.family_members    || null,
-      groom_name:        b.groom_name        || null,
-      groom_gotra:       b.groom_gotra       || null,
-      bride_name:        b.bride_name        || null,
-      bride_gotra:       b.bride_gotra       || null,
-      wedding_date:      b.wedding_date      || null,
-      departed_name:     b.departed_name     || null,
-      departed_relation: b.departed_relation || null,
-      business_name:     b.business_name     || null,
-      home_address:      b.home_address      || null,
-      date_of_birth:     b.date_of_birth     || null
-    });
-    req.session.pujaSuccess     = true;
-    req.session.lastPujaBooking = {
-      bookingNo:    booking.bookingNo,
-      puja_name:    booking.puja_name,
-      devotee_name: booking.devotee_name,
-      gotra:        booking.gotra,
-      occasion:     booking.occasion,
-      preferred_date: booking.preferred_date,
-      phone:        booking.phone,
-      status:       booking.status
-    };
-  } catch (err) {
-    console.error('PujaBooking error:', err.message);
-  }
-  res.redirect('/puja-sewa');
-});
-
 // ── SANKALP ───────────────────────────────────────────────
 app.get('/sankalp', (req, res) => {
   const activeEvents = enrichFestivals(festivals).filter(f => f.isLive || f.isUpcoming || f.isDaily).slice(0, 8);
@@ -360,7 +330,7 @@ app.get('/daan', (req, res) => {
   }
 
   res.render('daan', {
-    causes, STANDARD_TIERS, SPECIAL_TIERS, cities, page: 'daan',
+    causes, STANDARD_TIERS, SPECIAL_TIERS, cities: citiesMap, page: 'daan',
     success:      (req.query.success === '1') || req.session.donationSuccess || null,
     lastDonation,
     formatDate
@@ -506,12 +476,23 @@ app.get('/admin/login', (req, res) => {
   res.render('admin/login', { error: null });
 });
 
-app.post('/admin/login', (req, res) => {
+app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
-  if (username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) {
+  const validUser = username === process.env.ADMIN_USER;
+  // Support both plain text (legacy) and bcrypt hash in ADMIN_PASS
+  let validPass = false;
+  const storedPass = process.env.ADMIN_PASS || '';
+  if (storedPass.startsWith('$2b$')) {
+    validPass = await bcrypt.compare(password, storedPass);
+  } else {
+    validPass = password === storedPass;  // plain text fallback
+  }
+  if (validUser && validPass) {
     req.session.adminLoggedIn = true;
     return res.redirect('/admin');
   }
+  // Add a small delay to prevent brute-force
+  await new Promise(r => setTimeout(r, 800));
   res.render('admin/login', { error: 'Invalid username or password' });
 });
 
