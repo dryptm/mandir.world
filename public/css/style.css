@@ -728,11 +728,82 @@ em{font-style:italic;font-family:var(--font-display)}
   .pbf-row,.form-row{grid-template-columns:1fr}
   .stream-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 }
+
+@media(max-width:480px){
+  /* Index panchang card — fix pc-row overflow and sunrise wrapping */
+  .panchang-card{border-radius:var(--r);margin:0}
+  .pc-row{padding:.4rem 1rem;flex-wrap:nowrap}
+  .pc-row span{width:80px;font-size:.65rem}
+  .pc-row strong{font-size:.82rem}
+  .pc-row em{font-size:.65rem}
+  .pc-sun-row{padding:.6rem 1rem;font-size:.72rem;gap:.5rem;flex-wrap:nowrap;justify-content:space-between}
+  /* Prevent sunrise "PM" wrapping by using flex on the value */
+  .pc-sun-row div{display:flex;align-items:center;gap:.25rem;white-space:nowrap}
+
+  /* Calendar panchang grid — same 2-col fix already in 640px but reinforce here */
+  .panchang-grid{grid-template-columns:1fr 1fr !important}
+  .pg-item--sun{grid-column:span 2 !important}
+  .pg-item--sun .pg-value{white-space:nowrap;font-size:.8rem}
+
+  /* Puja sidebar on phone */
+  .stream-sidebar{grid-template-columns:1fr}
+
+  /* Section padding reduction */
+  .section{padding:2rem 0}
+  .container{padding:0 1rem}
+
+  /* Nav right actions spacing */
+  .nav-right-actions{gap:.5rem}
+
+  /* Tables horizontal scroll */
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch;max-width:100%}
+
+  /* Stat grid on admin */
+  .stat-grid{grid-template-columns:1fr 1fr}
+}
+
+/* ── GLOBAL MOBILE OVERFLOW FIX ─── */
+html, body { overflow-x: hidden; max-width: 100vw; }
+* { box-sizing: border-box; }
+
 @media(max-width:640px){
   .streams-home-grid,.festivals-home-grid{grid-template-columns:1fr}
   .shg-card--feat,.sgp-card--feat{grid-column:span 1}
-  .punchang-grid{grid-template-columns:1fr 1fr}
+
+  /* Fix typo (.punchang → .panchang) + force 2-col on mobile */
+  .panchang-grid{grid-template-columns:1fr 1fr}
   .pg-item--sun{grid-column:span 2}
+
+  /* Panchang widget padding + text sizes */
+  .panchang-full{padding:1rem;border-radius:var(--r)}
+  .pg-header{margin-bottom:.6rem;gap:.5rem}
+  .pc-om{font-size:1.6rem !important}
+  .pg-date-line{font-size:.78rem;margin-bottom:.6rem}
+  .pg-item{padding:.6rem .7rem}
+  .pg-label{font-size:.58rem;letter-spacing:.04em}
+  .pg-value{font-size:.95rem}
+  .pg-sub{font-size:.62rem}
+  .pc-auspicious{font-size:.68rem !important;padding:.2rem .5rem}
+
+  /* Sunrise/sunset — keep on one line, prevent PM wrapping */
+  .pg-item--sun .pg-value{
+    font-size:.8rem;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  /* Calendar panchang widget same fixes */
+  .panchang-full h2{font-size:1.1rem}
+
+  /* Next festival alert */
+  .next-fest-alert{flex-wrap:wrap;padding:1rem}
+  .nfa-icon{font-size:2rem}
+  .nfa-name{font-size:1.1rem}
+  .nfa-countdown{min-width:80px}
+  .nfa-days{font-size:1.8rem}
+
+  /* General layout */
   .ctv2-item{grid-template-columns:44px 1fr;gap:1rem}
   .ctv2-icon{width:44px;height:44px;font-size:1.1rem}
   .hero-ctas{flex-direction:column}
@@ -743,6 +814,9 @@ em{font-style:italic;font-family:var(--font-display)}
   .stream-sidebar{grid-template-columns:1fr}
   .cdc-card{grid-template-columns:auto 1fr;grid-template-rows:auto auto}
   .cdc-actions{grid-column:span 2;flex-direction:row}
+
+  /* Tables in admin don't overflow on mobile */
+  table{display:block;overflow-x:auto;-webkit-overflow-scrolling:touch}
 }
 
 /* ── TEMPLES DIRECTORY ── */
