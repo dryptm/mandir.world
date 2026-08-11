@@ -3,11 +3,14 @@
 <div class="section-card">
   <div class="section-header">
     <h2>Puja Catalogue</h2>
-    <span class="count"><%= pujas.length %> pujas</span>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <span class="count"><%= pujas.length %> pujas</span>
+      <a href="/admin/pujas/new" class="btn-primary-sm">+ Add Puja</a>
+    </div>
   </div>
   <table>
     <thead><tr>
-      <th>Puja</th><th>Deity</th><th>Duration</th><th>Price</th><th>Popular</th><th>Active</th>
+      <th>Puja</th><th>Deity</th><th>Duration</th><th>Price</th><th>Popular</th><th>Active</th><th>Actions</th>
     </tr></thead>
     <tbody>
     <% pujas.forEach(p => { %>
@@ -42,10 +45,28 @@
           </label>
         </form>
       </td>
+      <td>
+        <div style="display:flex;gap:.4rem">
+          <a href="/admin/pujas/<%= p._id %>/edit" class="action-btn">Edit</a>
+          <form method="POST" action="/admin/pujas/<%= p._id %>/delete"
+            onsubmit="return confirm('Delete &quot;<%= p.name %>&quot;? This cannot be undone.')">
+            <button type="submit" class="action-btn danger">Delete</button>
+          </form>
+        </div>
+      </td>
     </tr>
     <% }) %>
     </tbody>
   </table>
 </div>
+
+<style>
+  .btn-primary-sm {
+    background: #FF6B00; color: #fff; border: none; border-radius: 6px;
+    padding: .35rem .85rem; font-size: .78rem; font-weight: 600; text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary-sm:hover { background: #e05d00; }
+</style>
 
 <%- include('layout-bottom') %>

@@ -3,11 +3,15 @@
 <div class="section-card">
   <div class="section-header">
     <h2>Festival Calendar</h2>
-    <span class="count"><%= festivals.length %> festivals</span>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <span class="count"><%= festivals.length %> festivals</span>
+      <a href="/admin/festivals/bulk-upload" class="action-btn">📋 Bulk Upload</a>
+      <a href="/admin/festivals/new" class="btn-primary-sm">+ Add Festival</a>
+    </div>
   </div>
   <table>
     <thead><tr>
-      <th>Festival</th><th>Date</th><th>Deity</th><th>Category</th><th>Active</th>
+      <th>Festival</th><th>Date</th><th>Deity</th><th>Category</th><th>Active</th><th>Actions</th>
     </tr></thead>
     <tbody>
     <% festivals.forEach(f => { %>
@@ -34,10 +38,28 @@
           </label>
         </form>
       </td>
+      <td>
+        <div style="display:flex;gap:.4rem">
+          <a href="/admin/festivals/<%= f._id %>/edit" class="action-btn">Edit</a>
+          <form method="POST" action="/admin/festivals/<%= f._id %>/delete"
+            onsubmit="return confirm('Delete &quot;<%= f.name %>&quot;? This cannot be undone.')">
+            <button type="submit" class="action-btn danger">Delete</button>
+          </form>
+        </div>
+      </td>
     </tr>
     <% }) %>
     </tbody>
   </table>
 </div>
+
+<style>
+  .btn-primary-sm {
+    background: #FF6B00; color: #fff; border: none; border-radius: 6px;
+    padding: .35rem .85rem; font-size: .78rem; font-weight: 600; text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary-sm:hover { background: #e05d00; }
+</style>
 
 <%- include('layout-bottom') %>

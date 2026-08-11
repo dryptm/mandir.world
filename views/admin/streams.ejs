@@ -3,11 +3,14 @@
 <div class="section-card">
   <div class="section-header">
     <h2>Temple Streams</h2>
-    <span class="count"><%= streams.length %> streams</span>
+    <div style="display:flex;gap:.5rem;align-items:center">
+      <span class="count"><%= streams.length %> streams</span>
+      <a href="/admin/streams/new" class="btn-primary-sm">+ Add Stream</a>
+    </div>
   </div>
   <table>
     <thead><tr>
-      <th>Temple</th><th>City</th><th>Deity</th><th>YouTube Video ID</th><th>Live</th><th>Viewers</th><th>Active</th>
+      <th>Temple</th><th>City</th><th>Deity</th><th>YouTube Video ID</th><th>Live</th><th>Viewers</th><th>Active</th><th>Actions</th>
     </tr></thead>
     <tbody>
     <% streams.forEach(s => { %>
@@ -18,13 +21,7 @@
       </td>
       <td><%= s.city %>, <%= s.state %></td>
       <td style="color:rgba(253,246,227,.55)"><%= s.deity %></td>
-      <td>
-        <form method="POST" action="/admin/streams/<%= s._id %>/update" style="display:flex;gap:.4rem;align-items:center">
-          <input type="text" name="youtubeVideoId" value="<%= s.youtubeVideoId %>"
-            style="background:rgba(255,255,255,.05);border:1px solid rgba(200,146,42,.2);border-radius:6px;padding:.3rem .6rem;color:#FDF6E3;font-size:.75rem;width:130px;outline:none"/>
-          <button type="submit" class="action-btn">Save</button>
-        </form>
-      </td>
+      <td style="font-size:.75rem;color:rgba(253,246,227,.5)"><%= s.youtubeVideoId || '—' %></td>
       <td>
         <form method="POST" action="/admin/streams/<%= s._id %>/toggle-live">
           <label class="toggle">
@@ -42,10 +39,28 @@
           </label>
         </form>
       </td>
+      <td>
+        <div style="display:flex;gap:.4rem">
+          <a href="/admin/streams/<%= s._id %>/edit" class="action-btn">Edit</a>
+          <form method="POST" action="/admin/streams/<%= s._id %>/delete"
+            onsubmit="return confirm('Delete &quot;<%= s.title %>&quot;? This cannot be undone.')">
+            <button type="submit" class="action-btn danger">Delete</button>
+          </form>
+        </div>
+      </td>
     </tr>
     <% }) %>
     </tbody>
   </table>
 </div>
+
+<style>
+  .btn-primary-sm {
+    background: #FF6B00; color: #fff; border: none; border-radius: 6px;
+    padding: .35rem .85rem; font-size: .78rem; font-weight: 600; text-decoration: none;
+    display: inline-block;
+  }
+  .btn-primary-sm:hover { background: #e05d00; }
+</style>
 
 <%- include('layout-bottom') %>

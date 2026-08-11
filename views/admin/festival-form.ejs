@@ -1,0 +1,130 @@
+<%- include('layout-top', { title: festival ? 'Edit Festival' : 'New Festival', page: 'festivals' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2><%= festival ? 'Edit Festival' : 'Add New Festival' %></h2>
+    <div style="display:flex;gap:.5rem">
+      <a href="/admin/festivals/bulk-upload" class="action-btn">📋 Bulk Upload (JSON)</a>
+      <a href="/admin/festivals" class="action-btn">← Back to Festivals</a>
+    </div>
+  </div>
+
+  <form method="POST" action="<%= festival ? `/admin/festivals/${festival._id}/edit` : '/admin/festivals/new' %>" style="padding:1.5rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+      <div class="form-field">
+        <label>Unique ID <span style="color:#f87171">*</span></label>
+        <input type="text" name="id" value="<%= festival?.id || '' %>" placeholder="e.g. diwali-2027" required/>
+        <small>Lowercase, hyphenated, must be unique</small>
+      </div>
+
+      <div class="form-field">
+        <label>Festival Name <span style="color:#f87171">*</span></label>
+        <input type="text" name="name" value="<%= festival?.name || '' %>" placeholder="e.g. Diwali" required/>
+      </div>
+
+      <div class="form-field">
+        <label>Hindi Name</label>
+        <input type="text" name="hindi" value="<%= festival?.hindi || '' %>" placeholder="e.g. दीपावली"/>
+      </div>
+
+      <div class="form-field">
+        <label>Deity</label>
+        <input type="text" name="deity" value="<%= festival?.deity || '' %>" placeholder="e.g. Maa Lakshmi"/>
+      </div>
+
+      <div class="form-field">
+        <label>Date <span style="color:#f87171">*</span> <span style="color:rgba(253,246,227,.35)">(YYYY-MM-DD or "daily")</span></label>
+        <input type="text" name="date" value="<%= festival?.date || '' %>" placeholder="e.g. 2027-11-08" required/>
+      </div>
+
+      <div class="form-field">
+        <label>End Date <span style="color:rgba(253,246,227,.35)">(for multi-day festivals)</span></label>
+        <input type="text" name="endDate" value="<%= festival?.endDate || '' %>" placeholder="e.g. 2027-11-10"/>
+      </div>
+
+      <div class="form-field">
+        <label>Month</label>
+        <input type="text" name="month" value="<%= festival?.month || '' %>" placeholder="e.g. November"/>
+      </div>
+
+      <div class="form-field">
+        <label>Category</label>
+        <input type="text" name="category" value="<%= festival?.category || '' %>" placeholder="e.g. major, minor, regional"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="What this festival celebrates"><%= festival?.description || '' %></textarea>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Significance</label>
+        <textarea name="significance" rows="2" placeholder="Spiritual/mythological significance"><%= festival?.significance || '' %></textarea>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Rituals <span style="color:rgba(253,246,227,.35)">(comma-separated)</span></label>
+        <input type="text" name="rituals" value="<%= (festival?.rituals || []).join(', ') %>" placeholder="e.g. Lakshmi Puja, Diya lighting, Rangoli"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Cities <span style="color:rgba(253,246,227,.35)">(comma-separated)</span></label>
+        <input type="text" name="cities" value="<%= (festival?.cities || []).join(', ') %>" placeholder="e.g. Varanasi, Ayodhya, Mathura"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Donation Causes <span style="color:rgba(253,246,227,.35)">(comma-separated)</span></label>
+        <input type="text" name="donationCauses" value="<%= (festival?.donationCauses || []).join(', ') %>" placeholder="e.g. Annadaan, Gau Seva"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Sacred Mantra</label>
+        <input type="text" name="mantra" value="<%= festival?.mantra || '' %>" placeholder="e.g. ॐ ह्रीं श्रीं लक्ष्मीभ्यो नमः"/>
+      </div>
+
+      <div class="form-field">
+        <label>Theme Color</label>
+        <input type="text" name="color" value="<%= festival?.color || '#FF6B00' %>" placeholder="#FF6B00"/>
+      </div>
+
+      <div class="form-field">
+        <label>Icon Emoji</label>
+        <input type="text" name="icon" value="<%= festival?.icon || '🕉️' %>" placeholder="🪔"/>
+      </div>
+
+      <div class="form-field">
+        <label class="checkbox-label">
+          <input type="checkbox" name="isDaily" <%= festival?.isDaily ? 'checked' : '' %>/>
+          Daily Recurring Event (not a dated festival)
+        </label>
+      </div>
+
+    </div>
+
+    <div style="margin-top:1.5rem;display:flex;gap:.75rem">
+      <button type="submit" class="btn-primary"><%= festival ? 'Save Changes' : 'Create Festival' %></button>
+      <a href="/admin/festivals" class="action-btn" style="padding:.55rem 1.2rem">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .form-field { display: flex; flex-direction: column; gap: .35rem; }
+  .form-field label { font-size: .8rem; color: rgba(253,246,227,.7); font-weight: 500; }
+  .form-field small { font-size: .7rem; color: rgba(253,246,227,.35); }
+  .form-field input[type="text"], .form-field textarea {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(200,146,42,.2); border-radius: 8px;
+    padding: .6rem .8rem; color: #FDF6E3; font-size: .85rem; outline: none; font-family: inherit;
+  }
+  .form-field input:focus, .form-field textarea:focus { border-color: #C8922A; }
+  .checkbox-label { display: flex; align-items: center; gap: .5rem; cursor: pointer; margin-top: 1.4rem; }
+  .checkbox-label input { width: 16px; height: 16px; }
+  .btn-primary {
+    background: #FF6B00; color: #fff; border: none; border-radius: 8px;
+    padding: .65rem 1.5rem; font-size: .9rem; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:hover { background: #e05d00; }
+</style>
+
+<%- include('layout-bottom') %>

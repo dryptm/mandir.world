@@ -561,8 +561,54 @@ app.get('/admin/streams', requireAdmin, async (req, res) => {
   res.render('admin/streams', { streams: dbStreams });
 });
 
-app.post('/admin/streams/:id/update', requireAdmin, async (req, res) => {
-  await Stream.findByIdAndUpdate(req.params.id, { youtubeVideoId: req.body.youtubeVideoId });
+app.get('/admin/streams/new', requireAdmin, (req, res) => {
+  res.render('admin/stream-form', { stream: null });
+});
+
+app.get('/admin/streams/:id/edit', requireAdmin, async (req, res) => {
+  const stream = await Stream.findById(req.params.id).lean();
+  if (!stream) return res.redirect('/admin/streams');
+  res.render('admin/stream-form', { stream });
+});
+
+app.post('/admin/streams/new', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body;
+    await Stream.create({
+      id: b.id, title: b.title, hindi: b.hindi || '', city: b.city, state: b.state || '',
+      location: b.location || '', description: b.description || '', schedule: b.schedule || '',
+      thumbnail: b.thumbnail || '', youtubeChannelId: b.youtubeChannelId || '',
+      youtubeVideoId: b.youtubeVideoId || '', deity: b.deity || '',
+      tags: (b.tags || '').split(',').map(t => t.trim()).filter(Boolean),
+      isLive: b.isLive === 'on', viewers: Number(b.viewers) || 0, active: true
+    });
+    await loadDataFromDB();
+  } catch (err) {
+    console.error('Create stream error:', err.message);
+  }
+  res.redirect('/admin/streams');
+});
+
+app.post('/admin/streams/:id/edit', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body;
+    await Stream.findByIdAndUpdate(req.params.id, {
+      id: b.id, title: b.title, hindi: b.hindi || '', city: b.city, state: b.state || '',
+      location: b.location || '', description: b.description || '', schedule: b.schedule || '',
+      thumbnail: b.thumbnail || '', youtubeChannelId: b.youtubeChannelId || '',
+      youtubeVideoId: b.youtubeVideoId || '', deity: b.deity || '',
+      tags: (b.tags || '').split(',').map(t => t.trim()).filter(Boolean),
+      isLive: b.isLive === 'on', viewers: Number(b.viewers) || 0
+    });
+    await loadDataFromDB();
+  } catch (err) {
+    console.error('Edit stream error:', err.message);
+  }
+  res.redirect('/admin/streams');
+});
+
+app.post('/admin/streams/:id/delete', requireAdmin, async (req, res) => {
+  await Stream.findByIdAndDelete(req.params.id);
   await loadDataFromDB();
   res.redirect('/admin/streams');
 });
@@ -581,10 +627,66 @@ app.post('/admin/streams/:id/toggle-active', requireAdmin, async (req, res) => {
   res.redirect('/admin/streams');
 });
 
-// Festivals
+// ── FESTIVALS ─────────────────────────────────────────────
 app.get('/admin/festivals', requireAdmin, async (req, res) => {
   const dbFestivals = await Festival.find().sort({ date: 1 }).lean();
   res.render('admin/festivals', { festivals: dbFestivals });
+});
+
+app.get('/admin/festivals/new', requireAdmin, (req, res) => {
+  res.render('admin/festival-form', { festival: null });
+});
+
+app.get('/admin/festivals/:id/edit', requireAdmin, async (req, res) => {
+  const festival = await Festival.findById(req.params.id).lean();
+  if (!festival) return res.redirect('/admin/festivals');
+  res.render('admin/festival-form', { festival });
+});
+
+app.post('/admin/festivals/new', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body;
+    await Festival.create({
+      id: b.id, name: b.name, hindi: b.hindi || '', date: b.date, endDate: b.endDate || null,
+      month: b.month || '', deity: b.deity || '', category: b.category || '',
+      description: b.description || '', significance: b.significance || '',
+      rituals: (b.rituals || '').split(',').map(r => r.trim()).filter(Boolean),
+      cities: (b.cities || '').split(',').map(c => c.trim()).filter(Boolean),
+      donationCauses: (b.donationCauses || '').split(',').map(c => c.trim()).filter(Boolean),
+      mantra: b.mantra || '', color: b.color || '#FF6B00', icon: b.icon || '🕉️',
+      isDaily: b.isDaily === 'on', active: true
+    });
+    await loadDataFromDB();
+  } catch (err) {
+    console.error('Create festival error:', err.message);
+  }
+  res.redirect('/admin/festivals');
+});
+
+app.post('/admin/festivals/:id/edit', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body;
+    await Festival.findByIdAndUpdate(req.params.id, {
+      id: b.id, name: b.name, hindi: b.hindi || '', date: b.date, endDate: b.endDate || null,
+      month: b.month || '', deity: b.deity || '', category: b.category || '',
+      description: b.description || '', significance: b.significance || '',
+      rituals: (b.rituals || '').split(',').map(r => r.trim()).filter(Boolean),
+      cities: (b.cities || '').split(',').map(c => c.trim()).filter(Boolean),
+      donationCauses: (b.donationCauses || '').split(',').map(c => c.trim()).filter(Boolean),
+      mantra: b.mantra || '', color: b.color || '#FF6B00', icon: b.icon || '🕉️',
+      isDaily: b.isDaily === 'on'
+    });
+    await loadDataFromDB();
+  } catch (err) {
+    console.error('Edit festival error:', err.message);
+  }
+  res.redirect('/admin/festivals');
+});
+
+app.post('/admin/festivals/:id/delete', requireAdmin, async (req, res) => {
+  await Festival.findByIdAndDelete(req.params.id);
+  await loadDataFromDB();
+  res.redirect('/admin/festivals');
 });
 
 app.post('/admin/festivals/:id/toggle-active', requireAdmin, async (req, res) => {
@@ -594,10 +696,103 @@ app.post('/admin/festivals/:id/toggle-active', requireAdmin, async (req, res) =>
   res.redirect('/admin/festivals');
 });
 
-// Pujas
+// Bulk JSON upload — for adding a full year's festival calendar at once
+app.get('/admin/festivals/bulk-upload', requireAdmin, (req, res) => {
+  res.render('admin/festival-bulk', { result: null, error: null });
+});
+
+app.post('/admin/festivals/bulk-upload', requireAdmin, async (req, res) => {
+  try {
+    const parsed = JSON.parse(req.body.jsonData);
+    if (!Array.isArray(parsed)) throw new Error('JSON must be an array of festival objects');
+
+    let inserted = 0, updated = 0;
+    for (const f of parsed) {
+      if (!f.id || !f.name || !f.date) continue;
+      const existing = await Festival.findOne({ id: f.id });
+      const doc = {
+        id: f.id, name: f.name, hindi: f.hindi || '', date: f.date, endDate: f.endDate || null,
+        month: f.month || '', deity: f.deity || '', category: f.category || '',
+        description: f.description || '', significance: f.significance || '',
+        rituals: f.rituals || [], cities: f.cities || [], donationCauses: f.donationCauses || [],
+        mantra: f.mantra || '', color: f.color || '#FF6B00', icon: f.icon || '🕉️',
+        isDaily: !!f.isDaily, active: true
+      };
+      if (existing) {
+        await Festival.findByIdAndUpdate(existing._id, doc);
+        updated++;
+      } else {
+        await Festival.create(doc);
+        inserted++;
+      }
+    }
+    await loadDataFromDB();
+    res.render('admin/festival-bulk', { result: { inserted, updated, total: parsed.length }, error: null });
+  } catch (err) {
+    res.render('admin/festival-bulk', { result: null, error: err.message });
+  }
+});
+
+// ── PUJAS ─────────────────────────────────────────────────
 app.get('/admin/pujas', requireAdmin, async (req, res) => {
   const dbPujas = await PujaModel.find().sort({ name: 1 }).lean();
   res.render('admin/pujas', { pujas: dbPujas });
+});
+
+app.get('/admin/pujas/new', requireAdmin, (req, res) => {
+  res.render('admin/puja-form', { puja: null });
+});
+
+app.get('/admin/pujas/:id/edit', requireAdmin, async (req, res) => {
+  const puja = await PujaModel.findById(req.params.id).lean();
+  if (!puja) return res.redirect('/admin/pujas');
+  res.render('admin/puja-form', { puja });
+});
+
+app.post('/admin/pujas/new', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body;
+    await PujaModel.create({
+      id: b.id, name: b.name, hindi: b.hindi || '', deity: b.deity || '',
+      duration: b.duration || '', price: Number(b.price) || 0, description: b.description || '',
+      includes: (b.includes || '').split(',').map(i => i.trim()).filter(Boolean),
+      icon: b.icon || '🙏',
+      purpose: b.purpose || '',
+      notFor: (b.notFor || '').split(',').map(i => i.trim()).filter(Boolean),
+      compatibleOccasions: (b.compatibleOccasions || '').split(',').map(i => i.trim()).filter(Boolean),
+      popular: b.popular === 'on', prasad: b.prasad === 'on', active: true
+    });
+    await loadDataFromDB();
+  } catch (err) {
+    console.error('Create puja error:', err.message);
+  }
+  res.redirect('/admin/pujas');
+});
+
+app.post('/admin/pujas/:id/edit', requireAdmin, async (req, res) => {
+  try {
+    const b = req.body;
+    await PujaModel.findByIdAndUpdate(req.params.id, {
+      id: b.id, name: b.name, hindi: b.hindi || '', deity: b.deity || '',
+      duration: b.duration || '', price: Number(b.price) || 0, description: b.description || '',
+      includes: (b.includes || '').split(',').map(i => i.trim()).filter(Boolean),
+      icon: b.icon || '🙏',
+      purpose: b.purpose || '',
+      notFor: (b.notFor || '').split(',').map(i => i.trim()).filter(Boolean),
+      compatibleOccasions: (b.compatibleOccasions || '').split(',').map(i => i.trim()).filter(Boolean),
+      popular: b.popular === 'on', prasad: b.prasad === 'on'
+    });
+    await loadDataFromDB();
+  } catch (err) {
+    console.error('Edit puja error:', err.message);
+  }
+  res.redirect('/admin/pujas');
+});
+
+app.post('/admin/pujas/:id/delete', requireAdmin, async (req, res) => {
+  await PujaModel.findByIdAndDelete(req.params.id);
+  await loadDataFromDB();
+  res.redirect('/admin/pujas');
 });
 
 app.post('/admin/pujas/:id/update-price', requireAdmin, async (req, res) => {

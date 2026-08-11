@@ -1,0 +1,92 @@
+<%- include('layout-top', { title: 'Bulk Upload Festivals', page: 'festivals' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>📋 Bulk Upload Festivals (JSON)</h2>
+    <a href="/admin/festivals" class="action-btn">← Back to Festivals</a>
+  </div>
+
+  <div style="padding:1.5rem">
+    <div class="info-box">
+      <strong>How this works:</strong>
+      <p>Paste a JSON array of festival objects below. Each festival needs at least <code>id</code>, <code>name</code>, and <code>date</code>.
+      If a festival with the same <code>id</code> already exists, it will be <strong>updated</strong> — otherwise a new one is <strong>created</strong>.
+      This is the fastest way to add a full year's calendar (e.g. all of 2027) in one go.</p>
+    </div>
+
+    <% if (result) { %>
+    <div class="result-box success">
+      ✅ Upload complete — <strong><%= result.inserted %></strong> new festivals created,
+      <strong><%= result.updated %></strong> existing festivals updated
+      (<%= result.total %> total processed).
+    </div>
+    <% } %>
+
+    <% if (error) { %>
+    <div class="result-box error">
+      ❌ Upload failed: <%= error %>
+    </div>
+    <% } %>
+
+    <form method="POST" action="/admin/festivals/bulk-upload">
+      <label style="font-size:.85rem;color:rgba(253,246,227,.7);margin-bottom:.5rem;display:block">
+        Paste Festival JSON Array
+      </label>
+      <textarea name="jsonData" rows="18" placeholder='[
+  {
+    "id": "diwali-2027",
+    "name": "Diwali",
+    "hindi": "दीपावली",
+    "date": "2027-10-29",
+    "month": "October",
+    "deity": "Maa Lakshmi",
+    "category": "major",
+    "description": "Festival of lights...",
+    "significance": "Celebrates the return of Lord Rama...",
+    "rituals": ["Lakshmi Puja", "Diya lighting", "Rangoli"],
+    "cities": ["Varanasi", "Ayodhya", "Mathura"],
+    "donationCauses": ["Annadaan", "Gau Seva"],
+    "mantra": "ॐ ह्रीं श्रीं लक्ष्मीभ्यो नमः",
+    "color": "#F59E0B",
+    "icon": "🪔",
+    "isDaily": false
+  }
+]' required></textarea>
+
+      <div style="margin-top:1.25rem;display:flex;gap:.75rem">
+        <button type="submit" class="btn-primary">Upload Festivals</button>
+        <a href="/admin/festivals/new" class="action-btn" style="padding:.55rem 1.2rem">Add Single Festival Instead →</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .info-box {
+    background: rgba(200,146,42,.08); border: 1px solid rgba(200,146,42,.2);
+    border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 1.5rem;
+  }
+  .info-box strong { color: #C8922A; font-size: .85rem; }
+  .info-box p { color: rgba(253,246,227,.65); font-size: .8rem; line-height: 1.6; margin-top: .5rem; }
+  .info-box code {
+    background: rgba(255,255,255,.08); padding: .1rem .4rem; border-radius: 4px;
+    font-size: .78rem; color: #C8922A;
+  }
+  .result-box { padding: .85rem 1.1rem; border-radius: 8px; font-size: .85rem; margin-bottom: 1.25rem; }
+  .result-box.success { background: rgba(34,197,94,.1); border: 1px solid rgba(34,197,94,.3); color: #86efac; }
+  .result-box.error { background: rgba(220,38,38,.1); border: 1px solid rgba(220,38,38,.3); color: #fca5a5; }
+  textarea[name="jsonData"] {
+    width: 100%; background: rgba(255,255,255,.05); border: 1px solid rgba(200,146,42,.2);
+    border-radius: 8px; padding: 1rem; color: #FDF6E3; font-size: .8rem; font-family: 'Courier New', monospace;
+    outline: none; resize: vertical; line-height: 1.5;
+  }
+  textarea[name="jsonData"]:focus { border-color: #C8922A; }
+  textarea[name="jsonData"]::placeholder { color: rgba(253,246,227,.25); }
+  .btn-primary {
+    background: #FF6B00; color: #fff; border: none; border-radius: 8px;
+    padding: .65rem 1.5rem; font-size: .9rem; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:hover { background: #e05d00; }
+</style>
+
+<%- include('layout-bottom') %>

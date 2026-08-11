@@ -1,0 +1,118 @@
+<%- include('layout-top', { title: stream ? 'Edit Stream' : 'New Stream', page: 'streams' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2><%= stream ? 'Edit Stream' : 'Add New Stream' %></h2>
+    <a href="/admin/streams" class="action-btn">← Back to Streams</a>
+  </div>
+
+  <form method="POST" action="<%= stream ? `/admin/streams/${stream._id}/edit` : '/admin/streams/new' %>" style="padding:1.5rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+      <div class="form-field">
+        <label>Unique ID <span style="color:#f87171">*</span></label>
+        <input type="text" name="id" value="<%= stream?.id || '' %>" placeholder="e.g. kashi-vishwanath" required/>
+        <small>Lowercase, hyphenated, must be unique</small>
+      </div>
+
+      <div class="form-field">
+        <label>Temple Title <span style="color:#f87171">*</span></label>
+        <input type="text" name="title" value="<%= stream?.title || '' %>" placeholder="e.g. Kashi Vishwanath Temple" required/>
+      </div>
+
+      <div class="form-field">
+        <label>Hindi Name</label>
+        <input type="text" name="hindi" value="<%= stream?.hindi || '' %>" placeholder="e.g. काशी विश्वनाथ मंदिर"/>
+      </div>
+
+      <div class="form-field">
+        <label>Deity</label>
+        <input type="text" name="deity" value="<%= stream?.deity || '' %>" placeholder="e.g. Lord Shiva"/>
+      </div>
+
+      <div class="form-field">
+        <label>City <span style="color:#f87171">*</span></label>
+        <input type="text" name="city" value="<%= stream?.city || '' %>" placeholder="e.g. Varanasi" required/>
+      </div>
+
+      <div class="form-field">
+        <label>State</label>
+        <input type="text" name="state" value="<%= stream?.state || '' %>" placeholder="e.g. Uttar Pradesh"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Full Location</label>
+        <input type="text" name="location" value="<%= stream?.location || '' %>" placeholder="e.g. Vishwanath Gali, Varanasi, UP"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="Short description of the temple and darshan"><%= stream?.description || '' %></textarea>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Schedule</label>
+        <input type="text" name="schedule" value="<%= stream?.schedule || '' %>" placeholder="e.g. Mangala Aarti 4 AM · Shringar 6 PM"/>
+      </div>
+
+      <div class="form-field">
+        <label>YouTube Video ID</label>
+        <input type="text" name="youtubeVideoId" value="<%= stream?.youtubeVideoId || '' %>" placeholder="e.g. dQw4w9WgXcQ"/>
+        <small>The part after watch?v= in the YouTube URL</small>
+      </div>
+
+      <div class="form-field">
+        <label>YouTube Channel ID <span style="color:rgba(253,246,227,.35)">(for live streams)</span></label>
+        <input type="text" name="youtubeChannelId" value="<%= stream?.youtubeChannelId || '' %>" placeholder="e.g. UCxxxxxxxxxxxx"/>
+      </div>
+
+      <div class="form-field">
+        <label>Thumbnail URL</label>
+        <input type="text" name="thumbnail" value="<%= stream?.thumbnail || '' %>" placeholder="/thumb.jpg or https://..."/>
+      </div>
+
+      <div class="form-field">
+        <label>Simulated Viewer Count</label>
+        <input type="number" name="viewers" value="<%= stream?.viewers || 0 %>" min="0"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Tags <span style="color:rgba(253,246,227,.35)">(comma-separated)</span></label>
+        <input type="text" name="tags" value="<%= (stream?.tags || []).join(', ') %>" placeholder="e.g. Shiva, Jyotirlinga, Varanasi"/>
+      </div>
+
+      <div class="form-field">
+        <label class="checkbox-label">
+          <input type="checkbox" name="isLive" <%= stream?.isLive ? 'checked' : '' %>/>
+          Currently Live
+        </label>
+      </div>
+
+    </div>
+
+    <div style="margin-top:1.5rem;display:flex;gap:.75rem">
+      <button type="submit" class="btn-primary"><%= stream ? 'Save Changes' : 'Create Stream' %></button>
+      <a href="/admin/streams" class="action-btn" style="padding:.55rem 1.2rem">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .form-field { display: flex; flex-direction: column; gap: .35rem; }
+  .form-field label { font-size: .8rem; color: rgba(253,246,227,.7); font-weight: 500; }
+  .form-field small { font-size: .7rem; color: rgba(253,246,227,.35); }
+  .form-field input[type="text"], .form-field input[type="number"], .form-field textarea {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(200,146,42,.2); border-radius: 8px;
+    padding: .6rem .8rem; color: #FDF6E3; font-size: .85rem; outline: none; font-family: inherit;
+  }
+  .form-field input:focus, .form-field textarea:focus { border-color: #C8922A; }
+  .checkbox-label { display: flex; align-items: center; gap: .5rem; cursor: pointer; margin-top: 1.4rem; }
+  .checkbox-label input { width: 16px; height: 16px; }
+  .btn-primary {
+    background: #FF6B00; color: #fff; border: none; border-radius: 8px;
+    padding: .65rem 1.5rem; font-size: .9rem; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:hover { background: #e05d00; }
+</style>
+
+<%- include('layout-bottom') %>

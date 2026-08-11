@@ -1,0 +1,111 @@
+<%- include('layout-top', { title: puja ? 'Edit Puja' : 'New Puja', page: 'pujas' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2><%= puja ? 'Edit Puja' : 'Add New Puja' %></h2>
+    <a href="/admin/pujas" class="action-btn">← Back to Pujas</a>
+  </div>
+
+  <form method="POST" action="<%= puja ? `/admin/pujas/${puja._id}/edit` : '/admin/pujas/new' %>" style="padding:1.5rem">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+      <div class="form-field">
+        <label>Unique ID <span style="color:#f87171">*</span></label>
+        <input type="text" name="id" value="<%= puja?.id || '' %>" placeholder="e.g. rudrabhishek" required/>
+        <small>Lowercase, hyphenated, must be unique</small>
+      </div>
+
+      <div class="form-field">
+        <label>Puja Name <span style="color:#f87171">*</span></label>
+        <input type="text" name="name" value="<%= puja?.name || '' %>" placeholder="e.g. Rudrabhishek" required/>
+      </div>
+
+      <div class="form-field">
+        <label>Hindi Name</label>
+        <input type="text" name="hindi" value="<%= puja?.hindi || '' %>" placeholder="e.g. रुद्राभिषेक"/>
+      </div>
+
+      <div class="form-field">
+        <label>Deity</label>
+        <input type="text" name="deity" value="<%= puja?.deity || '' %>" placeholder="e.g. Lord Shiva"/>
+      </div>
+
+      <div class="form-field">
+        <label>Duration</label>
+        <input type="text" name="duration" value="<%= puja?.duration || '' %>" placeholder="e.g. 45 mins"/>
+      </div>
+
+      <div class="form-field">
+        <label>Price (₹) <span style="color:#f87171">*</span></label>
+        <input type="number" name="price" value="<%= puja?.price || '' %>" min="0" required/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Description</label>
+        <textarea name="description" rows="3" placeholder="What happens during this puja"><%= puja?.description || '' %></textarea>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Purpose <span style="color:rgba(253,246,227,.35)">— shown as green "Best for" banner</span></label>
+        <textarea name="purpose" rows="2" placeholder="e.g. For personal wellbeing, health, marriage blessings..."><%= puja?.purpose || '' %></textarea>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Not For <span style="color:rgba(253,246,227,.35)">(comma-separated — shown as red "Not for" list)</span></label>
+        <input type="text" name="notFor" value="<%= (puja?.notFor || []).join(', ') %>" placeholder="e.g. Ancestor liberation, Birth of child"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Compatible Occasions <span style="color:rgba(253,246,227,.35)">(comma-separated — filters the dropdown)</span></label>
+        <input type="text" name="compatibleOccasions" value="<%= (puja?.compatibleOccasions || []).join(', ') %>" placeholder="e.g. Personal wellbeing, Health recovery, Marriage"/>
+      </div>
+
+      <div class="form-field" style="grid-column:1/-1">
+        <label>Includes <span style="color:rgba(253,246,227,.35)">(comma-separated)</span></label>
+        <input type="text" name="includes" value="<%= (puja?.includes || []).join(', ') %>" placeholder="e.g. Panchamrit abhishek, Bilva patra offering"/>
+      </div>
+
+      <div class="form-field">
+        <label>Icon Emoji</label>
+        <input type="text" name="icon" value="<%= puja?.icon || '🙏' %>" placeholder="🕉️"/>
+      </div>
+
+      <div style="display:flex;gap:1.5rem;align-items:center">
+        <label class="checkbox-label">
+          <input type="checkbox" name="popular" <%= puja?.popular ? 'checked' : '' %>/>
+          Mark as Popular
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" name="prasad" <%= puja?.prasad ? 'checked' : '' %>/>
+          Prasad Dispatch Available
+        </label>
+      </div>
+
+    </div>
+
+    <div style="margin-top:1.5rem;display:flex;gap:.75rem">
+      <button type="submit" class="btn-primary"><%= puja ? 'Save Changes' : 'Create Puja' %></button>
+      <a href="/admin/pujas" class="action-btn" style="padding:.55rem 1.2rem">Cancel</a>
+    </div>
+  </form>
+</div>
+
+<style>
+  .form-field { display: flex; flex-direction: column; gap: .35rem; }
+  .form-field label { font-size: .8rem; color: rgba(253,246,227,.7); font-weight: 500; }
+  .form-field small { font-size: .7rem; color: rgba(253,246,227,.35); }
+  .form-field input[type="text"], .form-field input[type="number"], .form-field textarea {
+    background: rgba(255,255,255,.05); border: 1px solid rgba(200,146,42,.2); border-radius: 8px;
+    padding: .6rem .8rem; color: #FDF6E3; font-size: .85rem; outline: none; font-family: inherit;
+  }
+  .form-field input:focus, .form-field textarea:focus { border-color: #C8922A; }
+  .checkbox-label { display: flex; align-items: center; gap: .5rem; cursor: pointer; }
+  .checkbox-label input { width: 16px; height: 16px; }
+  .btn-primary {
+    background: #FF6B00; color: #fff; border: none; border-radius: 8px;
+    padding: .65rem 1.5rem; font-size: .9rem; font-weight: 600; cursor: pointer;
+  }
+  .btn-primary:hover { background: #e05d00; }
+</style>
+
+<%- include('layout-bottom') %>
