@@ -103,7 +103,7 @@ em{font-style:italic;font-family:var(--font-display)}
 .hero{position:relative;min-height:92vh;background:var(--dark);overflow:hidden;display:flex;align-items:center}
 .hero-ambient{position:absolute;inset:0;background:radial-gradient(ellipse 70% 60% at 60% 30%,rgba(255,107,0,.14) 0%,transparent 65%),radial-gradient(ellipse 50% 40% at 20% 70%,rgba(200,146,42,.1) 0%,transparent 60%),radial-gradient(ellipse 80% 80% at 50% 100%,rgba(45,26,0,.8) 0%,transparent 70%);opacity:1}
 .hero-content{position:relative;z-index:1;width:100%;padding:5rem 0 4rem}
-.hero-grid{display:grid;grid-template-columns:1fr 400px;gap:3rem;align-items:start}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1fr) 400px;gap:3rem;align-items:start}
 .hero-eyebrow{display:flex;align-items:center;gap:.5rem;font-size:.78rem;color:rgba(253,246,227,.55);text-transform:uppercase;letter-spacing:.08em;margin-bottom:1.25rem}
 .hero-hindi{display:block;font-family:var(--font-hindi);font-size:.5em;color:var(--gold-lt);font-weight:300;margin-bottom:.2rem}
 .hero-title{color:#fff;margin-bottom:1.25rem;line-height:1.15}
@@ -232,7 +232,7 @@ em{font-style:italic;font-family:var(--font-display)}
 .dc-live-tag span{width:6px;height:6px;background:#ff3333;border-radius:50%;animation:pulseLive 1.3s ease infinite}
 
 /* DAAN HOME */
-.daan-home-row{display:grid;grid-template-columns:1fr 1.2fr;gap:3rem;align-items:center}
+.daan-home-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:3rem;align-items:center}
 .dhr-left h2{margin:.5rem 0 1rem}
 .dhr-left p{color:var(--text-mid);margin-bottom:1.25rem}
 .daan-tiers-preview{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
@@ -335,7 +335,7 @@ em{font-style:italic;font-family:var(--font-display)}
 .fd-hindi{font-family:var(--font-hindi);color:var(--gold-lt);font-size:1.1rem;margin:.25rem 0}
 .fd-meta{display:flex;gap:1rem;flex-wrap:wrap;font-size:.82rem;color:rgba(253,246,227,.55);margin-top:.5rem}
 .fd-countdown{background:rgba(255,107,0,.2);color:var(--saffron-lt);padding:.2rem .6rem;border-radius:50px;font-weight:700}
-.fd-layout{display:grid;grid-template-columns:1fr 300px;gap:2.5rem;align-items:start}
+.fd-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:2.5rem;align-items:start}
 .fd-main{display:flex;flex-direction:column;gap:0}
 .fd-block{margin-bottom:2rem}
 .fd-block h2{font-size:1.4rem;margin-bottom:.6rem}
@@ -397,9 +397,9 @@ em{font-style:italic;font-family:var(--font-display)}
 .hiw-step strong{font-size:.85rem;font-weight:600;display:block}
 .hiw-step span{font-size:.75rem;color:var(--text-soft)}
 .hiw-arrow{color:var(--gold-lt);font-size:1.25rem;flex-shrink:0}
-.pujas-layout{display:grid;grid-template-columns:1fr 280px;gap:2rem;align-items:start}
+.pujas-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:2rem;align-items:start}
 .pujas-list h2{margin-bottom:1.25rem}
-.puja-card{background:#fff;border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:1.75rem;box-shadow:var(--shadow-sm);margin-bottom:1.75rem}
+.puja-card{background:#fff;border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:1.75rem;box-shadow:var(--shadow-sm);margin-bottom:1.75rem;width:100%;max-width:100%;min-width:0}
 .puja-card:last-child{margin-bottom:0}
 .puja-card-header{display:flex;align-items:flex-start;gap:1rem;margin-bottom:.75rem}
 .puja-icon{font-size:2.25rem;flex-shrink:0;line-height:1}
@@ -434,7 +434,7 @@ em{font-style:italic;font-family:var(--font-display)}
 .bs-icon{font-size:4rem;margin-bottom:1rem}
 
 /* SANKALP PAGE */
-.sankalp-layout{display:grid;grid-template-columns:1fr 300px;gap:2.5rem;align-items:start}
+.sankalp-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:2.5rem;align-items:start}
 .sankalp-form-side{}
 .sankalp-explainer{background:var(--gold-pale);border:1px solid rgba(200,146,42,.2);border-radius:var(--r);padding:1.25rem;margin-bottom:1.5rem;font-size:.9rem;color:var(--text-mid)}
 .sankalp-explainer h3{font-size:1rem;margin-bottom:.4rem}
@@ -451,7 +451,7 @@ em{font-style:italic;font-family:var(--font-display)}
 .mantra-block{font-family:var(--font-hindi);font-size:.95rem;color:var(--dark-mid);background:var(--cream);border-left:3px solid var(--saffron);padding:.75rem 1rem;border-radius:0 var(--r-sm) var(--r-sm) 0;line-height:1.7;margin:.5rem 0}
 
 /* DAAN PAGE */
-.daan-page-layout{display:grid;grid-template-columns:1fr 280px;gap:2rem;align-items:start}
+.daan-page-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:2rem;align-items:start}
 .daan-causes-col h2{margin-bottom:1.25rem}
 .cause-card-v2{background:#fff;border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:1.75rem;margin-bottom:1.75rem;box-shadow:var(--shadow-sm)}
 .cause-card-v2:last-child{margin-bottom:0}
@@ -514,7 +514,7 @@ em{font-style:italic;font-family:var(--font-display)}
 .info-box--saffron{background:var(--saffron-pale);border-color:rgba(255,107,0,.2)}
 
 /* ABOUT PAGE */
-.about-layout{display:grid;grid-template-columns:1fr 280px;gap:2.5rem;align-items:start}
+.about-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:2.5rem;align-items:start}
 .about-main h2{font-size:1.5rem;margin:2rem 0 .6rem}
 .about-main h2:first-child{margin-top:0}
 .about-main p{color:var(--text-mid);margin-bottom:.75rem}
@@ -532,7 +532,7 @@ em{font-style:italic;font-family:var(--font-display)}
 
 /* STREAM PAGE STYLES (kept from v2 + stream-daan-widget) */
 .stream-page{padding:2rem 0 4rem}
-.stream-page-layout{display:grid;grid-template-columns:1fr 350px;gap:2rem}
+.stream-page-layout{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:2rem}
 .video-outer{position:relative;border-radius:var(--r);overflow:hidden}
 .video-embed{position:relative;padding-bottom:56.25%;background:#000;overflow:hidden}
 .video-embed iframe{position:absolute;inset:0;width:100%;height:100%}
@@ -723,7 +723,7 @@ em{font-style:italic;font-family:var(--font-display)}
   .footer-links-grid{grid-template-columns:1fr 1fr}
 }
 @media(max-width:900px){
-  .sankalp-feat-inner,.puja-feature,.daan-home-row,.sankalp-layout,.pujas-layout,.daan-page-layout,.about-layout,.fd-layout,.stream-page-layout{grid-template-columns:1fr}
+  .sankalp-feat-inner,.puja-feature,.daan-home-row,.sankalp-layout,.pujas-layout,.daan-page-layout,.about-layout,.fd-layout,.stream-page-layout{grid-template-columns:minmax(0,1fr)}
   .puja-sidebar,.daan-sidebar-col,.about-side,.sankalp-info-side{position:static}
   .pbf-row,.form-row{grid-template-columns:1fr}
   .stream-sidebar{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
