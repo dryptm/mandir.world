@@ -35,7 +35,9 @@
   <% if (recentDonations.length === 0) { %>
   <div class="empty-state">No donations yet</div>
   <% } else { %>
-  <table>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
     <thead><tr>
       <th>Name</th><th>Amount</th><th>Cause</th><th>Phone</th><th>Status</th><th>Date</th>
     </tr></thead>
@@ -56,6 +58,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </div>
 
@@ -68,7 +71,9 @@
   <% if (recentBookings.length === 0) { %>
   <div class="empty-state">No bookings yet</div>
   <% } else { %>
-  <table>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
     <thead><tr>
       <th>Booking No</th><th>Devotee</th><th>Puja</th><th>Date</th><th>Amount</th><th>Status</th>
     </tr></thead>
@@ -85,6 +90,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </div>
 
@@ -97,7 +103,9 @@
   <% if (recentSankalpas.length === 0) { %>
   <div class="empty-state">No sankalpas yet</div>
   <% } else { %>
-  <table>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
     <thead><tr><th>#</th><th>Name</th><th>Event</th><th>Wish</th><th>Phone</th><th>Date</th></tr></thead>
     <tbody>
     <% recentSankalpas.forEach(s => { %>
@@ -112,6 +120,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </div>
 

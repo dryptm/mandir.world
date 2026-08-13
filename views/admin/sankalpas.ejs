@@ -8,7 +8,9 @@
   <% if (sankalpas.length === 0) { %>
   <div class="empty-state">No sankalpas yet</div>
   <% } else { %>
-  <table>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
     <thead><tr>
       <th>#</th><th>Name</th><th>Gotra</th><th>Event</th><th>City</th>
       <th>Wish</th><th>Phone</th><th>Email</th><th>Date</th>
@@ -29,6 +31,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </div>
 

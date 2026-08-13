@@ -8,7 +8,9 @@
   <% if (donations.length === 0) { %>
   <div class="empty-state">No donations yet</div>
   <% } else { %>
-  <table>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
     <thead><tr>
       <th>Receipt No</th><th>Name</th><th>Amount</th><th>Cause</th>
       <th>Phone</th><th>Email</th><th>Payment ID</th><th>Status</th><th>Date</th>
@@ -33,6 +35,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </div>
 

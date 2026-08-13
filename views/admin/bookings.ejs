@@ -8,7 +8,9 @@
   <% if (bookings.length === 0) { %>
   <div class="empty-state">No bookings yet</div>
   <% } else { %>
-  <table>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
     <thead><tr>
       <th>Booking No</th><th>Devotee</th><th>Puja</th><th>Occasion</th>
       <th>Preferred Date</th><th>Phone</th><th>Payment</th><th>Status</th><th>Action</th>
@@ -57,6 +59,7 @@
     <% }) %>
     </tbody>
   </table>
+  </div>
   <% } %>
 </div>
 

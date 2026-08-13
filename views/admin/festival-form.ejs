@@ -10,7 +10,7 @@
   </div>
 
   <form method="POST" action="<%= festival ? `/admin/festivals/${festival._id}/edit` : '/admin/festivals/new' %>" style="padding:1.5rem">
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+    <div class="form-grid">
 
       <div class="form-field">
         <label>Unique ID <span style="color:#f87171">*</span></label>
@@ -110,6 +110,8 @@
 </div>
 
 <style>
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media(max-width:700px){ .form-grid { grid-template-columns: 1fr; } }
   .form-field { display: flex; flex-direction: column; gap: .35rem; }
   .form-field label { font-size: .8rem; color: rgba(253,246,227,.7); font-weight: 500; }
   .form-field small { font-size: .7rem; color: rgba(253,246,227,.35); }

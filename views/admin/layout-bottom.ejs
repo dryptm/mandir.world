@@ -1,4 +1,22 @@
   </div><!-- /content -->
 </div><!-- /main -->
+
+<script>
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('sbOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('sbOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Close drawer automatically if window is resized back to desktop width
+  window.addEventListener('resize', () => {
+    if (window.innerWidth > 900) closeSidebar();
+  });
+</script>
+
 </body>
 </html>
