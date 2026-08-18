@@ -6,6 +6,7 @@ const MongoStore            = require('connect-mongo');
 const bcrypt                = require('bcrypt');
 const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation } = require('./utils/notify');
 const { fetchLiveViewers } = require('./utils/youtube');
+const liveViewers = require('./utils/liveViewers');
 
 const express    = require('express');
 const bodyParser = require('body-parser');
@@ -137,19 +138,15 @@ function enrichFestivals(list) {
   });
 }
 
-// Attach real combined view counts (platform DB views + YouTube LIVE viewers) to a list of streams.
-// YouTube's live viewer count is only fetched for streams we've marked isLive — for
-// non-live streams the YouTube portion is always 0 (no total-view-count substitute).
+// Attach real combined view counts (platform concurrent viewers + YouTube LIVE viewers) to a list of streams.
+// Both numbers are "right now" counts — nobody watching = 0, not a running total.
 async function attachRealViews(streamList) {
-  const dbStreams = await Stream.find({ id: { $in: streamList.map(s => s.id) } }).lean();
-  const platformMap = Object.fromEntries(dbStreams.map(d => [d.id, d.platformViews || 0]));
-
   return Promise.all(streamList.map(async s => {
-    const platformViews = platformMap[s.id] || 0;
+    const platformConcurrent = liveViewers.getConcurrentCount(s.id);
     const youtubeLiveViewers = (s.isLive && process.env.YOUTUBE_API_KEY)
       ? await fetchLiveViewers(s.youtubeVideoId)
       : 0;
-    return { ...s, realViews: platformViews + youtubeLiveViewers };
+    return { ...s, realViews: platformConcurrent + youtubeLiveViewers };
   }));
 }
 
@@ -204,26 +201,16 @@ app.get('/darshan/:id', async (req, res) => {
   if (!stream) return res.redirect('/darshan');
   const relatedStreams = streams.filter(s => s.id !== stream.id).slice(0, 3);
 
-  // Count a platform view once per browser session (cookie-based, avoids refresh-spam)
-  const viewedKey = `viewed_${stream.id}`;
-  if (!req.cookies?.[viewedKey]) {
-    res.cookie(viewedKey, '1', { maxAge: 30 * 60 * 1000, httpOnly: true }); // 30 min window
-    try {
-      await Stream.findOneAndUpdate({ id: stream.id }, { $inc: { platformViews: 1 } });
-    } catch (err) {
-      console.error('View count increment failed:', err.message);
-    }
-  }
-
-  // Real combined view count for first paint (platform + YouTube LIVE viewers)
+  // Real combined view count for first paint (platform concurrent + YouTube LIVE viewers).
+  // The actual "I'm watching" registration happens client-side via heartbeat —
+  // see /api/streams/:id/heartbeat — so this is just a snapshot for the initial render.
   let initialViews = 0;
   try {
-    const dbStream = await Stream.findOne({ id: stream.id }).lean();
-    const platformViews = dbStream?.platformViews || 0;
+    const platformConcurrent = liveViewers.getConcurrentCount(stream.id);
     const youtubeLiveViewers = (stream.isLive && process.env.YOUTUBE_API_KEY)
       ? await fetchLiveViewers(stream.youtubeVideoId)
       : 0;
-    initialViews = platformViews + youtubeLiveViewers;
+    initialViews = platformConcurrent + youtubeLiveViewers;
   } catch (err) {
     console.error('Initial view count error:', err.message);
   }
@@ -231,30 +218,44 @@ app.get('/darshan/:id', async (req, res) => {
   res.render('stream', { stream, relatedStreams, page: 'darshan', formatDate, initialViews });
 });
 
-// Combined view count: platform views (our DB) + YouTube LIVE viewers (real-time, not total views)
-// Client polls this every ~20s to show a live-updating number
+// Combined view count: platform concurrent viewers (real-time) + YouTube LIVE viewers.
+// Client polls this every ~20s to show a live-updating number.
 app.get('/api/streams/:id/views', async (req, res) => {
   try {
     const stream = streams.find(s => s.id === req.params.id);
     if (!stream) return res.status(404).json({ error: 'Stream not found' });
 
-    const dbStream = await Stream.findOne({ id: stream.id }).lean();
-    const platformViews = dbStream?.platformViews || 0;
+    const platformConcurrent = liveViewers.getConcurrentCount(stream.id);
 
     const youtubeLiveViewers = (stream.isLive && process.env.YOUTUBE_API_KEY)
       ? await fetchLiveViewers(stream.youtubeVideoId)
       : 0;
 
     res.json({
-      platformViews,
+      platformConcurrent,
       youtubeLiveViewers,
-      total: platformViews + youtubeLiveViewers,
+      total: platformConcurrent + youtubeLiveViewers,
       youtubeConfigured: !!process.env.YOUTUBE_API_KEY
     });
   } catch (err) {
     console.error('View count fetch error:', err.message);
     res.status(500).json({ error: 'Could not fetch view count' });
   }
+});
+
+// Heartbeat: sent every ~15s while someone has a stream page open.
+// This is what actually registers them as "watching right now."
+app.post('/api/streams/:id/heartbeat', (req, res) => {
+  const { viewerId } = req.body;
+  liveViewers.heartbeat(req.params.id, viewerId);
+  res.json({ ok: true });
+});
+
+// Leave: sent via sendBeacon when the tab closes or the user navigates away.
+// Immediately removes them instead of waiting for the heartbeat to time out.
+app.post('/api/streams/:id/leave', (req, res) => {
+  liveViewers.leave(req.params.id, req.body?.viewerId);
+  res.json({ ok: true });
 });
 
 // ── TEMPLES ──────────────────────────────────────────────
@@ -635,7 +636,11 @@ app.get('/admin/sankalpas', requireAdmin, async (req, res) => {
 // Streams
 app.get('/admin/streams', requireAdmin, async (req, res) => {
   const dbStreams = await Stream.find().sort({ city: 1 }).lean();
-  res.render('admin/streams', { streams: dbStreams });
+  const enriched = dbStreams.map(s => ({
+    ...s,
+    concurrentViewers: liveViewers.getConcurrentCount(s.id)
+  }));
+  res.render('admin/streams', { streams: enriched });
 });
 
 app.get('/admin/streams/new', requireAdmin, (req, res) => {

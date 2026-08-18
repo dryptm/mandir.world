@@ -290,10 +290,53 @@
 window.__STREAM_ID__   = '<%= stream.id %>';
 window.__STREAM_CITY__ = '<%= stream.city %>';
 
-// ── REAL VIEW COUNT — platform views + YouTube views, refreshed live ──
+// ── REAL CONCURRENT VIEWER TRACKING ──
+// Each browser tab gets its own viewer ID (sessionStorage = per-tab, not shared
+// across tabs). Opening the same stream in 2 tabs correctly counts as 2 viewers;
+// closing either tab removes just that one from the count.
+const _streamId = '<%= stream.id %>';
+const _viewerId = (() => {
+  const key = 'mw_viewer_' + _streamId;
+  let id = sessionStorage.getItem(key);
+  if (!id) {
+    id = 'v_' + Date.now() + '_' + Math.random().toString(36).slice(2, 10);
+    sessionStorage.setItem(key, id);
+  }
+  return id;
+})();
+
+function sendHeartbeat() {
+  fetch(`/api/streams/${_streamId}/heartbeat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ viewerId: _viewerId }),
+    keepalive: true
+  }).catch(() => {});
+}
+
+function sendLeave() {
+  // sendBeacon works reliably during page unload, unlike fetch()
+  const blob = new Blob([JSON.stringify({ viewerId: _viewerId })], { type: 'application/json' });
+  navigator.sendBeacon(`/api/streams/${_streamId}/leave`, blob);
+}
+
+// Register immediately, then keep the heartbeat alive every 15s
+sendHeartbeat();
+const _heartbeatTimer = setInterval(sendHeartbeat, 15000);
+
+// Leave cleanly on tab close, navigation, or refresh
+window.addEventListener('pagehide', sendLeave);
+window.addEventListener('beforeunload', sendLeave);
+// Also leave if the tab is backgrounded for a while (mobile app switch, etc.)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'hidden') sendLeave();
+  else sendHeartbeat(); // came back — re-register immediately
+});
+
+// ── DISPLAYED COUNT — polls the combined real total every 20s ──
 async function updateViewCount() {
   try {
-    const res = await fetch('/api/streams/<%= stream.id %>/views');
+    const res = await fetch(`/api/streams/${_streamId}/views`);
     const data = await res.json();
     const el = document.getElementById('viewerCount');
     if (el) el.textContent = data.total.toLocaleString('en-IN');
@@ -302,7 +345,7 @@ async function updateViewCount() {
   }
 }
 updateViewCount();
-setInterval(updateViewCount, 20000); // refresh every 20 seconds
+setInterval(updateViewCount, 20000);
 
 // Tap-to-unmute: send postMessage commands to the already-playing iframe.
 // No reload/navigation happens, so the click's "user gesture" stays valid
