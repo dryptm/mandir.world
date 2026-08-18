@@ -5,12 +5,14 @@ const crypto                = require('crypto');
 const MongoStore            = require('connect-mongo');
 const bcrypt                = require('bcrypt');
 const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation } = require('./utils/notify');
+const { fetchLiveViewers } = require('./utils/youtube');
 
 const express    = require('express');
 const bodyParser = require('body-parser');
 const session    = require('express-session');
 const path       = require('path');
 const compression     = require('compression');
+const cookieParser    = require('cookie-parser');
 const helmet          = require('helmet');
 const { connectDB }   = require('./db/connect');
 const { getPanchang } = require('./panchang');
@@ -36,6 +38,7 @@ const razorpay = new Razorpay({
 
 // ── SECURITY & COMPRESSION ───────────────────────────────
 app.use(compression());
+app.use(cookieParser());
 app.use(helmet({
   contentSecurityPolicy: isProd ? {
     directives: {
@@ -134,6 +137,22 @@ function enrichFestivals(list) {
   });
 }
 
+// Attach real combined view counts (platform DB views + YouTube LIVE viewers) to a list of streams.
+// YouTube's live viewer count is only fetched for streams we've marked isLive — for
+// non-live streams the YouTube portion is always 0 (no total-view-count substitute).
+async function attachRealViews(streamList) {
+  const dbStreams = await Stream.find({ id: { $in: streamList.map(s => s.id) } }).lean();
+  const platformMap = Object.fromEntries(dbStreams.map(d => [d.id, d.platformViews || 0]));
+
+  return Promise.all(streamList.map(async s => {
+    const platformViews = platformMap[s.id] || 0;
+    const youtubeLiveViewers = (s.isLive && process.env.YOUTUBE_API_KEY)
+      ? await fetchLiveViewers(s.youtubeVideoId)
+      : 0;
+    return { ...s, realViews: platformViews + youtubeLiveViewers };
+  }));
+}
+
 // ── ROUTES ───────────────────────────────────────────────
 
 // Health check
@@ -146,7 +165,8 @@ app.get('/health', async (req, res) => {
 // ── HOME ─────────────────────────────────────────────────
 app.get('/', async (req, res) => {
   const panchang          = getPanchang(new Date());
-  const liveStreams        = streams.filter(s => s.isLive).slice(0, 4);
+  const liveStreamsRaw    = streams.filter(s => s.isLive).slice(0, 4);
+  const liveStreams       = await attachRealViews(liveStreamsRaw);
   const enrichedHome      = enrichFestivals(festivals);
   const upcomingFestivals = enrichedHome
     .filter(f => f.isUpcoming && !f.isDaily)
@@ -171,26 +191,79 @@ app.get('/', async (req, res) => {
 });
 
 // ── DARSHAN ──────────────────────────────────────────────
-app.get('/darshan', (req, res) => {
+app.get('/darshan', async (req, res) => {
   const city     = req.query.city || '';
   const filtered = city ? streams.filter(s => s.city.toLowerCase() === city.toLowerCase()) : streams;
   const cities   = [...new Set(streams.map(s => s.city))];
-  res.render('darshan', { streams: filtered, allStreams: streams, cities, selectedCity: city, page: 'darshan', formatDate });
+  const enrichedStreams = await attachRealViews(filtered);
+  res.render('darshan', { streams: enrichedStreams, allStreams: streams, cities, selectedCity: city, page: 'darshan', formatDate });
 });
 
-app.get('/darshan/:id', (req, res) => {
+app.get('/darshan/:id', async (req, res) => {
   const stream = streams.find(s => s.id === req.params.id);
   if (!stream) return res.redirect('/darshan');
   const relatedStreams = streams.filter(s => s.id !== stream.id).slice(0, 3);
-  res.render('stream', { stream, relatedStreams, page: 'darshan', formatDate });
+
+  // Count a platform view once per browser session (cookie-based, avoids refresh-spam)
+  const viewedKey = `viewed_${stream.id}`;
+  if (!req.cookies?.[viewedKey]) {
+    res.cookie(viewedKey, '1', { maxAge: 30 * 60 * 1000, httpOnly: true }); // 30 min window
+    try {
+      await Stream.findOneAndUpdate({ id: stream.id }, { $inc: { platformViews: 1 } });
+    } catch (err) {
+      console.error('View count increment failed:', err.message);
+    }
+  }
+
+  // Real combined view count for first paint (platform + YouTube LIVE viewers)
+  let initialViews = 0;
+  try {
+    const dbStream = await Stream.findOne({ id: stream.id }).lean();
+    const platformViews = dbStream?.platformViews || 0;
+    const youtubeLiveViewers = (stream.isLive && process.env.YOUTUBE_API_KEY)
+      ? await fetchLiveViewers(stream.youtubeVideoId)
+      : 0;
+    initialViews = platformViews + youtubeLiveViewers;
+  } catch (err) {
+    console.error('Initial view count error:', err.message);
+  }
+
+  res.render('stream', { stream, relatedStreams, page: 'darshan', formatDate, initialViews });
+});
+
+// Combined view count: platform views (our DB) + YouTube LIVE viewers (real-time, not total views)
+// Client polls this every ~20s to show a live-updating number
+app.get('/api/streams/:id/views', async (req, res) => {
+  try {
+    const stream = streams.find(s => s.id === req.params.id);
+    if (!stream) return res.status(404).json({ error: 'Stream not found' });
+
+    const dbStream = await Stream.findOne({ id: stream.id }).lean();
+    const platformViews = dbStream?.platformViews || 0;
+
+    const youtubeLiveViewers = (stream.isLive && process.env.YOUTUBE_API_KEY)
+      ? await fetchLiveViewers(stream.youtubeVideoId)
+      : 0;
+
+    res.json({
+      platformViews,
+      youtubeLiveViewers,
+      total: platformViews + youtubeLiveViewers,
+      youtubeConfigured: !!process.env.YOUTUBE_API_KEY
+    });
+  } catch (err) {
+    console.error('View count fetch error:', err.message);
+    res.status(500).json({ error: 'Could not fetch view count' });
+  }
 });
 
 // ── TEMPLES ──────────────────────────────────────────────
-app.get('/temples', (req, res) => {
+app.get('/temples', async (req, res) => {
+  const enrichedStreams = await attachRealViews(streams);
   const byCity = {};
-  streams.forEach(s => { if (!byCity[s.city]) byCity[s.city] = []; byCity[s.city].push(s); });
+  enrichedStreams.forEach(s => { if (!byCity[s.city]) byCity[s.city] = []; byCity[s.city].push(s); });
   const cities = Object.keys(byCity).sort();
-  res.render('temples', { streams, byCity, cities, page: 'temples', formatDate });
+  res.render('temples', { streams: enrichedStreams, byCity, cities, page: 'temples', formatDate });
 });
 
 // ── PUJA SEWA ─────────────────────────────────────────────
@@ -386,11 +459,14 @@ app.get('/api/stats', async (req, res) => {
     Donation.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]),
     PujaBooking.countDocuments()
   ]);
+  const liveStreamsList = streams.filter(s => s.isLive);
+  const enrichedLive = await attachRealViews(liveStreamsList);
+  const liveViewers = enrichedLive.reduce((sum, s) => sum + (s.realViews || 0), 0);
   res.json({
     sankalpCount:   sankalpCount + 18470,
     totalDonations: (donationAgg[0]?.total || 0) + 1847500,
     pujaBookings:   pujaCount,
-    liveViewers:    streams.filter(s => s.isLive).reduce((s, st) => s + st.viewers, 0)
+    liveViewers
   });
 });
 
@@ -522,7 +598,8 @@ app.get('/admin', requireAdmin, async (req, res) => {
 
   const totalRevenue = donationAgg[0]?.total || 0;
   const liveCount    = streams.filter(s => s.isLive).length;
-  const liveViewers  = streams.filter(s => s.isLive).reduce((a, s) => a + (s.viewers || 0), 0);
+  const enrichedLiveStreams = await attachRealViews(streams.filter(s => s.isLive));
+  const liveViewers  = enrichedLiveStreams.reduce((a, s) => a + (s.realViews || 0), 0);
 
   res.render('admin/dashboard', {
     totalRevenue, donationCount, paidCount, recentDonations,

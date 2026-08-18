@@ -12,7 +12,7 @@
           <% if (stream.isLive) { %>
           <div class="live-indicator-bar">
             <span class="live-pulse-dot"></span>
-            LIVE &nbsp;·&nbsp; <span id="viewerCount"><%= stream.viewers.toLocaleString('en-IN') %></span> watching
+            LIVE &nbsp;·&nbsp; <span id="viewerCount"><%= (initialViews || 0).toLocaleString('en-IN') %></span> watching
           </div>
           <% } %>
 
@@ -287,11 +287,22 @@
 
 <% if (stream.isLive) { %>
 <script>
-// Inject server-side viewer count into main.js ticker
-window.__STREAM_VIEWERS__ = <%= stream.viewers %>;
-window.__STREAM_MIN_VIEWERS__ = <%= stream.viewers - 300 %>;
 window.__STREAM_ID__   = '<%= stream.id %>';
 window.__STREAM_CITY__ = '<%= stream.city %>';
+
+// ── REAL VIEW COUNT — platform views + YouTube views, refreshed live ──
+async function updateViewCount() {
+  try {
+    const res = await fetch('/api/streams/<%= stream.id %>/views');
+    const data = await res.json();
+    const el = document.getElementById('viewerCount');
+    if (el) el.textContent = data.total.toLocaleString('en-IN');
+  } catch (err) {
+    // Silently keep last known number if the request fails
+  }
+}
+updateViewCount();
+setInterval(updateViewCount, 20000); // refresh every 20 seconds
 
 // Tap-to-unmute: send postMessage commands to the already-playing iframe.
 // No reload/navigation happens, so the click's "user gesture" stays valid

@@ -74,7 +74,7 @@
     <div class="streams-home-grid">
       <% liveStreams.forEach((s,i) => { %>
       <a href="/darshan/<%= s.id %>" class="shg-card <%= i===0?'shg-card--feat':'' %>">
-        <div class="shg-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="shg-live-badge"><span></span>LIVE</div><div class="shg-viewers"><%= s.viewers.toLocaleString('en-IN') %> watching</div><div class="shg-overlay"></div></div>
+        <div class="shg-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="shg-live-badge"><span></span>LIVE</div><div class="shg-viewers"><%= (s.realViews || 0).toLocaleString('en-IN') %> watching</div><div class="shg-overlay"></div></div>
         <div class="shg-info"><div class="shg-city"><%= s.city %></div><h3><%= s.title %></h3><div class="shg-deity"><%= s.deity %></div></div>
       </a>
       <% }) %>

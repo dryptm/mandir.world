@@ -12,7 +12,7 @@
   <div class="table-scroll">
 <table>
     <thead><tr>
-      <th>Temple</th><th>City</th><th>Deity</th><th>YouTube Video ID</th><th>Live</th><th>Viewers</th><th>Active</th><th>Actions</th>
+      <th>Temple</th><th>City</th><th>Deity</th><th>YouTube Video ID</th><th>Live</th><th>Platform Views</th><th>Active</th><th>Actions</th>
     </tr></thead>
     <tbody>
     <% streams.forEach(s => { %>
@@ -32,7 +32,10 @@
           </label>
         </form>
       </td>
-      <td><%= s.viewers?.toLocaleString('en-IN') || 0 %></td>
+      <td>
+        <%= (s.platformViews || 0).toLocaleString('en-IN') %>
+        <div style="font-size:.65rem;color:rgba(253,246,227,.35)">+ real-time YouTube live viewers, when live</div>
+      </td>
       <td>
         <form method="POST" action="/admin/streams/<%= s._id %>/toggle-active">
           <label class="toggle">

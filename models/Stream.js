@@ -13,7 +13,8 @@ const streamSchema = new mongoose.Schema({
   youtubeChannelId:  { type: String, default: '' },
   youtubeVideoId:    { type: String, default: '' },
   isLive:            { type: Boolean, default: false },
-  viewers:           { type: Number, default: 0 },
+  viewers:           { type: Number, default: 0 },      // fallback/manual number
+  platformViews:     { type: Number, default: 0 },      // real views tracked on mandir.world
   deity:             { type: String },
   tags:              [{ type: String }],
   active:            { type: Boolean, default: true }

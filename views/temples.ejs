@@ -27,7 +27,7 @@
           </div>
           <div class="tdc-footer">
             <% if (temple.isLive) { %>
-            <span class="tdc-viewers"><%= temple.viewers.toLocaleString('en-IN') %> watching</span>
+            <span class="tdc-viewers"><%= (temple.realViews || 0).toLocaleString('en-IN') %> watching</span>
             <% } %>
             <span class="tdc-cta">Watch Darshan →</span>
           </div>

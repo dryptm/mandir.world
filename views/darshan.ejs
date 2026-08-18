@@ -23,7 +23,7 @@
     <div class="streams-grid-page">
       <% live.forEach((s,i) => { %>
       <a href="/darshan/<%= s.id %>" class="sgp-card <%= i===0?'sgp-card--feat':'' %>">
-        <div class="sgp-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="sgp-live"><span></span>LIVE</div><div class="sgp-viewers"><%= s.viewers.toLocaleString('en-IN') %> watching</div><div class="sgp-play">▶</div></div>
+        <div class="sgp-thumb"><img src="<%= s.thumbnail %>" alt="<%= s.title %>" loading="lazy"/><div class="sgp-live"><span></span>LIVE</div><div class="sgp-viewers"><%= (s.realViews || 0).toLocaleString('en-IN') %> watching</div><div class="sgp-play">▶</div></div>
         <div class="sgp-info"><div class="sgp-city"><%= s.city %>, <%= s.state %></div><h3><%= s.title %></h3><div class="sgp-hindi"><%= s.hindi %></div><p><%= s.description.substring(0,90) %>...</p><div class="sgp-schedule">⏰ <%= s.schedule.split('|')[0] %></div></div>
       </a>
       <% }) %>

@@ -72,8 +72,9 @@
       </div>
 
       <div class="form-field">
-        <label>Simulated Viewer Count</label>
+        <label>Legacy Viewer Field <span style="color:rgba(253,246,227,.35)">(unused — real views shown on site)</span></label>
         <input type="number" name="viewers" value="<%= stream?.viewers || 0 %>" min="0"/>
+        <small>Platform + YouTube views are now calculated automatically and shown live on the site.</small>
       </div>
 
       <div class="form-field" style="grid-column:1/-1">
