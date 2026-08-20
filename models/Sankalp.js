@@ -13,11 +13,11 @@ const sankalpSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Auto-increment sankalp number before saving
+// Auto-increment sankalp number before saving — a real sequential count, starting at 1
 sankalpSchema.pre('save', async function (next) {
   if (this.isNew) {
     const count = await mongoose.model('Sankalp').countDocuments();
-    this.number = count + 18471;
+    this.number = count + 1;
   }
   next();
 });

@@ -17,7 +17,7 @@
             <a href="/puja-sewa" class="btn btn--ghost btn--large">Book a Puja 🙏</a>
           </div>
           <div class="hero-stats-row">
-            <div class="hstat"><div class="hstat-num" id="h-viewers">15,162</div><div class="hstat-lbl">watching live</div></div>
+            <div class="hstat"><div class="hstat-num"><%= totalWatches.toLocaleString('en-IN') %></div><div class="hstat-lbl">watches</div></div>
             <div class="hstat-sep"></div>
             <div class="hstat"><div class="hstat-num"><%= totalSankalpCount.toLocaleString('en-IN') %></div><div class="hstat-lbl">sankalpas recorded</div></div>
             <div class="hstat-sep"></div>
@@ -149,7 +149,7 @@
           <div class="scp-row"><span>अवसर</span><strong>Ganga Aarti, Varanasi</strong></div>
           <div class="scp-row"><span>संकल्प</span><strong>सर्वे भवन्तु सुखिनः 🙏</strong></div>
         </div>
-        <div class="scp-footer">Registered on Mandir.World · Sankalp #18,471</div>
+        <div class="scp-footer">Registered on Mandir.World · Sankalp #<%= nextSankalpNumber.toLocaleString('en-IN') %></div>
       </div>
     </div>
   </div>

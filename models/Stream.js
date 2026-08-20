@@ -14,7 +14,7 @@ const streamSchema = new mongoose.Schema({
   youtubeVideoId:    { type: String, default: '' },
   isLive:            { type: Boolean, default: false },
   viewers:           { type: Number, default: 0 },      // fallback/manual number
-  platformViews:     { type: Number, default: 0 },      // deprecated — real-time concurrent viewers now tracked in-memory (utils/liveViewers.js), not here
+  totalWatches:      { type: Number, default: 0 },      // lifetime count of unique watch sessions — permanent, only ever increases. Separate from live concurrent viewers (utils/liveViewers.js), which is real-time and resets.
   deity:             { type: String },
   tags:              [{ type: String }],
   active:            { type: Boolean, default: true }

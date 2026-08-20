@@ -40,18 +40,6 @@ async function loadTopbarPanchang() {
   }
 }
 
-// ── LIVE VIEWER TICKER (hero) ──
-function startViewerTicker() {
-  const el = document.getElementById('h-viewers');
-  if (!el) return;
-  let base = 15162;
-  setInterval(() => {
-    base += Math.floor(Math.random() * 20) - 7;
-    base = Math.max(14000, base);
-    el.textContent = base.toLocaleString('en-IN');
-  }, 4500);
-}
-
 // ── SCROLL REVEAL ──
 function initScrollReveal() {
   const style = document.createElement('style');
@@ -500,7 +488,6 @@ document.addEventListener('keydown', e => {
 // ── INIT ──
 document.addEventListener('DOMContentLoaded', () => {
   loadTopbarPanchang();
-  startViewerTicker();
   initScrollReveal();
   setPujaDateMin();
   preselectSankalpEvent();

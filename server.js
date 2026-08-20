@@ -174,16 +174,19 @@ app.get('/', async (req, res) => {
   const popularPujas = pujas.filter(p => p.popular).slice(0, 4);
 
   // Live counts from MongoDB
-  const [sankalpCount, donationAgg] = await Promise.all([
+  const [sankalpCount, donationAgg, watchesAgg] = await Promise.all([
     Sankalp.countDocuments(),
-    Donation.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }])
+    Donation.aggregate([{ $group: { _id: null, total: { $sum: '$amount' } } }]),
+    Stream.aggregate([{ $group: { _id: null, total: { $sum: '$totalWatches' } } }])
   ]);
-  const totalSankalpCount = sankalpCount + 18470;
-  const totalDonations    = (donationAgg[0]?.total || 0) + 1847500;
+  const totalSankalpCount = sankalpCount; // real count only — no fabricated baseline
+  const totalDonations    = donationAgg[0]?.total || 0; // real count only — no fabricated baseline
+  const totalWatches      = watchesAgg[0]?.total || 0; // real count only — no fabricated baseline
+  const nextSankalpNumber = sankalpCount + 1; // real next sequence number, for the certificate preview
 
   res.render('index', {
     panchang, liveStreams, upcomingFestivals, nextBig, dailyEvents,
-    popularPujas, totalSankalpCount, totalDonations, formatDate, daysUntil, page: 'home'
+    popularPujas, totalSankalpCount, totalDonations, totalWatches, nextSankalpNumber, formatDate, daysUntil, page: 'home'
   });
 });
 
@@ -247,7 +250,15 @@ app.get('/api/streams/:id/views', async (req, res) => {
 // This is what actually registers them as "watching right now."
 app.post('/api/streams/:id/heartbeat', (req, res) => {
   const { viewerId } = req.body;
-  liveViewers.heartbeat(req.params.id, viewerId);
+  const isNewSession = liveViewers.heartbeat(req.params.id, viewerId);
+
+  // Only bump the permanent lifetime counter once per session (not every 15s ping).
+  // Fire-and-forget — don't make the viewer wait on a DB write for their heartbeat.
+  if (isNewSession) {
+    Stream.findOneAndUpdate({ id: req.params.id }, { $inc: { totalWatches: 1 } })
+      .catch(err => console.error('totalWatches increment failed:', err.message));
+  }
+
   res.json({ ok: true });
 });
 
@@ -464,8 +475,8 @@ app.get('/api/stats', async (req, res) => {
   const enrichedLive = await attachRealViews(liveStreamsList);
   const liveViewers = enrichedLive.reduce((sum, s) => sum + (s.realViews || 0), 0);
   res.json({
-    sankalpCount:   sankalpCount + 18470,
-    totalDonations: (donationAgg[0]?.total || 0) + 1847500,
+    sankalpCount:   sankalpCount, // real count only — no fabricated baseline
+    totalDonations: donationAgg[0]?.total || 0, // real count only — no fabricated baseline
     pujaBookings:   pujaCount,
     liveViewers
   });
