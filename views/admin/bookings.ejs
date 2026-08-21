@@ -13,7 +13,7 @@
 <table>
     <thead><tr>
       <th>Booking No</th><th>Devotee</th><th>Puja</th><th>Occasion</th>
-      <th>Preferred Date</th><th>Phone</th><th>Payment</th><th>Status</th><th>Action</th>
+      <th>Booked On</th><th>Preferred Date</th><th>Phone</th><th>Payment</th><th>Status</th><th>Action</th>
     </tr></thead>
     <tbody>
     <% bookings.forEach(b => { %>
@@ -27,6 +27,7 @@
       </td>
       <td><%= b.puja_name %></td>
       <td><%= b.occasion %></td>
+      <td style="font-size:.78rem;white-space:nowrap"><%= new Date(b.createdAt).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) %></td>
       <td><%= b.preferred_date %></td>
       <td><%= b.phone %><% if (b.email) { %><br/><span style="font-size:.7rem;color:rgba(253,246,227,.4)"><%= b.email %></span><% } %></td>
       <td>
