@@ -4,7 +4,7 @@ const Razorpay              = require('razorpay');
 const crypto                = require('crypto');
 const MongoStore            = require('connect-mongo');
 const bcrypt                = require('bcrypt');
-const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation } = require('./utils/notify');
+const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp } = require('./utils/notify');
 const { fetchLiveViewers } = require('./utils/youtube');
 const liveViewers = require('./utils/liveViewers');
 
@@ -26,6 +26,8 @@ const Festival    = require('./models/Festival');
 const Stream      = require('./models/Stream');
 const PujaModel   = require('./models/Puja');
 const City        = require('./models/City');
+const User        = require('./models/User');
+const Otp         = require('./models/Otp');
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -151,6 +153,117 @@ async function attachRealViews(streamList) {
 }
 
 // ── ROUTES ───────────────────────────────────────────────
+
+// Expose the logged-in user (if any) to every view as `currentUser`.
+// This never blocks anything — pages render exactly the same for logged-out
+// visitors, this just adds a small "Sign in" vs "My Account" link.
+app.use(async (req, res, next) => {
+  res.locals.currentUser = null;
+  if (req.session?.userId) {
+    try {
+      res.locals.currentUser = await User.findById(req.session.userId).lean();
+    } catch (err) { /* ignore — treat as logged out */ }
+  }
+  next();
+});
+
+// ── AUTH: EMAIL + OTP (no passwords) ─────────────────────
+
+function generateOtp() {
+  return String(Math.floor(100000 + Math.random() * 900000)); // 6 digits
+}
+
+// Step 1 — request a code sent to their email
+app.post('/api/auth/request-otp', async (req, res) => {
+  try {
+    const email = (req.body.email || '').trim().toLowerCase();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ ok: false, error: 'Please enter a valid email address.' });
+    }
+
+    // Rate-limit: don't allow more than 1 OTP request per email per 60 seconds
+    const recent = await Otp.findOne({ email }).sort({ createdAt: -1 });
+    if (recent && (Date.now() - recent.createdAt.getTime()) < 60 * 1000) {
+      return res.status(429).json({ ok: false, error: 'Please wait a moment before requesting another code.' });
+    }
+
+    const code = generateOtp();
+    await Otp.create({ email, code });
+
+    const sent = await sendLoginOtp({ email, code });
+    if (!sent) return res.status(500).json({ ok: false, error: 'Could not send code. Please try again.' });
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error('OTP request error:', err.message);
+    res.status(500).json({ ok: false, error: 'Something went wrong. Please try again.' });
+  }
+});
+
+// Step 2 — verify the code, create/find the user, log them in
+app.post('/api/auth/verify-otp', async (req, res) => {
+  try {
+    const email = (req.body.email || '').trim().toLowerCase();
+    const code  = (req.body.code  || '').trim();
+    if (!email || !code) return res.status(400).json({ ok: false, error: 'Email and code are required.' });
+
+    const otpDoc = await Otp.findOne({ email }).sort({ createdAt: -1 });
+    if (!otpDoc) return res.status(400).json({ ok: false, error: 'Code expired or not found. Please request a new one.' });
+
+    if (otpDoc.attempts >= 5) {
+      await Otp.deleteOne({ _id: otpDoc._id });
+      return res.status(400).json({ ok: false, error: 'Too many attempts. Please request a new code.' });
+    }
+
+    if (otpDoc.code !== code) {
+      otpDoc.attempts += 1;
+      await otpDoc.save();
+      return res.status(400).json({ ok: false, error: 'Incorrect code. Please try again.' });
+    }
+
+    // Correct — consume the OTP and log them in
+    await Otp.deleteMany({ email });
+
+    let user = await User.findOne({ email });
+    if (!user) user = await User.create({ email });
+    user.lastLoginAt = new Date();
+    await user.save();
+
+    req.session.userId = user._id.toString();
+    res.json({ ok: true, redirect: '/account' });
+  } catch (err) {
+    console.error('OTP verify error:', err.message);
+    res.status(500).json({ ok: false, error: 'Something went wrong. Please try again.' });
+  }
+});
+
+app.post('/api/auth/logout', (req, res) => {
+  req.session.userId = null;
+  res.json({ ok: true });
+});
+
+app.get('/login', (req, res) => {
+  if (res.locals.currentUser) return res.redirect('/account');
+  res.render('login', { page: 'login' });
+});
+
+// ── ACCOUNT — sankalp/donation/booking history for the logged-in user ────
+app.get('/account', async (req, res) => {
+  if (!res.locals.currentUser) return res.redirect('/login');
+  const email = res.locals.currentUser.email;
+
+  const [sankalpas, donations, bookings] = await Promise.all([
+    Sankalp.find({ email }).sort({ createdAt: -1 }).lean(),
+    Donation.find({ email }).sort({ createdAt: -1 }).lean(),
+    PujaBooking.find({ email }).sort({ createdAt: -1 }).lean()
+  ]);
+
+  res.render('account', {
+    user: res.locals.currentUser,
+    sankalpas, donations, bookings,
+    page: 'account', formatDate
+  });
+});
 
 // Health check
 app.get('/health', async (req, res) => {

@@ -104,6 +104,14 @@
       <a href="/calendar" class="nav-link <%= page === 'calendar' ? 'active' : '' %>">Panchang</a>
     </div>
 
+    <div class="nav-right-actions">
+      <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+        <a href="/account" class="nav-account-link">👤 My Account</a>
+      <% } else { %>
+        <a href="/login" class="nav-account-link">Sign In</a>
+      <% } %>
+    </div>
+
     <button class="nav-toggle" id="navToggle" onclick="toggleMenu()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -119,4 +127,9 @@
   <a href="/sankalp">🕉️ Sankalp</a>
   <a href="/calendar">📅 Panchang & Calendar</a>
   <a href="/about">About Us</a>
+  <% if (typeof currentUser !== 'undefined' && currentUser) { %>
+    <a href="/account">👤 My Account</a>
+  <% } else { %>
+    <a href="/login">🔑 Sign In</a>
+  <% } %>
 </div>

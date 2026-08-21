@@ -288,4 +288,49 @@ async function sendPujaConfirmation({ name, phone, email, puja_name, occasion, p
   }
 }
 
-module.exports = { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation };
+// ── LOGIN OTP ──────────────────────────────────────────────
+async function sendLoginOtp({ email, code }) {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.warn('SMTP not configured — cannot send login OTP');
+    return false;
+  }
+
+  const html = `
+<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#f5f0e8;font-family:'Segoe UI',Arial,sans-serif">
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr><td align="center" style="padding:32px 16px">
+    <table width="440" cellpadding="0" cellspacing="0" style="background:#1A0F00;border-radius:12px;overflow:hidden;max-width:100%">
+      <tr><td style="padding:32px 32px 16px;text-align:center">
+        <div style="font-size:32px">🕉️</div>
+        <h1 style="color:#C8922A;font-size:20px;margin:8px 0 4px;font-family:Georgia,serif">Mandir.World</h1>
+      </td></tr>
+      <tr><td style="padding:8px 32px 32px;text-align:center">
+        <p style="color:rgba(253,246,227,.7);font-size:14px;margin:0 0 20px">Your login code is</p>
+        <div style="background:rgba(255,255,255,.06);border:1px solid rgba(200,146,42,.25);border-radius:10px;padding:16px;margin-bottom:20px">
+          <span style="color:#FDF6E3;font-size:32px;font-weight:700;letter-spacing:8px">${code}</span>
+        </div>
+        <p style="color:rgba(253,246,227,.4);font-size:12px;margin:0">This code expires in 10 minutes. If you didn't request this, you can ignore this email.</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>`;
+
+  try {
+    await transporter.sendMail({
+      from:    process.env.EMAIL_FROM || 'Mandir.World <mandir.world@walkupwagon.com>',
+      to:      email,
+      subject: `🕉️ Your login code: ${code}`,
+      html
+    });
+    return true;
+  } catch (err) {
+    console.error('OTP email send failed:', err.message);
+    return false;
+  }
+}
+
+module.exports = { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp };

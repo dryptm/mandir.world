@@ -1,0 +1,116 @@
+<%- include('partials/header', { title: 'My Account' }) %>
+
+<section class="page-hero page-hero--dark">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → My Account</div>
+    <h1>My Account</h1>
+    <p><%= user.email %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+
+    <div class="account-summary">
+      <div class="acc-stat"><div class="acc-stat-num"><%= sankalpas.length %></div><div class="acc-stat-lbl">Sankalpas</div></div>
+      <div class="acc-stat"><div class="acc-stat-num"><%= donations.length %></div><div class="acc-stat-lbl">Donations</div></div>
+      <div class="acc-stat"><div class="acc-stat-num"><%= bookings.length %></div><div class="acc-stat-lbl">Puja Bookings</div></div>
+    </div>
+
+    <!-- SANKALPAS -->
+    <h2 class="acc-section-heading">🕉️ My Sankalpas</h2>
+    <% if (sankalpas.length === 0) { %>
+    <div class="acc-empty">No sankalpas recorded yet. <a href="/sankalp">Register your first sankalp →</a></div>
+    <% } else { %>
+    <div class="acc-list">
+      <% sankalpas.forEach(s => { %>
+      <div class="acc-item">
+        <div class="acc-item-top">
+          <strong>#<%= s.number %> — <%= s.event %></strong>
+          <span class="acc-item-date"><%= new Date(s.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></span>
+        </div>
+        <p class="acc-item-wish">"<%= s.wish %>"</p>
+        <div class="acc-item-meta"><%= s.city %><% if (s.gotra && s.gotra !== 'Not specified') { %> · Gotra: <%= s.gotra %><% } %></div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <!-- DONATIONS -->
+    <h2 class="acc-section-heading" style="margin-top:2.5rem">🪔 My Donations</h2>
+    <% if (donations.length === 0) { %>
+    <div class="acc-empty">No donations yet. <a href="/darshan">Watch a live darshan and give daan →</a></div>
+    <% } else { %>
+    <div class="acc-list">
+      <% donations.forEach(d => { %>
+      <div class="acc-item">
+        <div class="acc-item-top">
+          <strong>₹<%= d.amount.toLocaleString('en-IN') %> — <%= d.cause_name %></strong>
+          <span class="acc-item-date"><%= new Date(d.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></span>
+        </div>
+        <div class="acc-item-meta">
+          Receipt: <%= d.receiptNo %>
+          <span class="badge-inline <%= d.payment?.status === 'paid' ? 'badge-inline--green' : 'badge-inline--yellow' %>"><%= d.payment?.status || 'pending' %></span>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <!-- PUJA BOOKINGS -->
+    <h2 class="acc-section-heading" style="margin-top:2.5rem">🛕 My Puja Bookings</h2>
+    <% if (bookings.length === 0) { %>
+    <div class="acc-empty">No pujas booked yet. <a href="/puja-sewa">Book a puja →</a></div>
+    <% } else { %>
+    <div class="acc-list">
+      <% bookings.forEach(b => { %>
+      <div class="acc-item">
+        <div class="acc-item-top">
+          <strong><%= b.puja_name %></strong>
+          <span class="acc-item-date"><%= new Date(b.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></span>
+        </div>
+        <div class="acc-item-meta">
+          <%= b.occasion %> · Preferred: <%= b.preferred_date %>
+          <span class="badge-inline <%= b.status === 'Completed' ? 'badge-inline--green' : b.status === 'Cancelled' ? 'badge-inline--red' : 'badge-inline--blue' %>"><%= b.status %></span>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+    <div style="margin-top:2.5rem;text-align:center">
+      <button class="btn btn--outline" onclick="logout()">Sign Out</button>
+    </div>
+  </div>
+</section>
+
+<style>
+  .account-summary{display:flex;gap:1rem;margin-bottom:2.5rem;flex-wrap:wrap}
+  .acc-stat{flex:1;min-width:120px;background:var(--cream);border:1px solid var(--border-soft);border-radius:var(--r);padding:1.25rem;text-align:center}
+  .acc-stat-num{font-family:var(--font-display);font-size:1.8rem;font-weight:700;color:var(--saffron)}
+  .acc-stat-lbl{font-size:.78rem;color:var(--text-soft);text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+  .acc-section-heading{font-size:1.15rem;margin-bottom:1rem;padding-bottom:.5rem;border-bottom:2px solid var(--saffron-pale)}
+  .acc-empty{padding:1.5rem;background:var(--cream);border-radius:var(--r);text-align:center;color:var(--text-soft);font-size:.88rem}
+  .acc-empty a{color:var(--saffron);font-weight:600}
+  .acc-list{display:flex;flex-direction:column;gap:.75rem}
+  .acc-item{background:#fff;border:1px solid var(--border-soft);border-radius:var(--r);padding:1rem 1.25rem}
+  .acc-item-top{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:.5rem;margin-bottom:.4rem}
+  .acc-item-top strong{font-size:.92rem}
+  .acc-item-date{font-size:.75rem;color:var(--text-soft)}
+  .acc-item-wish{font-style:italic;color:var(--text-mid);font-size:.85rem;margin-bottom:.4rem}
+  .acc-item-meta{font-size:.78rem;color:var(--text-soft);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+  .badge-inline{padding:.15rem .5rem;border-radius:50px;font-size:.68rem;font-weight:600}
+  .badge-inline--green{background:rgba(34,197,94,.12);color:#16a34a}
+  .badge-inline--yellow{background:rgba(234,179,8,.12);color:#a16207}
+  .badge-inline--blue{background:rgba(59,130,246,.12);color:#2563eb}
+  .badge-inline--red{background:rgba(220,38,38,.12);color:#dc2626}
+</style>
+
+<script>
+async function logout() {
+  await fetch('/api/auth/logout', { method: 'POST' });
+  window.location.href = '/';
+}
+</script>
+
+<%- include('partials/footer') %>

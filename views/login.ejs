@@ -1,0 +1,149 @@
+<%- include('partials/header', { title: 'Sign In' }) %>
+
+<section class="section" style="min-height:60vh;display:flex;align-items:center;justify-content:center">
+  <div class="login-card">
+    <div class="login-card-header">
+      <span class="om-mark">ॐ</span>
+      <h1>Sign In</h1>
+      <p>See your sankalp history, donations, and puja bookings — all in one place.</p>
+    </div>
+
+    <!-- STEP 1: Enter email -->
+    <div id="stepEmail">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" class="form-input" placeholder="your@email.com" autofocus/>
+      </div>
+      <div class="login-error" id="emailError"></div>
+      <button class="btn btn--gold btn--large" style="width:100%" onclick="requestOtp()" id="requestBtn">
+        Send Login Code
+      </button>
+    </div>
+
+    <!-- STEP 2: Enter OTP -->
+    <div id="stepOtp" style="display:none">
+      <p class="otp-sent-msg">We sent a 6-digit code to <strong id="otpEmailDisplay"></strong></p>
+      <div class="form-group">
+        <label>Enter Code</label>
+        <input type="text" id="otpCode" class="form-input otp-input" placeholder="000000" maxlength="6" inputmode="numeric"/>
+      </div>
+      <div class="login-error" id="otpError"></div>
+      <button class="btn btn--gold btn--large" style="width:100%" onclick="verifyOtp()" id="verifyBtn">
+        Verify & Sign In
+      </button>
+      <button class="btn-link" onclick="backToEmail()">← Use a different email</button>
+    </div>
+
+    <p class="login-skip">
+      Just browsing? <a href="/">Continue without signing in →</a>
+    </p>
+  </div>
+</section>
+
+<style>
+  .login-card{background:#fff;border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:2.5rem 2rem;max-width:420px;width:100%;box-shadow:var(--shadow-lg)}
+  .login-card-header{text-align:center;margin-bottom:1.75rem}
+  .login-card-header .om-mark{font-family:var(--font-hindi);font-size:2rem;color:var(--saffron);display:block;margin-bottom:.5rem}
+  .login-card-header h1{font-size:1.4rem;margin-bottom:.4rem}
+  .login-card-header p{color:var(--text-soft);font-size:.85rem}
+  .otp-sent-msg{font-size:.85rem;color:var(--text-mid);margin-bottom:1rem;text-align:center}
+  .otp-input{font-size:1.4rem;letter-spacing:.5rem;text-align:center;font-weight:700}
+  .login-error{color:#dc2626;font-size:.82rem;margin-bottom:.75rem;min-height:1.2em}
+  .btn-link{background:none;border:none;color:var(--saffron);font-size:.82rem;cursor:pointer;width:100%;text-align:center;margin-top:.75rem;padding:.5rem}
+  .login-skip{text-align:center;font-size:.82rem;color:var(--text-soft);margin-top:1.5rem;padding-top:1.25rem;border-top:1px solid var(--border-soft)}
+  .login-skip a{color:var(--saffron);font-weight:600}
+</style>
+
+<script>
+let _loginEmail = '';
+
+async function requestOtp() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const errEl = document.getElementById('emailError');
+  const btn = document.getElementById('requestBtn');
+  errEl.textContent = '';
+
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    errEl.textContent = 'Please enter a valid email address.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending...';
+
+  try {
+    const res = await fetch('/api/auth/request-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      errEl.textContent = data.error || 'Could not send code.';
+      btn.disabled = false;
+      btn.textContent = 'Send Login Code';
+      return;
+    }
+    _loginEmail = email;
+    document.getElementById('otpEmailDisplay').textContent = email;
+    document.getElementById('stepEmail').style.display = 'none';
+    document.getElementById('stepOtp').style.display = 'block';
+    document.getElementById('otpCode').focus();
+  } catch (err) {
+    errEl.textContent = 'Network error. Please try again.';
+  }
+  btn.disabled = false;
+  btn.textContent = 'Send Login Code';
+}
+
+async function verifyOtp() {
+  const code = document.getElementById('otpCode').value.trim();
+  const errEl = document.getElementById('otpError');
+  const btn = document.getElementById('verifyBtn');
+  errEl.textContent = '';
+
+  if (!/^\d{6}$/.test(code)) {
+    errEl.textContent = 'Please enter the 6-digit code.';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Verifying...';
+
+  try {
+    const res = await fetch('/api/auth/verify-otp', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: _loginEmail, code })
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      errEl.textContent = data.error || 'Verification failed.';
+      btn.disabled = false;
+      btn.textContent = 'Verify & Sign In';
+      return;
+    }
+    window.location.href = data.redirect || '/account';
+  } catch (err) {
+    errEl.textContent = 'Network error. Please try again.';
+    btn.disabled = false;
+    btn.textContent = 'Verify & Sign In';
+  }
+}
+
+function backToEmail() {
+  document.getElementById('stepOtp').style.display = 'none';
+  document.getElementById('stepEmail').style.display = 'block';
+  document.getElementById('otpCode').value = '';
+  document.getElementById('otpError').textContent = '';
+}
+
+document.getElementById('otpCode')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') verifyOtp();
+});
+document.getElementById('loginEmail')?.addEventListener('keydown', e => {
+  if (e.key === 'Enter') requestOtp();
+});
+</script>
+
+<%- include('partials/footer') %>

@@ -231,7 +231,7 @@
 
     <div class="modal-section">
       <label class="modal-label">Email <span class="modal-label-note">For receipt & confirmation</span></label>
-      <input type="email" id="daanEmail" class="form-input" placeholder="your@email.com" />
+      <input type="email" id="daanEmail" class="form-input" placeholder="your@email.com" value="<%= typeof currentUser !== 'undefined' && currentUser ? currentUser.email : '' %>" />
     </div>
 
     <div class="modal-section">
