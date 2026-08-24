@@ -11,8 +11,35 @@ const transporter = nodemailer.createTransport({
   },
   tls: {
     rejectUnauthorized: false  // prevents cert errors on some hosts
-  }
+  },
+  connectionTimeout: 10000,  // fail fast instead of hanging if the host is unreachable
+  greetingTimeout:   10000,
+  socketTimeout:     15000
 });
+
+// Verify SMTP is actually reachable and credentials work — call this once at
+// server startup so a misconfiguration shows up immediately in the logs,
+// instead of silently failing on the first real email weeks later.
+async function verifyEmailConfig() {
+  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
+    console.error('❌  EMAIL NOT CONFIGURED — SMTP_USER / SMTP_PASS are missing.');
+    console.error('    If this is running on Railway: your local .env file is gitignored');
+    console.error('    and never reaches Railway. Add SMTP_HOST, SMTP_PORT, SMTP_SECURE,');
+    console.error('    SMTP_USER, SMTP_PASS, EMAIL_FROM directly in Railway → Variables.');
+    return false;
+  }
+  try {
+    await transporter.verify();
+    console.log(`✅  Email configured — SMTP connected as ${process.env.SMTP_USER}`);
+    return true;
+  } catch (err) {
+    console.error('❌  EMAIL SMTP CONNECTION FAILED:', err.message);
+    console.error('    Code:', err.code, '| Response:', err.response || '(none)');
+    console.error('    Check SMTP_HOST/PORT/SECURE match Hostinger exactly, and that');
+    console.error('    SMTP_PASS is correct (re-copy it if it was ever changed).');
+    return false;
+  }
+}
 
 async function sendDaanReceipt({ name, email, phone, amount, cause_name, receiptNo, createdAt }) {
   if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
@@ -83,7 +110,7 @@ async function sendDaanReceipt({ name, email, phone, amount, cause_name, receipt
     });
     console.log(`Receipt email sent to ${email}`);
   } catch (err) {
-    console.error('Email send failed:', err.message);
+    console.error('Email send failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
   }
 }
 
@@ -180,7 +207,7 @@ async function sendSankalpConfirmation({ name, phone, email, event, wish, number
       });
       console.log(`Sankalp confirmation email sent to ${email}`);
     } catch (err) {
-      console.error('Sankalp email failed:', err.message);
+      console.error('Sankalp email failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
     }
   }
 
@@ -268,7 +295,7 @@ async function sendPujaConfirmation({ name, phone, email, puja_name, occasion, p
       });
       console.log(`Puja confirmation email sent to ${email}`);
     } catch (err) {
-      console.error('Puja email failed:', err.message);
+      console.error('Puja email failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
     }
   }
 
@@ -328,9 +355,9 @@ async function sendLoginOtp({ email, code }) {
     });
     return true;
   } catch (err) {
-    console.error('OTP email send failed:', err.message);
+    console.error('OTP email send failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
     return false;
   }
 }
 
-module.exports = { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp };
+module.exports = { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp, verifyEmailConfig };

@@ -4,7 +4,7 @@ const Razorpay              = require('razorpay');
 const crypto                = require('crypto');
 const MongoStore            = require('connect-mongo');
 const bcrypt                = require('bcrypt');
-const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp } = require('./utils/notify');
+const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp, verifyEmailConfig } = require('./utils/notify');
 const { fetchLiveViewers } = require('./utils/youtube');
 const liveViewers = require('./utils/liveViewers');
 
@@ -703,6 +703,21 @@ app.get('/admin/logout', (req, res) => {
 });
 
 // Dashboard
+// Quick self-diagnostic: send a real test email to any address, right from the admin panel.
+// Visit /admin/test-email?to=you@example.com while logged into admin.
+app.get('/admin/test-email', requireAdmin, async (req, res) => {
+  const to = req.query.to;
+  if (!to) return res.json({ ok: false, error: 'Add ?to=your@email.com to the URL.' });
+
+  const sent = await sendLoginOtp({ email: to, code: '000000' });
+  res.json({
+    ok: sent,
+    message: sent
+      ? `Test email sent to ${to} — check the inbox (and spam folder).`
+      : 'Send failed — check Railway logs for the exact SMTP error, or SMTP_USER/SMTP_PASS may be missing in Railway → Variables.'
+  });
+});
+
 app.get('/admin', requireAdmin, async (req, res) => {
   const today = new Date(); today.setHours(0,0,0,0);
 
@@ -1276,6 +1291,9 @@ async function start() {
   await loadDataFromDB();
   // Refresh every 5 minutes so employee edits reflect without restart
   setInterval(loadDataFromDB, 5 * 60 * 1000);
+
+  // Check email is actually working — logs a clear ✅/❌ right at boot
+  await verifyEmailConfig();
 
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n🕉️  Mandir.World → http://localhost:${PORT}  [${isProd ? 'production' : 'development'}]\n`);

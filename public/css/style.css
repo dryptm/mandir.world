@@ -101,7 +101,20 @@ em{font-style:italic;font-family:var(--font-display)}
 .mobile-menu a{padding:.9rem 1.5rem;color:rgba(253,246,227,.75);font-size:.95rem;border-bottom:1px solid rgba(255,255,255,.05);transition:color .2s}
 .mobile-menu a:hover{color:var(--gold-lt)}
 .mobile-menu.open{display:flex}
-@media(max-width:768px){.nav-links{display:none}.nav-toggle{display:flex}}
+@media(max-width:768px){
+  .nav-links{display:none}
+  .nav-toggle{display:flex}
+  .nav-inner{gap:.6rem;padding:0 1rem}
+  .brand-tagline{display:none}
+  .brand-name{font-size:1.05rem}
+  .nav-account-link{padding:.4rem .8rem;font-size:.78rem}
+  .nav-right-actions{margin-left:auto;margin-right:.6rem}
+  .nav-toggle{margin-left:0}
+}
+@media(max-width:380px){
+  .nav-account-link{padding:.35rem .65rem;font-size:.72rem}
+  .brand-name{font-size:.95rem}
+}
 
 /* HERO */
 .hero{position:relative;min-height:92vh;background:var(--dark);overflow:hidden;display:flex;align-items:center}
