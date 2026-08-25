@@ -1,49 +1,50 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// ── EMAIL ─────────────────────────────────────────────────
-const transporter = nodemailer.createTransport({
-  host:   process.env.SMTP_HOST || 'smtp.hostinger.com',
-  port:   parseInt(process.env.SMTP_PORT || '465'),
-  secure: process.env.SMTP_SECURE === 'true',  // true for port 465 SSL
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS
-  },
-  tls: {
-    rejectUnauthorized: false  // prevents cert errors on some hosts
-  },
-  connectionTimeout: 10000,  // fail fast instead of hanging if the host is unreachable
-  greetingTimeout:   10000,
-  socketTimeout:     15000
-});
+// ── EMAIL — via Resend's HTTPS API ──────────────────────────
+// Switched from raw SMTP (nodemailer) because Render/Railway/most cloud
+// hosts block outbound SMTP ports (465/587) by default to prevent spam
+// abuse — confirmed via ETIMEDOUT on both ports in production. Resend's
+// API rides over normal HTTPS (443), which is never blocked.
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
-// Verify SMTP is actually reachable and credentials work — call this once at
-// server startup so a misconfiguration shows up immediately in the logs,
-// instead of silently failing on the first real email weeks later.
+// A tiny shim so every call below can keep using the same
+// transporter.sendMail({ from, to, subject, html }) shape it already had —
+// only this one function needed to change.
+async function sendMail({ from, to, subject, html }) {
+  if (!resend) throw new Error('RESEND_API_KEY not set');
+  const { data, error } = await resend.emails.send({ from, to, subject, html });
+  if (error) throw new Error(error.message || JSON.stringify(error));
+  return data;
+}
+
+// Verify email is actually configured — call this once at server startup
+// so a misconfiguration shows up immediately in the logs, instead of
+// silently failing on the first real email weeks later.
 async function verifyEmailConfig() {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.error('❌  EMAIL NOT CONFIGURED — SMTP_USER / SMTP_PASS are missing.');
-    console.error('    If this is running on Railway: your local .env file is gitignored');
-    console.error('    and never reaches Railway. Add SMTP_HOST, SMTP_PORT, SMTP_SECURE,');
-    console.error('    SMTP_USER, SMTP_PASS, EMAIL_FROM directly in Railway → Variables.');
+  if (!process.env.RESEND_API_KEY) {
+    console.error('❌  EMAIL NOT CONFIGURED — RESEND_API_KEY is missing.');
+    console.error('    Get a free key at resend.com (3,000 emails/month free),');
+    console.error('    verify your sending domain there, then add RESEND_API_KEY');
+    console.error('    in your host\'s environment variables (e.g. Render → Environment).');
     return false;
   }
   try {
-    await transporter.verify();
-    console.log(`✅  Email configured — SMTP connected as ${process.env.SMTP_USER}`);
+    // Lightweight check: list domains — confirms the API key itself is valid
+    // without sending a real email on every restart.
+    const { error } = await resend.domains.list();
+    if (error) throw new Error(error.message || JSON.stringify(error));
+    console.log(`✅  Email configured — Resend API key is valid`);
     return true;
   } catch (err) {
-    console.error('❌  EMAIL SMTP CONNECTION FAILED:', err.message);
-    console.error('    Code:', err.code, '| Response:', err.response || '(none)');
-    console.error('    Check SMTP_HOST/PORT/SECURE match Hostinger exactly, and that');
-    console.error('    SMTP_PASS is correct (re-copy it if it was ever changed).');
+    console.error('❌  RESEND API KEY CHECK FAILED:', err.message);
+    console.error('    Double-check RESEND_API_KEY was copied correctly.');
     return false;
   }
 }
 
 async function sendDaanReceipt({ name, email, phone, amount, cause_name, receiptNo, createdAt }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('SMTP not configured — skipping email receipt');
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not set — skipping email receipt');
     return;
   }
   if (!email) return;
@@ -102,7 +103,7 @@ async function sendDaanReceipt({ name, email, phone, amount, cause_name, receipt
 </html>`;
 
   try {
-    await transporter.sendMail({
+    await sendMail({
       from:    process.env.EMAIL_FROM || 'Mandir.World <noreply@mandir.world>',
       to:      email,
       subject: `🪔 Daan Receipt — ₹${Number(amount).toLocaleString('en-IN')} | ${receiptNo}`,
@@ -110,7 +111,7 @@ async function sendDaanReceipt({ name, email, phone, amount, cause_name, receipt
     });
     console.log(`Receipt email sent to ${email}`);
   } catch (err) {
-    console.error('Email send failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
+    console.error('Email send failed:', err.message);
   }
 }
 
@@ -197,9 +198,9 @@ async function sendSankalpConfirmation({ name, phone, email, event, wish, number
 </body>
 </html>`;
 
-  if (email && process.env.SMTP_USER) {
+  if (email && process.env.RESEND_API_KEY) {
     try {
-      await transporter.sendMail({
+      await sendMail({
         from:    process.env.EMAIL_FROM || 'Mandir.World <mandir.world@walkupwagon.com>',
         to:      email,
         subject: `🙏 Sankalp Registered — #${number} | ${event}`,
@@ -207,7 +208,7 @@ async function sendSankalpConfirmation({ name, phone, email, event, wish, number
       });
       console.log(`Sankalp confirmation email sent to ${email}`);
     } catch (err) {
-      console.error('Sankalp email failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
+      console.error('Sankalp email failed:', err.message);
     }
   }
 
@@ -285,9 +286,9 @@ async function sendPujaConfirmation({ name, phone, email, puja_name, occasion, p
 </body>
 </html>`;
 
-  if (email && process.env.SMTP_USER) {
+  if (email && process.env.RESEND_API_KEY) {
     try {
-      await transporter.sendMail({
+      await sendMail({
         from:    process.env.EMAIL_FROM || 'Mandir.World <mandir.world@walkupwagon.com>',
         to:      email,
         subject: `🪔 Puja Confirmed — ${puja_name} | ${bookingNo}`,
@@ -295,7 +296,7 @@ async function sendPujaConfirmation({ name, phone, email, puja_name, occasion, p
       });
       console.log(`Puja confirmation email sent to ${email}`);
     } catch (err) {
-      console.error('Puja email failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
+      console.error('Puja email failed:', err.message);
     }
   }
 
@@ -317,8 +318,8 @@ async function sendPujaConfirmation({ name, phone, email, puja_name, occasion, p
 
 // ── LOGIN OTP ──────────────────────────────────────────────
 async function sendLoginOtp({ email, code }) {
-  if (!process.env.SMTP_USER || !process.env.SMTP_PASS) {
-    console.warn('SMTP not configured — cannot send login OTP');
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not set — cannot send login OTP');
     return false;
   }
 
@@ -347,7 +348,7 @@ async function sendLoginOtp({ email, code }) {
 </html>`;
 
   try {
-    await transporter.sendMail({
+    await sendMail({
       from:    process.env.EMAIL_FROM || 'Mandir.World <mandir.world@walkupwagon.com>',
       to:      email,
       subject: `🕉️ Your login code: ${code}`,
@@ -355,7 +356,7 @@ async function sendLoginOtp({ email, code }) {
     });
     return true;
   } catch (err) {
-    console.error('OTP email send failed:', err.message, '| code:', err.code, '| response:', err.response || '(none)');
+    console.error('OTP email send failed:', err.message);
     return false;
   }
 }

@@ -714,7 +714,7 @@ app.get('/admin/test-email', requireAdmin, async (req, res) => {
     ok: sent,
     message: sent
       ? `Test email sent to ${to} — check the inbox (and spam folder).`
-      : 'Send failed — check Railway logs for the exact SMTP error, or SMTP_USER/SMTP_PASS may be missing in Railway → Variables.'
+      : 'Send failed — check your logs for the exact error, or RESEND_API_KEY may be missing/wrong in your host\'s environment variables.'
   });
 });
 
