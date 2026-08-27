@@ -239,7 +239,7 @@ function initiatePujaPayment(btn, price) {
   fetch('/api/payment/puja/create-order', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ puja_id, puja_name, amount: price, name, phone, email: email||null, occasion })
+    body: JSON.stringify({ puja_id, puja_name, amount: price, name, phone, email: email||null, occasion, preferred_date: date, gotra: extraFields.gotra || '' })
   })
   .then(r => r.json())
   .then(orderData => {

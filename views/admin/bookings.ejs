@@ -34,6 +34,9 @@
         <span class="badge <%= b.payment?.status === 'paid' ? 'badge-green' : 'badge-yellow' %>">
           <%= b.payment?.status || 'pending' %>
         </span>
+        <% if (b.payment?.source === 'webhook_fallback') { %>
+        <span class="badge badge-yellow" title="Frontend never confirmed — recovered from Razorpay webhook. Some details may be missing, follow up with the devotee directly.">⚠️ Follow up</span>
+        <% } %>
       </td>
       <td>
         <span class="badge <%= b.status === 'Completed' ? 'badge-green' : b.status === 'Confirmed' ? 'badge-blue' : b.status === 'Cancelled' ? 'badge-red' : 'badge-yellow' %>">

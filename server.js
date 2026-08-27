@@ -14,6 +14,7 @@ const session    = require('express-session');
 const path       = require('path');
 const compression     = require('compression');
 const cookieParser    = require('cookie-parser');
+const rateLimit        = require('express-rate-limit');
 const helmet          = require('helmet');
 const { connectDB }   = require('./db/connect');
 const { getPanchang } = require('./panchang');
@@ -56,6 +57,48 @@ app.use(helmet({
   } : false
 }));
 app.set('trust proxy', 1);
+
+// ── RATE LIMITING ─────────────────────────────────────────
+// Applied only to endpoints where abuse actually costs money or risks
+// security (OTP sends, payment order creation, admin login). Deliberately
+// NOT applied to the live-viewer heartbeat/poll endpoints — those are
+// legitimately high-frequency by design (every 15-20s per open tab) and
+// throttling them would break the live viewer counter for real visitors.
+
+// OTP requests — each one costs a real Resend API call. 5 per 15 min per IP.
+const otpRequestLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 5,
+  standardHeaders: true, legacyHeaders: false,
+  message: { ok: false, error: 'Too many code requests. Please wait a few minutes and try again.' }
+});
+
+// OTP verification attempts — guards against brute-forcing codes across many emails.
+const otpVerifyLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 15,
+  standardHeaders: true, legacyHeaders: false,
+  message: { ok: false, error: 'Too many attempts. Please wait a few minutes and try again.' }
+});
+
+// Payment order creation — each call hits Razorpay's API.
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 15,
+  standardHeaders: true, legacyHeaders: false,
+  message: { ok: false, error: 'Too many payment attempts. Please wait a few minutes and try again.' }
+});
+
+// Sankalp submissions — cheap to attempt, but should still not be scriptable at will.
+const formLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 20,
+  standardHeaders: true, legacyHeaders: false,
+  message: 'Too many submissions from this device. Please wait a few minutes and try again.'
+});
+
+// Admin login — brute-force protection on top of the existing bcrypt delay.
+const adminLoginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, max: 10,
+  standardHeaders: true, legacyHeaders: false,
+  message: 'Too many login attempts. Please wait a few minutes and try again.'
+});
 
 // ── APP SETUP ────────────────────────────────────────────
 app.set('view engine', 'ejs');
@@ -174,7 +217,7 @@ function generateOtp() {
 }
 
 // Step 1 — request a code sent to their email
-app.post('/api/auth/request-otp', async (req, res) => {
+app.post('/api/auth/request-otp', otpRequestLimiter, async (req, res) => {
   try {
     const email = (req.body.email || '').trim().toLowerCase();
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -201,7 +244,7 @@ app.post('/api/auth/request-otp', async (req, res) => {
 });
 
 // Step 2 — verify the code, create/find the user, log them in
-app.post('/api/auth/verify-otp', async (req, res) => {
+app.post('/api/auth/verify-otp', otpVerifyLimiter, async (req, res) => {
   try {
     const email = (req.body.email || '').trim().toLowerCase();
     const code  = (req.body.code  || '').trim();
@@ -433,7 +476,7 @@ app.get('/sankalp', (req, res) => {
   req.session.lastSankalp    = null;
 });
 
-app.post('/sankalp', async (req, res) => {
+app.post('/sankalp', formLimiter, async (req, res) => {
   const { name, gotra, wish, event, city, phone, email } = req.body;
   if (!name || !wish || !event) return res.redirect('/sankalp?error=missing');
   if (!phone || !/^\d{10}$/.test(phone)) return res.redirect('/sankalp?error=phone');
@@ -572,6 +615,9 @@ app.post('/daan', async (req, res) => {
 
 // ── ABOUT ────────────────────────────────────────────────
 app.get('/about', (req, res) => res.render('about', { page: 'about', formatDate }));
+app.get('/privacy', (req, res) => res.render('privacy', { page: 'privacy' }));
+app.get('/terms',   (req, res) => res.render('terms',   { page: 'terms' }));
+app.get('/refund',  (req, res) => res.render('refund',  { page: 'refund' }));
 
 // ── API ──────────────────────────────────────────────────
 app.get('/api/streams',   (req, res) => res.json(streams));
@@ -677,7 +723,7 @@ app.get('/admin/login', (req, res) => {
   res.render('admin/login', { error: null });
 });
 
-app.post('/admin/login', async (req, res) => {
+app.post('/admin/login', adminLoginLimiter, async (req, res) => {
   const { username, password } = req.body;
   const validUser = username === process.env.ADMIN_USER;
   // Support both plain text (legacy) and bcrypt hash in ADMIN_PASS
@@ -1038,9 +1084,9 @@ app.post('/admin/pujas/:id/toggle-active', requireAdmin, async (req, res) => {
 
 // ── PUJA PAYMENT ROUTES ──────────────────────────────────
 
-app.post('/api/payment/puja/create-order', async (req, res) => {
+app.post('/api/payment/puja/create-order', paymentLimiter, async (req, res) => {
   try {
-    const { puja_id, puja_name, amount, name, phone, email, occasion } = req.body;
+    const { puja_id, puja_name, amount, name, phone, email, occasion, preferred_date, gotra } = req.body;
     if (!amount || !name || !phone) return res.status(400).json({ ok: false, error: 'Missing required fields' });
     if (!/^\d{10}$/.test(phone)) return res.status(400).json({ ok: false, error: 'Valid 10-digit mobile required' });
 
@@ -1049,7 +1095,12 @@ app.post('/api/payment/puja/create-order', async (req, res) => {
       currency:        'INR',
       receipt:         `MDW-P-${Date.now()}`,
       payment_capture: 1,
-      notes:           { name, phone, email: email || '', puja_id, puja_name, occasion }
+      // Enough context here so the webhook can reconstruct a usable booking
+      // even if the browser never confirms back to us (closed tab, crash).
+      notes: {
+        name, phone, email: email || '', puja_id, puja_name, occasion,
+        preferred_date: preferred_date || '', gotra: gotra || ''
+      }
     });
 
     res.json({
@@ -1136,7 +1187,7 @@ app.post('/api/payment/puja/verify', async (req, res) => {
 // ── PAYMENT ROUTES ───────────────────────────────────────
 
 // Step 1: Create Razorpay order
-app.post('/api/payment/create-order', async (req, res) => {
+app.post('/api/payment/create-order', paymentLimiter, async (req, res) => {
   try {
     const { amount, name, email, phone, cause_id, cause_name, streamId, streamCity, tier_type } = req.body;
 
@@ -1242,22 +1293,112 @@ app.post('/api/payment/verify', async (req, res) => {
   }
 });
 
-// Step 3: Handle Razorpay webhooks (payment.captured for server-side confirmation)
-app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), (req, res) => {
-  const sig  = req.headers['x-razorpay-signature'];
-  const body = req.body.toString();
-  const expectedSig = crypto
-    .createHmac('sha256', process.env.RAZORPAY_KEY_SECRET)
-    .update(body)
-    .digest('hex');
+// Step 3: Razorpay webhook — the real safety net.
+//
+// The frontend `handler` callback (in puja-sewa.ejs / daan.ejs / stream.ejs)
+// is how bookings/donations normally get saved. But if the browser tab
+// closes, the connection drops, or the app crashes between "payment
+// succeeded" and "we called /verify" — Razorpay still captured the money,
+// and without this webhook, that transaction would vanish from our
+// database with no trace of who paid or for what.
+//
+// IMPORTANT: this uses RAZORPAY_WEBHOOK_SECRET, a separate secret you set
+// yourself in the Razorpay Dashboard (Settings → Webhooks → Add New
+// Webhook) — it is NOT the same as RAZORPAY_KEY_SECRET used elsewhere.
+app.post('/api/payment/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const signature = req.headers['x-razorpay-signature'];
+  const rawBody    = req.body.toString();
 
-  if (sig !== expectedSig) return res.status(400).send('Invalid signature');
-
-  const event = JSON.parse(body);
-  if (event.event === 'payment.captured') {
-    console.log('Webhook: payment captured —', event.payload.payment.entity.id);
+  if (!process.env.RAZORPAY_WEBHOOK_SECRET) {
+    console.error('❌  RAZORPAY_WEBHOOK_SECRET not set — webhook cannot verify signatures, rejecting.');
+    return res.status(500).send('Webhook not configured');
   }
+
+  let validSignature = false;
+  try {
+    validSignature = Razorpay.validateWebhookSignature(rawBody, signature, process.env.RAZORPAY_WEBHOOK_SECRET);
+  } catch (err) {
+    console.error('Webhook signature check threw:', err.message);
+  }
+  if (!validSignature) return res.status(400).send('Invalid signature');
+
+  // Acknowledge fast — Razorpay retries on non-2xx or slow responses.
+  // Do the actual work after responding so a slow DB write can't cause Razorpay to retry unnecessarily.
   res.json({ status: 'ok' });
+
+  try {
+    const event = JSON.parse(rawBody);
+    if (event.event !== 'payment.captured') return;
+
+    const payment  = event.payload.payment.entity;
+    const notes    = payment.notes || {};
+    const orderId  = payment.order_id;
+    const isPuja   = !!notes.puja_id;
+    const isDaan   = !!notes.cause_id;
+
+    if (isPuja) {
+      const existing = await PujaBooking.findOne({ 'payment.orderId': orderId });
+      if (existing) return; // frontend already saved this one — nothing to do
+
+      const booking = await PujaBooking.create({
+        puja_id:        notes.puja_id,
+        puja_name:      notes.puja_name || 'Puja',
+        devotee_name:   notes.name || 'Unknown',
+        gotra:          notes.gotra || 'Not specified',
+        occasion:       notes.occasion || 'Not specified',
+        preferred_date: notes.preferred_date || 'To be confirmed',
+        phone:          notes.phone || payment.contact || '',
+        email:          notes.email || payment.email || null,
+        payment: {
+          provider: 'razorpay', orderId, paymentId: payment.id,
+          status: 'paid', source: 'webhook_fallback'
+        },
+        status: 'Confirmed'
+      });
+
+      console.warn(`⚠️  Recovered puja booking via webhook (frontend never confirmed): ${booking.bookingNo}`);
+      sendPujaConfirmation({
+        name: booking.devotee_name, phone: booking.phone, email: booking.email,
+        puja_name: booking.puja_name, occasion: booking.occasion, preferred_date: booking.preferred_date,
+        bookingNo: booking.bookingNo, amount: payment.amount / 100
+      }).catch(() => {});
+
+    } else if (isDaan) {
+      const existing = await Donation.findOne({ 'payment.orderId': orderId });
+      if (existing) return;
+
+      const donation = await Donation.create({
+        name:       notes.name || 'Unknown',
+        phone:      notes.phone || payment.contact || null,
+        email:      notes.email || payment.email || null,
+        cause_id:   notes.cause_id || 'daan',
+        cause_name: notes.cause_name || 'Mandir.World Daan',
+        amount:     payment.amount / 100,
+        streamId:   notes.streamId || null,
+        payment: {
+          provider: 'razorpay', orderId, paymentId: payment.id,
+          status: 'paid', source: 'webhook_fallback'
+        }
+      });
+
+      console.warn(`⚠️  Recovered donation via webhook (frontend never confirmed): ${donation.receiptNo}`);
+      sendDaanReceipt({
+        name: donation.name, email: donation.email, phone: donation.phone,
+        amount: donation.amount, cause_name: donation.cause_name,
+        receiptNo: donation.receiptNo, createdAt: donation.createdAt
+      }).catch(() => {});
+      sendDaanSMS({
+        name: donation.name, phone: donation.phone,
+        amount: donation.amount, receiptNo: donation.receiptNo
+      }).catch(() => {});
+    } else {
+      console.warn('Webhook: payment.captured with unrecognized notes shape —', JSON.stringify(notes));
+    }
+  } catch (err) {
+    // Never let a webhook processing error take down the server —
+    // we already responded 200, this is just background recovery work.
+    console.error('Webhook processing error:', err.message);
+  }
 });
 
 // 404

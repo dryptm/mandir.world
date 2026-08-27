@@ -1,0 +1,55 @@
+<%- include('partials/header', { title: 'Refund Policy' }) %>
+
+<section class="page-hero page-hero--dark">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Refund Policy</div>
+    <h1>Refund & Cancellation Policy</h1>
+    <p>Last updated: <%= new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) %></p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container legal-content">
+
+    <p>This policy explains how refunds and cancellations are handled for donations (daan) and puja bookings made through Mandir.World.</p>
+
+    <h2>1. Donations (Daan)</h2>
+    <p>Donations made through the Service are voluntary contributions to the dharmic causes and temple seva listed on our platform, and are <strong>generally non-refundable</strong> once processed, in line with standard practice for charitable giving.</p>
+    <p>Exceptions where a refund will be considered:</p>
+    <ul>
+      <li>A duplicate payment was made for the same donation due to a technical error</li>
+      <li>An incorrect amount was charged due to a system error on our end</li>
+      <li>The payment was made fraudulently without your authorization (subject to Razorpay's dispute process)</li>
+    </ul>
+    <p>To request a review under any of the above, contact us within 7 days of the transaction at <a href="mailto:mandir.world@walkupwagon.com">mandir.world@walkupwagon.com</a> with your receipt number.</p>
+
+    <h2>2. Puja Bookings</h2>
+    <p>Puja bookings involve payment for a service to be performed by a partner pandit on a future date.</p>
+    <ul>
+      <li><strong>Cancellation by you:</strong> If you cancel more than 48 hours before your confirmed puja date, you are eligible for a full refund. Cancellations within 48 hours of the confirmed date may not be eligible for a refund, as preparations and pandit scheduling are typically already underway.</li>
+      <li><strong>Cancellation or non-performance by us:</strong> If a booked puja cannot be performed for any reason on our end (e.g. pandit unavailability, temple access issue), you will receive a full refund or the option to reschedule, at your choice.</li>
+      <li><strong>Rescheduling:</strong> You may request to reschedule your preferred date at no additional cost, subject to pandit availability, by contacting our team.</li>
+    </ul>
+
+    <h2>3. Prasad Delivery</h2>
+    <p>Once prasad has been dispatched for delivery, the shipping charge is non-refundable. If prasad is lost or damaged in transit, contact us and we will arrange a replacement dispatch where possible.</p>
+
+    <h2>4. How Refunds Are Processed</h2>
+    <p>Approved refunds are processed back to your original payment method via Razorpay. Refunds typically reflect in your account within 7–10 business days, depending on your bank or payment provider's processing times, which are outside our control.</p>
+
+    <h2>5. How to Request a Refund</h2>
+    <p>Email <a href="mailto:mandir.world@walkupwagon.com">mandir.world@walkupwagon.com</a> with:</p>
+    <ul>
+      <li>Your receipt number or booking number</li>
+      <li>The registered mobile number or email used for the transaction</li>
+      <li>The reason for your refund request</li>
+    </ul>
+    <p>We aim to respond to all refund requests within 3 business days.</p>
+
+    <h2>6. Contact Us</h2>
+    <p>For any questions about this policy, write to us at <a href="mailto:mandir.world@walkupwagon.com">mandir.world@walkupwagon.com</a>.</p>
+
+  </div>
+</section>
+
+<%- include('partials/footer') %>

@@ -38,7 +38,11 @@ const pujaBookingSchema = new mongoose.Schema({
     provider:  { type: String, default: 'razorpay' },
     orderId:   { type: String, default: null },
     paymentId: { type: String, default: null },
-    status:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
+    status:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+    // See Donation.js for why this exists — recovered puja bookings from the
+    // webhook may be missing contextual fields (gotra, family members, etc.)
+    // and should be followed up with the devotee directly.
+    source:    { type: String, enum: ['checkout', 'webhook_fallback'], default: 'checkout' }
   },
   status: {
     type: String,

@@ -37,7 +37,13 @@ const donationSchema = new mongoose.Schema({
     provider:  { type: String, default: 'razorpay' },
     orderId:   { type: String, default: null },
     paymentId: { type: String, default: null },
-    status:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' }
+    status:    { type: String, enum: ['pending', 'paid', 'failed'], default: 'pending' },
+    // 'checkout' = normal flow (frontend confirmed). 'webhook_fallback' = the
+    // browser tab closed/crashed before confirming, but Razorpay's webhook
+    // caught the successful payment and this record was recovered from it —
+    // some optional fields (PAN, prasad address) may be missing and should
+    // be followed up with the donor directly.
+    source:    { type: String, enum: ['checkout', 'webhook_fallback'], default: 'checkout' }
   },
 
   prasad: {
