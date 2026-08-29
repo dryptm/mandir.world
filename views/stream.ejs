@@ -277,11 +277,15 @@
 <!-- DAAN SUCCESS -->
 <div class="daan-success-overlay" id="daanSuccessOverlay">
   <div class="daan-success-box">
-    <div class="daan-success-icon">🪔</div>
-    <h2>Daan Received with Gratitude</h2>
-    <p id="successMsg"></p>
-    <div class="success-receipt" id="successReceipt"></div>
-    <button class="btn btn--gold" onclick="closeDaanSuccess()" style="margin-top:1.5rem;width:100%;">Continue Darshan 🙏</button>
+    <div id="shareCardStreamDaan" class="share-card-capture-zone">
+      <div class="daan-success-icon">🪔</div>
+      <h2>Daan Received with Gratitude</h2>
+      <p id="successMsg"></p>
+      <div class="success-receipt" id="successReceipt"></div>
+      <div class="share-card-branding"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>
+    </div>
+    <button class="share-btn" id="streamDaanShareBtn" style="width:100%;margin-top:1rem" onclick="shareCard('shareCardStreamDaan', 'daan-live', window.__lastDaanShareText || 'I gave daan during live darshan on Mandir.World 🪔')">📤 Share</button>
+    <button class="btn btn--gold" onclick="closeDaanSuccess()" style="margin-top:.75rem;width:100%;">Continue Darshan 🙏</button>
   </div>
 </div>
 

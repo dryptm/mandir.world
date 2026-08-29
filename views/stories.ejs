@@ -1,0 +1,50 @@
+<%- include('partials/header', { title: 'Devotee Stories' }) %>
+
+<section class="page-hero page-hero--dark">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Devotee Stories</div>
+    <h1>Devotee Stories <span class="ph-hindi">भक्तों की कहानियां</span></h1>
+    <p>Real stories from real devotees, watching darshan and staying connected to home from wherever life has taken them.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+
+    <div style="text-align:center;margin-bottom:2.5rem">
+      <a href="/share-your-story" class="btn btn--saffron btn--large">Share Your Own Story →</a>
+    </div>
+
+    <% if (stories.length === 0) { %>
+    <div class="acc-empty" style="max-width:500px;margin:0 auto">
+      No stories shared yet. Be the first — <a href="/share-your-story">tell us yours</a>.
+    </div>
+    <% } else { %>
+    <div class="stories-grid">
+      <% stories.forEach(s => { %>
+      <div class="story-card">
+        <div class="story-card-quote">"</div>
+        <p class="story-card-text"><%= s.story %></p>
+        <div class="story-card-footer">
+          <strong><%= s.name %></strong>
+          <span><%= s.location %></span>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <% } %>
+
+  </div>
+</section>
+
+<style>
+  .stories-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+  .story-card{background:#fff;border:1px solid var(--border-soft);border-radius:var(--r-lg);padding:1.75rem;box-shadow:var(--shadow-sm);position:relative}
+  .story-card-quote{font-family:Georgia,serif;font-size:3rem;color:var(--saffron-pale);line-height:.5;margin-bottom:.5rem}
+  .story-card-text{font-size:.92rem;color:var(--text-mid);line-height:1.65;margin-bottom:1.25rem;font-style:italic}
+  .story-card-footer{border-top:1px solid var(--border-soft);padding-top:.85rem;display:flex;flex-direction:column;gap:.15rem}
+  .story-card-footer strong{font-size:.9rem;color:var(--dark)}
+  .story-card-footer span{font-size:.78rem;color:var(--saffron);font-weight:600}
+</style>
+
+<%- include('partials/footer') %>

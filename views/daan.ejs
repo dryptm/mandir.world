@@ -17,7 +17,7 @@
       <div class="success-icon">🪔</div>
       <h2>Daan Received with Gratitude</h2>
       <p>Your donation of <strong>₹<%= lastDonation.amount.toLocaleString('en-IN') %></strong> to <strong><%= lastDonation.cause_name %></strong> has been recorded.</p>
-      <div class="sankalp-certificate">
+      <div class="sankalp-certificate" id="shareCardDaan">
         <div class="cert-header"><span>🪔</span><h3>Daan Praman-Patra</h3><span>🪔</span></div>
         <div class="cert-body">
           <div class="cert-row"><span>Donor</span><strong><%= lastDonation.name %></strong></div>
@@ -27,6 +27,10 @@
           <div class="cert-row"><span>Date</span><strong><%= new Date(lastDonation.timestamp).toLocaleString('en-IN') %></strong></div>
         </div>
         <div class="cert-footer">🙏 धर्मो रक्षति रक्षितः — Mandir.World</div>
+        <div class="share-card-branding"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>
+      </div>
+      <div style="margin-top:1rem;text-align:center">
+        <button class="share-btn" onclick="shareCard('shareCardDaan', 'daan-<%= lastDonation.receiptNo %>', 'I gave daan to <%= lastDonation.cause_name %> on Mandir.World 🪔 — join me at mandir.world')">📤 Share My Daan</button>
       </div>
       <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
         <a href="/daan" class="btn btn--outline">Give More Daan</a>

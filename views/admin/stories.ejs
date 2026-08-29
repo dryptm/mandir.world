@@ -1,0 +1,66 @@
+<%- include('layout-top', { title: 'Stories', page: 'stories' }) %>
+
+<div class="section-card">
+  <div class="section-header">
+    <h2>Devotee Stories — Moderation</h2>
+    <span class="count"><%= stories.length %> total</span>
+  </div>
+  <div class="scroll-hint">← Swipe to see more →</div>
+  <div class="table-scroll">
+<table>
+    <thead><tr>
+      <th>Name</th><th>Location</th><th>Story</th><th>Email</th><th>Status</th><th>Featured</th><th>Submitted</th><th>Actions</th>
+    </tr></thead>
+    <tbody>
+    <% if (stories.length === 0) { %>
+    <tr><td colspan="8" class="empty-state">No stories submitted yet.</td></tr>
+    <% } %>
+    <% stories.forEach(s => { %>
+    <tr>
+      <td><strong><%= s.name %></strong></td>
+      <td><%= s.location %></td>
+      <td style="max-width:280px;font-size:.8rem;color:rgba(253,246,227,.65)"><%= s.story.substring(0, 140) %><%= s.story.length > 140 ? '...' : '' %></td>
+      <td style="font-size:.75rem"><%= s.email || '—' %></td>
+      <td>
+        <span class="badge <%= s.status === 'approved' ? 'badge-green' : s.status === 'rejected' ? 'badge-red' : 'badge-yellow' %>">
+          <%= s.status %>
+        </span>
+      </td>
+      <td>
+        <% if (s.status === 'approved') { %>
+        <form method="POST" action="/admin/stories/<%= s._id %>/toggle-featured">
+          <label class="toggle">
+            <input type="checkbox" <%= s.featured ? 'checked' : '' %> onchange="this.form.submit()"/>
+            <span class="toggle-slider"></span>
+          </label>
+        </form>
+        <% } else { %>
+        <span style="color:rgba(253,246,227,.25);font-size:.75rem">—</span>
+        <% } %>
+      </td>
+      <td style="font-size:.75rem"><%= new Date(s.createdAt).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'}) %></td>
+      <td>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+          <% if (s.status !== 'approved') { %>
+          <form method="POST" action="/admin/stories/<%= s._id %>/approve">
+            <button type="submit" class="action-btn">Approve</button>
+          </form>
+          <% } %>
+          <% if (s.status !== 'rejected') { %>
+          <form method="POST" action="/admin/stories/<%= s._id %>/reject">
+            <button type="submit" class="action-btn danger">Reject</button>
+          </form>
+          <% } %>
+          <form method="POST" action="/admin/stories/<%= s._id %>/delete" onsubmit="return confirm('Delete this story permanently?')">
+            <button type="submit" class="action-btn danger">Delete</button>
+          </form>
+        </div>
+      </td>
+    </tr>
+    <% }) %>
+    </tbody>
+</table>
+  </div>
+</div>
+
+<%- include('layout-bottom') %>

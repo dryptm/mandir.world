@@ -155,6 +155,36 @@
   </div>
 </section>
 
+<!-- DEVOTEE STORIES TEASER -->
+<% if (featuredStories && featuredStories.length > 0) { %>
+<section class="section">
+  <div class="container">
+    <div class="section-heading-row">
+      <div>
+        <span class="badge badge--saffron">💬 REAL STORIES</span>
+        <h2>Stories from devotees around the world</h2>
+      </div>
+      <a href="/stories" class="btn btn--outline">Read All Stories →</a>
+    </div>
+    <div class="home-stories-grid">
+      <% featuredStories.forEach(s => { %>
+      <div class="story-card">
+        <div class="story-card-quote">"</div>
+        <p class="story-card-text"><%= s.story.length > 200 ? s.story.substring(0, 200) + '…' : s.story %></p>
+        <div class="story-card-footer">
+          <strong><%= s.name %></strong>
+          <span><%= s.location %></span>
+        </div>
+      </div>
+      <% }) %>
+    </div>
+    <div style="text-align:center;margin-top:1.5rem">
+      <a href="/share-your-story" class="btn btn--saffron">Share Your Own Story →</a>
+    </div>
+  </div>
+</section>
+<% } %>
+
 <!-- DAILY STREAMS -->
 <section class="section section--dark-alt">
   <div class="container">

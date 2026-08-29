@@ -1,0 +1,67 @@
+<%- include('partials/header', { title: 'Share Your Story' }) %>
+
+<section class="page-hero page-hero--dark">
+  <div class="container">
+    <div class="ph-breadcrumb">Home → Share Your Story</div>
+    <h1>Share Your Story</h1>
+    <p>Couldn't make it home for a festival? Lit a diya with family from thousands of miles away? Tell us — your story might help someone else feel less far from home.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width:640px">
+
+    <% if (submitted) { %>
+    <div class="sankalp-success">
+      <div class="success-icon">🙏</div>
+      <h2>Thank You for Sharing</h2>
+      <p>Your story has been received. Our team reviews every submission before it's shown on the site — if approved, it may be featured on our stories page.</p>
+      <a href="/stories" class="btn btn--saffron" style="margin-top:1rem">Read Other Stories →</a>
+    </div>
+    <% } else { %>
+
+    <form action="/stories/submit" method="POST" class="story-form">
+      <div class="form-group">
+        <label>Your Name <span class="req">*</span></label>
+        <input type="text" name="name" class="form-input" placeholder="Your full name" required/>
+      </div>
+
+      <div class="form-group">
+        <label>Where are you writing from? <span class="req">*</span></label>
+        <input type="text" name="location" class="form-input" placeholder="e.g. London, UK or Toronto, Canada" required/>
+      </div>
+
+      <div class="form-group">
+        <label>Your Story <span class="req">*</span></label>
+        <textarea name="story" class="form-input form-textarea" rows="6" maxlength="1200"
+          placeholder="Tell us what mandir.world meant to you — a festival you watched from afar, a sankalp you made for someone back home, anything real." required></textarea>
+        <small style="color:var(--text-soft);font-size:.75rem">Max 1200 characters</small>
+      </div>
+
+      <div class="form-group">
+        <label>Email <span class="optional">(optional, only for follow-up — never shown publicly)</span></label>
+        <input type="email" name="email" class="form-input" placeholder="your@email.com"/>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label-inline">
+          <input type="checkbox" name="consent" value="yes" required/>
+          I'm okay with mandir.world sharing my name, location, and story publicly if approved.
+        </label>
+      </div>
+
+      <button type="submit" class="btn btn--gold btn--large" style="width:100%">Submit My Story 🙏</button>
+    </form>
+
+    <% } %>
+  </div>
+</section>
+
+<style>
+  .story-form{display:flex;flex-direction:column;gap:1.1rem}
+  .form-textarea{resize:vertical;font-family:inherit}
+  .checkbox-label-inline{display:flex;align-items:flex-start;gap:.6rem;font-size:.85rem;color:var(--text-mid);cursor:pointer;line-height:1.4}
+  .checkbox-label-inline input{margin-top:.2rem;flex-shrink:0}
+</style>
+
+<%- include('partials/footer') %>

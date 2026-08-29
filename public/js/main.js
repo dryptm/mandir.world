@@ -457,6 +457,8 @@ function showDaanSuccess(name, amount, receiptNo) {
   receiptNo = receiptNo || ('MDW-' + Date.now());
   if (!overlay) return;
   if (msg) msg.textContent = `Thank you, ${name}. Your daan of ₹${Number(amount).toLocaleString('en-IN')} has been recorded for this darshan.`;
+  const streamCityForShare = window.__STREAM_CITY__ || 'this darshan';
+  window.__lastDaanShareText = `I gave daan during live darshan from ${streamCityForShare} on Mandir.World 🪔 — join me at mandir.world`;
   if (receipt) {
     const streamTitle = document.querySelector('.stream-page-title')?.textContent || 'Live Stream';
     receipt.innerHTML = `
@@ -536,3 +538,67 @@ document.addEventListener('DOMContentLoaded', () => {
     if (banner) setTimeout(() => banner.style.display = 'flex', 2000);
   }
 });
+
+// ══════════════════════════════════════════
+// SHARE CARD — turns any certificate/card element into a shareable image
+// Used after sankalp registration, daan payment, puja booking, and live
+// stream daan. Uses the native Web Share API on mobile (one-tap to
+// WhatsApp/Instagram/etc) and falls back to a plain download on desktop.
+// ══════════════════════════════════════════
+
+async function shareCard(elementId, filename, shareText) {
+  const el = document.getElementById(elementId);
+  if (!el || typeof html2canvas === 'undefined') {
+    console.warn('Share card: element or html2canvas not available');
+    return;
+  }
+
+  // Briefly mark as "capturing" so any hover/focus styles don't show in the image
+  el.classList.add('capturing-share-card');
+
+  let canvas;
+  try {
+    canvas = await html2canvas(el, {
+      backgroundColor: '#1A0F00',
+      scale: 2, // sharper image for sharing
+      useCORS: true
+    });
+  } catch (err) {
+    console.error('Share card render failed:', err);
+    el.classList.remove('capturing-share-card');
+    return;
+  }
+  el.classList.remove('capturing-share-card');
+
+  canvas.toBlob(async (blob) => {
+    if (!blob) return;
+    const file = new File([blob], `${filename}.png`, { type: 'image/png' });
+
+    // Mobile with native share sheet — one tap to WhatsApp, Instagram, etc.
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: 'Mandir.World',
+          text: shareText || 'Shared from mandir.world 🙏'
+        });
+        return;
+      } catch (err) {
+        // User cancelled the share sheet — fall through to download as backup
+        if (err.name === 'AbortError') return;
+      }
+    }
+
+    // Desktop / unsupported — just download the image
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.png`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+window.shareCard = shareCard;

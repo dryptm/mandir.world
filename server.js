@@ -29,6 +29,7 @@ const PujaModel   = require('./models/Puja');
 const City        = require('./models/City');
 const User        = require('./models/User');
 const Otp         = require('./models/Otp');
+const Story       = require('./models/Story');
 
 const app    = express();
 const PORT   = process.env.PORT || 3000;
@@ -340,8 +341,16 @@ app.get('/', async (req, res) => {
   const totalWatches      = watchesAgg[0]?.total || 0; // real count only — no fabricated baseline
   const nextSankalpNumber = sankalpCount + 1; // real next sequence number, for the certificate preview
 
+  // Featured devotee stories for the homepage teaser — falls back to any
+  // approved story if nothing is marked featured yet, so the section isn't
+  // empty the moment the feature ships.
+  let featuredStories = await Story.find({ status: 'approved', featured: true }).sort({ createdAt: -1 }).limit(3).lean();
+  if (featuredStories.length === 0) {
+    featuredStories = await Story.find({ status: 'approved' }).sort({ createdAt: -1 }).limit(3).lean();
+  }
+
   res.render('index', {
-    panchang, liveStreams, upcomingFestivals, nextBig, dailyEvents,
+    panchang, liveStreams, upcomingFestivals, nextBig, dailyEvents, featuredStories,
     popularPujas, totalSankalpCount, totalDonations, totalWatches, nextSankalpNumber, formatDate, daysUntil, page: 'home'
   });
 });
@@ -615,6 +624,34 @@ app.post('/daan', async (req, res) => {
 
 // ── ABOUT ────────────────────────────────────────────────
 app.get('/about', (req, res) => res.render('about', { page: 'about', formatDate }));
+
+// ── DEVOTEE STORIES (diaspora testimonials) ──────────────
+app.get('/stories', async (req, res) => {
+  const stories = await Story.find({ status: 'approved' }).sort({ featured: -1, createdAt: -1 }).limit(60).lean();
+  res.render('stories', { stories, page: 'stories' });
+});
+
+app.get('/share-your-story', (req, res) => {
+  res.render('share-story', { submitted: false, page: 'share-story' });
+});
+
+app.post('/stories/submit', formLimiter, async (req, res) => {
+  try {
+    const { name, location, story, email, consent } = req.body;
+    if (!name || !location || !story || consent !== 'yes') {
+      return res.render('share-story', { submitted: false, page: 'share-story' });
+    }
+    await Story.create({
+      name: name.trim(), location: location.trim(), story: story.trim().slice(0, 1200),
+      email: email?.trim() || null, consent: true
+    });
+    res.render('share-story', { submitted: true, page: 'share-story' });
+  } catch (err) {
+    console.error('Story submission error:', err.message);
+    res.render('share-story', { submitted: false, page: 'share-story' });
+  }
+});
+
 app.get('/privacy', (req, res) => res.render('privacy', { page: 'privacy' }));
 app.get('/terms',   (req, res) => res.render('terms',   { page: 'terms' }));
 app.get('/refund',  (req, res) => res.render('refund',  { page: 'refund' }));
@@ -816,6 +853,33 @@ app.post('/admin/bookings/:id/status', requireAdmin, async (req, res) => {
 app.get('/admin/sankalpas', requireAdmin, async (req, res) => {
   const sankalpas = await Sankalp.find().sort({ createdAt: -1 }).limit(200).lean();
   res.render('admin/sankalpas', { sankalpas });
+});
+
+// ── STORIES (moderation) ──────────────────────────────────
+app.get('/admin/stories', requireAdmin, async (req, res) => {
+  const stories = await Story.find().sort({ createdAt: -1 }).limit(200).lean();
+  res.render('admin/stories', { stories });
+});
+
+app.post('/admin/stories/:id/approve', requireAdmin, async (req, res) => {
+  await Story.findByIdAndUpdate(req.params.id, { status: 'approved' });
+  res.redirect('/admin/stories');
+});
+
+app.post('/admin/stories/:id/reject', requireAdmin, async (req, res) => {
+  await Story.findByIdAndUpdate(req.params.id, { status: 'rejected' });
+  res.redirect('/admin/stories');
+});
+
+app.post('/admin/stories/:id/toggle-featured', requireAdmin, async (req, res) => {
+  const s = await Story.findById(req.params.id);
+  await Story.findByIdAndUpdate(req.params.id, { featured: !s.featured });
+  res.redirect('/admin/stories');
+});
+
+app.post('/admin/stories/:id/delete', requireAdmin, async (req, res) => {
+  await Story.findByIdAndDelete(req.params.id);
+  res.redirect('/admin/stories');
 });
 
 // Streams

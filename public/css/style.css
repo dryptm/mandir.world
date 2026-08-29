@@ -748,6 +748,13 @@ em{font-style:italic;font-family:var(--font-display)}
 
 @media(max-width:480px){
   .btn--wrap-text{font-size:.85rem}
+  /* Share buttons — full width on mobile, easier to tap */
+  .share-btn{width:100%;justify-content:center;font-size:.8rem;padding:.65rem 1rem}
+  .share-btn--sm{width:auto;padding:.4rem .85rem;font-size:.72rem}
+  /* Story cards — tighter padding on small screens */
+  .story-card{padding:1.25rem}
+  .story-card-text{font-size:.85rem}
+  .stories-grid,.home-stories-grid{grid-template-columns:1fr;gap:1rem}
   /* Puja card — stack header, wrap price under title on narrow screens */
   .puja-card{padding:1.1rem}
   .puja-card-header{flex-wrap:wrap}
@@ -1254,3 +1261,22 @@ html, body { overflow-x: hidden; max-width: 100vw; }
 .footer-legal-links span{color:rgba(253,246,227,.2)}
 
 .footer-disclaimer{text-align:center;font-size:.68rem;color:rgba(253,246,227,.28);margin-top:.75rem;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.5}
+
+/* ── SHARE CARD ─────────────────────────────────────────── */
+.share-card-branding{display:flex;align-items:center;justify-content:center;gap:.4rem;padding-top:.85rem;margin-top:.85rem;border-top:1px solid rgba(200,146,42,.2)}
+.share-card-branding .scb-om{font-family:var(--font-hindi);color:var(--gold-lt);font-size:1rem}
+.share-card-branding .scb-url{color:var(--gold-lt);font-weight:700;font-size:.85rem;letter-spacing:.02em}
+.capturing-share-card{box-shadow:none !important}
+.share-btn{display:inline-flex;align-items:center;gap:.5rem;background:rgba(200,146,42,.12);border:1px solid rgba(200,146,42,.35);color:var(--saffron);padding:.6rem 1.3rem;border-radius:50px;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s}
+.share-btn:hover{background:rgba(200,146,42,.2);border-color:var(--gold)}
+
+.share-card-capture-zone{background:#1A0F00;border-radius:var(--r);padding:1.25rem}
+
+.share-btn--sm{padding:.4rem .9rem;font-size:.75rem;margin-bottom:.75rem}
+
+/* ── HOMEPAGE STORIES TEASER ───────────────────────────── */
+.section-heading-row{display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:1.75rem;flex-wrap:wrap}
+.section-heading-row h2{margin-top:.4rem;margin-bottom:0}
+.home-stories-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem}
+@media(max-width:900px){.home-stories-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:640px){.home-stories-grid{grid-template-columns:1fr}.section-heading-row{flex-direction:column;align-items:flex-start}}

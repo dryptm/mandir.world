@@ -21,7 +21,7 @@
       <div class="bs-icon">🙏</div>
       <h2>Puja Booking Confirmed</h2>
       <p>Your <strong><%= lastBooking.puja_name %></strong> has been booked.</p>
-      <div class="sankalp-certificate">
+      <div class="sankalp-certificate" id="shareCardPuja">
         <div class="cert-header"><span>🙏</span><h3>Puja Booking Receipt</h3><span>🙏</span></div>
         <div class="cert-body">
           <div class="cert-row"><span>Booking No</span><strong><%= lastBooking.bookingNo %></strong></div>
@@ -31,6 +31,10 @@
           <div class="cert-row"><span>Status</span><strong style="color:#16a34a">✓ Confirmed</strong></div>
         </div>
         <div class="cert-footer">Our team will contact you at <%= lastBooking.phone %> within 24 hours.</div>
+        <div class="share-card-branding"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>
+      </div>
+      <div style="margin-top:1rem;text-align:center">
+        <button class="share-btn" onclick="shareCard('shareCardPuja', 'puja-<%= lastBooking.bookingNo %>', 'I booked a <%= lastBooking.puja_name %> on Mandir.World 🙏 — join me at mandir.world')">📤 Share My Booking</button>
       </div>
       <a href="/puja-sewa" class="btn btn--outline" style="margin-top:1.5rem">Book Another Puja</a>
       <% if (typeof currentUser === 'undefined' || !currentUser) { %>
@@ -94,6 +98,16 @@
             </div>
             <% } %>
           </div>
+
+          <button type="button" class="share-btn share-btn--sm"
+            data-icon="<%= puja.icon %>"
+            data-name="<%= puja.name %>"
+            data-hindi="<%= puja.hindi %>"
+            data-purpose="<%= puja.purpose %>"
+            data-notfor="<%= (puja.notFor || []).join('|') %>"
+            onclick="sharePujaGuide(this)">
+            📤 Share This Guide
+          </button>
 
           <!-- INCLUDES -->
           <div class="puja-includes">
@@ -296,6 +310,51 @@ function initiatePujaPayment(btn, price) {
     btn.textContent = `Book ${puja_name} — ₹${price.toLocaleString('en-IN')}+`;
     alert(err.message || 'Could not initiate payment.');
   });
+}
+</script>
+
+<!-- Hidden template, reused for every puja's "Share This Guide" button.
+     Positioned off-screen (not display:none) so html2canvas can still render it. -->
+<div id="pujaGuideShareTemplate" style="position:fixed;left:-9999px;top:0;width:420px;background:#1A0F00;padding:1.75rem;border-radius:16px;font-family:'Inter',system-ui,sans-serif">
+  <div style="text-align:center;margin-bottom:1rem">
+    <span id="pgsIcon" style="font-size:2.5rem"></span>
+    <h3 id="pgsName" style="color:#FDF6E3;font-family:Georgia,serif;font-size:1.3rem;margin:.4rem 0 .15rem"></h3>
+    <div id="pgsHindi" style="color:#C8922A;font-family:'Noto Sans Devanagari',sans-serif;font-size:.9rem"></div>
+  </div>
+  <div style="background:rgba(34,197,94,.1);border-left:3px solid #22c55e;border-radius:8px;padding:.85rem 1rem;margin-bottom:.75rem">
+    <strong style="color:#4ade80;font-size:.78rem">✓ BEST FOR</strong>
+    <p id="pgsPurpose" style="color:rgba(253,246,227,.85);font-size:.85rem;margin:.35rem 0 0;line-height:1.5"></p>
+  </div>
+  <div id="pgsNotForBox" style="background:rgba(220,38,38,.08);border-left:3px solid #dc2626;border-radius:8px;padding:.85rem 1rem;margin-bottom:.5rem">
+    <strong style="color:#f87171;font-size:.78rem">✗ NOT FOR</strong>
+    <div id="pgsNotFor" style="color:rgba(253,246,227,.7);font-size:.8rem;margin-top:.35rem;line-height:1.6"></div>
+  </div>
+  <div class="share-card-branding" style="margin-top:1rem"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>
+</div>
+
+<script>
+async function sharePujaGuide(btn) {
+  const icon    = btn.dataset.icon;
+  const name    = btn.dataset.name;
+  const hindi   = btn.dataset.hindi;
+  const purpose = btn.dataset.purpose;
+  const notFor  = (btn.dataset.notfor || '').split('|').filter(Boolean);
+
+  document.getElementById('pgsIcon').textContent    = icon;
+  document.getElementById('pgsName').textContent    = name;
+  document.getElementById('pgsHindi').textContent   = hindi;
+  document.getElementById('pgsPurpose').textContent = purpose;
+
+  const notForBox = document.getElementById('pgsNotForBox');
+  if (notFor.length > 0) {
+    notForBox.style.display = 'block';
+    document.getElementById('pgsNotFor').innerHTML = notFor.map(n => `→ ${n}`).join('<br/>');
+  } else {
+    notForBox.style.display = 'none';
+  }
+
+  await shareCard('pujaGuideShareTemplate', `puja-guide-${name.toLowerCase().replace(/\s+/g,'-')}`,
+    `Did you know? ${name} is best for: ${purpose} — via mandir.world 🙏`);
 }
 </script>
 

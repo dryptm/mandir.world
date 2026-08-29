@@ -13,7 +13,7 @@
       <div class="success-icon">🕉️</div>
       <h2>Your Sankalp is Registered</h2>
       <p>Sankalp #<%= lastSankalp.number %> has been recorded in the name of <strong><%= lastSankalp.name %></strong>.</p>
-      <div class="sankalp-certificate">
+      <div class="sankalp-certificate" id="shareCardSankalp">
         <div class="cert-header"><span>ॐ</span><h3>Sankalp Praman-Patra</h3><span>ॐ</span></div>
         <div class="cert-body">
           <div class="cert-row"><span>Devotee</span><strong><%= lastSankalp.name %></strong></div>
@@ -24,6 +24,10 @@
           <div class="cert-row"><span>Registered</span><strong><%= new Date(lastSankalp.timestamp).toLocaleString('en-IN') %></strong></div>
         </div>
         <div class="cert-footer">🙏 Registered on Mandir.World — Sankalp No. #<%= lastSankalp.number %></div>
+        <div class="share-card-branding"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>
+      </div>
+      <div style="margin-top:1rem;text-align:center">
+        <button class="share-btn" onclick="shareCard('shareCardSankalp', 'sankalp-<%= lastSankalp.number %>', 'I recorded a sankalp on Mandir.World 🕉️ — join me at mandir.world')">📤 Share My Sankalp</button>
       </div>
       <div style="margin-top:1.5rem;display:flex;gap:1rem;justify-content:center;flex-wrap:wrap">
         <a href="/sankalp" class="btn btn--outline">Register Another</a>
