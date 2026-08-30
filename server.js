@@ -474,22 +474,26 @@ app.get('/temples', async (req, res) => {
 });
 
 // ── PUJA SEWA ─────────────────────────────────────────────
-app.get('/puja-sewa', (req, res) => {
+app.get('/puja-sewa', async (req, res) => {
   const upcomingFestivals = enrichFestivals(festivals)
     .filter(f => f.isUpcoming && !f.isDaily)
     .sort((a, b) => new Date(a.date) - new Date(b.date))
     .slice(0, 5);
 
-  // Handle redirect from Razorpay payment success
+  // Handle redirect from Razorpay payment success — look up the real saved
+  // booking by its bookingNo instead of rebuilding a partial one from URL
+  // query params (which was silently dropping occasion/date/phone before).
   let lastBooking = req.session.lastPujaBooking || null;
   if (req.query.success === '1' && req.query.booking) {
-    lastBooking = {
-      bookingNo:  req.query.booking,
-      puja_name:  req.query.puja,
-      devotee_name: req.query.name,
-      amount:     req.query.amount,
-      status:     'Confirmed'
-    };
+    try {
+      const saved = await PujaBooking.findOne({ bookingNo: req.query.booking }).lean();
+      lastBooking = saved || {
+        bookingNo: req.query.booking, puja_name: req.query.puja,
+        devotee_name: req.query.name, amount: req.query.amount, status: 'Confirmed'
+      };
+    } catch (err) {
+      console.error('Booking lookup failed:', err.message);
+    }
   }
 
   res.render('puja-sewa', {
@@ -578,7 +582,7 @@ app.get('/calendar/:id', (req, res) => {
 });
 
 // ── DAAN ─────────────────────────────────────────────────
-app.get('/daan', (req, res) => {
+app.get('/daan', async (req, res) => {
   // Standard tiers (all causes): 11, 21, 51, 101, 251
   // Special tiers (coming after temple partnerships): 1001, 3001+ship, 4001+ship
   const STANDARD_TIERS = [11, 21, 51, 101, 251];
@@ -596,17 +600,22 @@ app.get('/daan', (req, res) => {
     { id:'ghat-dev',   name:'Ghat Preservation',    hindi:'घाट संरक्षण',       description:'Contribute to the restoration of ancient ghats in Varanasi and Haridwar.',                     icon:'🏛️', raised:178000, goal:500000,  pujaCity:'Varanasi' },
     { id:'platform',   name:'Support Mandir.World', hindi:'मंदिर.वर्ल्ड सेवा', description:'Help us build better streams and bring darshan to those who cannot travel.',                  icon:'📡', raised:84800,  goal:200000,  pujaCity:'Varanasi' }
   ];
-  // Build lastDonation from query params (Razorpay redirect) or session (fallback)
+  // Build lastDonation from the real saved record (Razorpay redirect) or session fallback.
+  // Looking it up by receiptNo instead of rebuilding from query params avoids
+  // silently dropping fields (PAN, prasad info, real timestamp) — same class
+  // of bug that was hiding occasion/date/phone on the puja booking receipt.
   let lastDonation = req.session.lastDonation || null;
   if (req.query.success === '1' && req.query.receipt) {
-    lastDonation = {
-      receiptNo:  req.query.receipt,
-      name:       req.query.name,
-      amount:     Number(req.query.amount) / 100,
-      cause_name: req.query.cause,
-      paymentId:  req.query.payId,
-      timestamp:  new Date().toISOString()
-    };
+    try {
+      const saved = await Donation.findOne({ receiptNo: req.query.receipt }).lean();
+      lastDonation = saved
+        ? { ...saved, timestamp: saved.createdAt } // template expects .timestamp, DB has .createdAt
+        : { receiptNo: req.query.receipt, name: req.query.name,
+            amount: Number(req.query.amount) / 100, cause_name: req.query.cause,
+            timestamp: new Date().toISOString() };
+    } catch (err) {
+      console.error('Donation lookup failed:', err.message);
+    }
   }
 
   res.render('daan', {
