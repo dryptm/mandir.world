@@ -53,7 +53,7 @@
           <%= d.payment?.status || 'pending' %>
         </span>
       </td>
-      <td><%= new Date(d.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) %></td>
+      <td><%= formatDateTimeIST(d.createdAt) %></td>
     </tr>
     <% }) %>
     </tbody>
@@ -115,7 +115,7 @@
       <td><%= s.event %></td>
       <td style="font-style:italic;color:rgba(253,246,227,.6)"><%= s.wish?.substring(0,60) %><%= s.wish?.length > 60 ? '...' : '' %></td>
       <td><%= s.phone || '—' %></td>
-      <td><%= new Date(s.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) %></td>
+      <td><%= formatDateTimeIST(s.createdAt) %></td>
     </tr>
     <% }) %>
     </tbody>

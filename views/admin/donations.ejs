@@ -33,7 +33,7 @@
         <span class="badge badge-yellow" title="Frontend never confirmed — recovered from Razorpay webhook. PAN/prasad address may be missing, follow up with the donor directly.">⚠️ Follow up</span>
         <% } %>
       </td>
-      <td style="font-size:.75rem"><%= new Date(d.createdAt).toLocaleString('en-IN', {day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) %></td>
+      <td style="font-size:.75rem"><%= formatDateTimeIST(d.createdAt) %></td>
     </tr>
     <% }) %>
     </tbody>

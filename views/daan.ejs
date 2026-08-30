@@ -24,7 +24,7 @@
           <div class="cert-row"><span>Amount</span><strong>₹<%= lastDonation.amount.toLocaleString('en-IN') %></strong></div>
           <div class="cert-row"><span>Cause</span><strong><%= lastDonation.cause_name %></strong></div>
           <div class="cert-row"><span>Receipt No</span><strong><%= lastDonation.receiptNo %></strong></div>
-          <div class="cert-row"><span>Date</span><strong><%= new Date(lastDonation.timestamp).toLocaleString('en-IN') %></strong></div>
+          <div class="cert-row"><span>Date</span><strong><%= formatDateTimeIST(lastDonation.timestamp) %></strong></div>
         </div>
         <div class="cert-footer">🙏 धर्मो रक्षति रक्षितः — Mandir.World</div>
         <div class="share-card-branding"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>

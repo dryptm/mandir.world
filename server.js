@@ -136,10 +136,38 @@ let pujas     = [];
 let citiesMap = {};
 
 // ── HELPERS ──────────────────────────────────────────────
+// All date/time formatting below explicitly sets timeZone: 'Asia/Kolkata'.
+// Without this, Node renders dates in the SERVER's timezone (UTC on
+// Render/Railway), not IST — 'en-IN' only controls formatting style
+// (comma placement, month names), not the actual timezone used.
+
 function formatDate(d) {
   if (!d || d === 'daily') return 'Daily';
-  return new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+  return new Date(d).toLocaleDateString('en-IN', {
+    day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Kolkata'
+  });
 }
+
+// Full date + time, always IST, always labelled — e.g. "30 Aug 2026, 2:03 PM IST"
+function formatDateTimeIST(d) {
+  if (!d) return '—';
+  const formatted = new Date(d).toLocaleString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+    timeZone: 'Asia/Kolkata'
+  });
+  return `${formatted} IST`;
+}
+
+// Time only, always IST, always labelled — e.g. "2:03 PM IST"
+function formatTimeIST(d) {
+  if (!d) return '—';
+  const formatted = new Date(d).toLocaleTimeString('en-IN', {
+    hour: 'numeric', minute: '2-digit', hour12: true, timeZone: 'Asia/Kolkata'
+  });
+  return `${formatted} IST`;
+}
+
 function daysUntil(dateStr) {
   if (!dateStr || dateStr === 'daily') return null;
   return Math.ceil((new Date(dateStr) - new Date()) / 86400000);
@@ -203,6 +231,8 @@ async function attachRealViews(streamList) {
 // visitors, this just adds a small "Sign in" vs "My Account" link.
 app.use(async (req, res, next) => {
   res.locals.currentUser = null;
+  res.locals.formatDateTimeIST = formatDateTimeIST;
+  res.locals.formatTimeIST     = formatTimeIST;
   if (req.session?.userId) {
     try {
       res.locals.currentUser = await User.findById(req.session.userId).lean();
@@ -632,23 +662,32 @@ app.get('/stories', async (req, res) => {
 });
 
 app.get('/share-your-story', (req, res) => {
-  res.render('share-story', { submitted: false, page: 'share-story' });
+  res.render('share-story', { submitted: false, page: 'share-story', error: null, formData: null });
 });
 
 app.post('/stories/submit', formLimiter, async (req, res) => {
   try {
     const { name, location, story, email, consent } = req.body;
-    if (!name || !location || !story || consent !== 'yes') {
-      return res.render('share-story', { submitted: false, page: 'share-story' });
+    const formData = { name, location, story, email };
+
+    if (!name?.trim() || !location?.trim() || !story?.trim()) {
+      return res.render('share-story', { submitted: false, page: 'share-story', formData,
+        error: 'Please fill in your name, location, and story.' });
     }
+    if (consent !== 'yes') {
+      return res.render('share-story', { submitted: false, page: 'share-story', formData,
+        error: 'Please check the consent box to confirm you\'re okay sharing your story publicly.' });
+    }
+
     await Story.create({
       name: name.trim(), location: location.trim(), story: story.trim().slice(0, 1200),
       email: email?.trim() || null, consent: true
     });
-    res.render('share-story', { submitted: true, page: 'share-story' });
+    res.render('share-story', { submitted: true, page: 'share-story', error: null, formData: null });
   } catch (err) {
     console.error('Story submission error:', err.message);
-    res.render('share-story', { submitted: false, page: 'share-story' });
+    res.render('share-story', { submitted: false, page: 'share-story', formData: req.body,
+      error: 'Something went wrong on our end. Please try again in a moment.' });
   }
 });
 

@@ -51,8 +51,9 @@ async function sendDaanReceipt({ name, email, phone, amount, cause_name, receipt
 
   const date = new Date(createdAt).toLocaleString('en-IN', {
     day: 'numeric', month: 'long', year: 'numeric',
-    hour: '2-digit', minute: '2-digit'
-  });
+    hour: 'numeric', minute: '2-digit', hour12: true,
+    timeZone: 'Asia/Kolkata'
+  }) + ' IST';
 
   const html = `
 <!DOCTYPE html>

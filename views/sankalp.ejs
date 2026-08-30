@@ -21,7 +21,7 @@
           <div class="cert-row"><span>Occasion</span><strong><%= lastSankalp.event %></strong></div>
           <div class="cert-row"><span>City</span><strong><%= lastSankalp.city %></strong></div>
           <div class="cert-row"><span>Sankalp</span><strong><%= lastSankalp.wish %></strong></div>
-          <div class="cert-row"><span>Registered</span><strong><%= new Date(lastSankalp.timestamp).toLocaleString('en-IN') %></strong></div>
+          <div class="cert-row"><span>Registered</span><strong><%= formatDateTimeIST(lastSankalp.timestamp) %></strong></div>
         </div>
         <div class="cert-footer">🙏 Registered on Mandir.World — Sankalp No. #<%= lastSankalp.number %></div>
         <div class="share-card-branding"><span class="scb-om">ॐ</span><span class="scb-url">mandir.world</span></div>

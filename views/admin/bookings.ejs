@@ -27,7 +27,7 @@
       </td>
       <td><%= b.puja_name %></td>
       <td><%= b.occasion %></td>
-      <td style="font-size:.78rem;white-space:nowrap"><%= new Date(b.createdAt).toLocaleString('en-IN', { day:'numeric', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit' }) %></td>
+      <td style="font-size:.78rem;white-space:nowrap"><%= formatDateTimeIST(b.createdAt) %></td>
       <td><%= b.preferred_date %></td>
       <td><%= b.phone %><% if (b.email) { %><br/><span style="font-size:.7rem;color:rgba(253,246,227,.4)"><%= b.email %></span><% } %></td>
       <td>
