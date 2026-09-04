@@ -106,71 +106,65 @@ function initAnchorScroll() {
 }
 
 // ══════════════════════════════════════════
-// LIVE STREAM PAGE — BUBBLES + ACTIVITY
+// LIVE STREAM PAGE — BUBBLES + REAL ACTIVITY
 // ══════════════════════════════════════════
 
 const BUBBLE_EMOJIS = ['🙏','❤️','🔥','ॐ','🪔','🌸','✨','💛','🕉️','🌺'];
-const FAKE_NAMES = [
-  'Ramesh ji','Priya Sharma','Anita Devi','Suresh Kumar','Kavita ji',
-  'Mohan Das','Sunita Gupta','Ravi Shankar','Meera Ben','Dinesh ji',
-  'Pooja Rani','Vijay Mishra','Savita ji','Ashok Pandey','Rekha Devi',
-  'Govind ji','Lalita ji','Hari Om','Deepak Verma','Pushpa ji',
-  'Arun Tiwari','Shanta Devi','Mahesh Rao','Geeta ji','Rajiv Bhaiya'
-];
-const CHAT_MSGS = [
-  'Jai Shiv Shankar 🙏','Har Har Mahadev!','Jai Ganga Maiya 🌊',
-  'Jai Shri Ram 🙏','Watching from London 🇬🇧','Jai Mata Di ❤️',
-  'Doing darshan from USA 🙏','So peaceful 🕉️','Har Har Gange 🙏',
-  'My whole family is watching!','Jai Vishwanath 🔥',
-  'Bahut sundar darshan 🙏','Watching from Dubai 🌸',
-  'Om Namah Shivay 🙏','First time watching live 😊',
-  'Jai Jai Ganga Maiya!','Watching with my parents ❤️',
-  'So blessed 🙏','Kashi vishwanath ki jai!',
-  'Joining from Canada 🇨🇦 🙏','Radhe Radhe 🌸',
-];
-const DAAN_MSGS = [
-  'gave ₹251 to Gau Seva 🐄','gave ₹51 to Annadaan 🍛',
-  'gave ₹1,100 to Ganga Safai 🌊','gave ₹501 to Platform Seva 📡',
-  'gave ₹5,100 to Gau Seva 🐄','gave ₹251 to Annadaan 🍛',
-  'gave ₹1,100 to Ghat Preservation 🏛️',
-];
-const SANKALP_MSGS = [
-  'recorded a sankalp 🕉️','registered their sankalp 🙏',
-  'added a sankalp for their family 🙏','registered a sankalp for their parents 🙏',
-];
 
 function initStreamPage() {
   const bubbleZone = document.getElementById('bubbleZone');
   const feed = document.getElementById('activityFeed');
   if (!bubbleZone && !feed) return;
 
-  // Viewer count ticker (uses server-injected value)
-  const viewerEl = document.getElementById('viewerCount');
-  if (viewerEl && window.__STREAM_VIEWERS__) {
-    let v = window.__STREAM_VIEWERS__;
-    const min = window.__STREAM_MIN_VIEWERS__ || v - 300;
-    setInterval(() => {
-      v += Math.floor(Math.random() * 12) - 4;
-      v = Math.max(min, v);
-      viewerEl.textContent = v.toLocaleString('en-IN');
-    }, 3500);
-  }
-
-  // Seed activity feed
-  const seeds = [
-    { name: 'Ramesh ji', msg: 'Har Har Mahadev! 🙏', type: 'chat' },
-    { name: 'Priya Sharma', msg: 'gave ₹251 to Gau Seva 🐄', type: 'daan' },
-    { name: 'Anita Devi', msg: 'Watching from Mumbai ❤️', type: 'chat' },
-    { name: 'Suresh Kumar', msg: 'recorded a sankalp 🕉️', type: 'sankalp' },
-    { name: 'Kavita ji', msg: 'Jai Ganga Maiya 🌊', type: 'chat' },
-  ];
-  if (feed) seeds.forEach(s => addActivity(`<strong>${s.name}</strong> ${s.msg}`, s.type));
-
-  // Auto bubbles
+  // Auto bubbles (purely decorative animation, not a data claim — fine as-is)
   if (bubbleZone) autoSpawnBubbles(bubbleZone);
 
-  // Auto activity
-  if (feed) scheduleActivity(feed);
+  // Real activity — no fabricated names or messages. Pulled from actual
+  // sankalp/donation records. Polls periodically so new real activity
+  // appears without a page refresh.
+  if (feed && window.__STREAM_ID__) {
+    loadRealActivity();
+    setInterval(loadRealActivity, 45000);
+  }
+}
+
+async function loadRealActivity() {
+  const feed = document.getElementById('activityFeed');
+  if (!feed) return;
+  try {
+    const res  = await fetch(`/api/streams/${window.__STREAM_ID__}/activity`);
+    const data = await res.json();
+    renderActivityFeed(data.items || []);
+  } catch (err) {
+    // Leave whatever was already showing rather than erroring the UI
+  }
+}
+
+function relativeTime(iso) {
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1)  return 'just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)  return `${hrs}h ago`;
+  return `${Math.floor(hrs / 24)}d ago`;
+}
+
+function renderActivityFeed(items) {
+  const feed = document.getElementById('activityFeed');
+  if (!feed) return;
+
+  if (items.length === 0) {
+    feed.innerHTML = `<div class="activity-empty">🙏 Be the first to give daan or record a sankalp during this darshan</div>`;
+    return;
+  }
+
+  feed.innerHTML = items.map(it => `
+    <div class="activity-item activity-item--${it.type}">
+      <strong>${it.name}</strong> ${it.text}
+      <span class="activity-time">${relativeTime(it.time)}</span>
+    </div>
+  `).join('');
 }
 
 function spawnBubble(emoji, fromClick = false, zone) {
@@ -199,25 +193,18 @@ window.sendReaction = function(emoji) {
   if (btn) { btn.classList.add('reaction-btn--active'); setTimeout(() => btn.classList.remove('reaction-btn--active'), 380); }
 };
 
+// New real activity (from an actual daan/sankalp this visitor just completed)
+// gets prepended immediately, ahead of the next poll cycle.
 function addActivity(html, type = 'chat') {
   const feed = document.getElementById('activityFeed');
   if (!feed) return;
+  const empty = feed.querySelector('.activity-empty');
+  if (empty) empty.remove();
   const item = document.createElement('div');
   item.className = `activity-item activity-item--${type}`;
   item.innerHTML = html;
   feed.insertBefore(item, feed.firstChild);
-  while (feed.children.length > 7) feed.removeChild(feed.lastChild);
-}
-
-function scheduleActivity(feed) {
-  const rand = Math.random();
-  const name = FAKE_NAMES[Math.floor(Math.random() * FAKE_NAMES.length)];
-  let msg, type;
-  if (rand < 0.52) { msg = CHAT_MSGS[Math.floor(Math.random() * CHAT_MSGS.length)]; type = 'chat'; }
-  else if (rand < 0.78) { msg = DAAN_MSGS[Math.floor(Math.random() * DAAN_MSGS.length)]; type = 'daan'; }
-  else { msg = SANKALP_MSGS[Math.floor(Math.random() * SANKALP_MSGS.length)]; type = 'sankalp'; }
-  addActivity(`<strong>${name}</strong> ${msg}`, type);
-  setTimeout(() => scheduleActivity(feed), 2200 + Math.random() * 4500);
+  while (feed.children.length > 8) feed.removeChild(feed.lastChild);
 }
 
 // ══════════════════════════════════════════
