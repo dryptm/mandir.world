@@ -3,7 +3,7 @@ require('dotenv').config();
 const Razorpay              = require('razorpay');
 const crypto                = require('crypto');
 const MongoStore            = require('connect-mongo');
-const bcrypt                = require('bcrypt');
+const bcrypt                = require('bcryptjs');
 const { sendDaanReceipt, sendDaanSMS, sendSankalpConfirmation, sendPujaConfirmation, sendLoginOtp, verifyEmailConfig } = require('./utils/notify');
 const { fetchLiveViewers } = require('./utils/youtube');
 const liveViewers = require('./utils/liveViewers');
@@ -423,31 +423,20 @@ app.get('/darshan/:id', async (req, res) => {
 // full names weren't collected with public-display in mind. Prioritizes
 // donations made ON this specific stream, falls back to recent site-wide
 // activity if this stream doesn't have enough on its own yet.
-app.get('/api/streams/:id/activity', async (req, res) => {
+// Site-wide recent activity — same feed everywhere, regardless of which
+// stream you're watching or whether it's currently live. Real donations
+// and sankalps only, no fabrication, first-name-only for privacy.
+app.get('/api/activity/recent', async (req, res) => {
   try {
-    const streamId = req.params.id;
-
-    const [streamDonations, recentDonations, recentSankalpas] = await Promise.all([
-      Donation.find({ streamId, 'payment.status': 'paid' }).sort({ createdAt: -1 }).limit(8).lean(),
-      Donation.find({ 'payment.status': 'paid' }).sort({ createdAt: -1 }).limit(8).lean(),
-      Sankalp.find().sort({ createdAt: -1 }).limit(8).lean()
+    const [recentDonations, recentSankalpas] = await Promise.all([
+      Donation.find({ 'payment.status': 'paid' }).sort({ createdAt: -1 }).limit(10).lean(),
+      Sankalp.find().sort({ createdAt: -1 }).limit(10).lean()
     ]);
-
-    // Prefer this stream's own donations; top up with recent site-wide ones if sparse
-    const seenIds = new Set();
-    const donations = [];
-    for (const d of [...streamDonations, ...recentDonations]) {
-      const id = d._id.toString();
-      if (seenIds.has(id)) continue;
-      seenIds.add(id);
-      donations.push(d);
-      if (donations.length >= 8) break;
-    }
 
     const firstName = (fullName) => (fullName || 'A devotee').trim().split(' ')[0];
 
     const items = [
-      ...donations.map(d => ({
+      ...recentDonations.map(d => ({
         type: 'daan',
         name: firstName(d.name),
         text: `gave ₹${Number(d.amount).toLocaleString('en-IN')} to ${d.cause_name}`,
@@ -459,7 +448,7 @@ app.get('/api/streams/:id/activity', async (req, res) => {
         text: 'recorded a sankalp',
         time: s.createdAt
       }))
-    ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 8);
+    ].sort((a, b) => new Date(b.time) - new Date(a.time)).slice(0, 10);
 
     res.json({ items });
   } catch (err) {

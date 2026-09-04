@@ -122,9 +122,9 @@ function initStreamPage() {
   // Real activity — no fabricated names or messages. Pulled from actual
   // sankalp/donation records. Polls periodically so new real activity
   // appears without a page refresh.
-  if (feed && window.__STREAM_ID__) {
+  if (feed) {
     loadRealActivity();
-    setInterval(loadRealActivity, 45000);
+    setInterval(loadRealActivity, 30000);
   }
 }
 
@@ -132,7 +132,7 @@ async function loadRealActivity() {
   const feed = document.getElementById('activityFeed');
   if (!feed) return;
   try {
-    const res  = await fetch(`/api/streams/${window.__STREAM_ID__}/activity`);
+    const res  = await fetch('/api/activity/recent');
     const data = await res.json();
     renderActivityFeed(data.items || []);
   } catch (err) {
